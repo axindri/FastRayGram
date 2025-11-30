@@ -67,7 +67,7 @@ Get started quickly with these steps:
 1. Clone the repository:
    ```bash
    git clone https://github.com/axindri/FastRayGram.git
-   cd fast_ray_gram
+   cd FastRayGram
    ```
 
 2. Copy the environment file:
@@ -132,7 +132,7 @@ Get started quickly with these steps:
 1. Клонируйте репозиторий:
    ```bash
    git clone https://github.com/axindri/FastRayGram.git
-   cd fast_ray_gram
+   cd FastRayGram
    ```
 
 2. Скопируйте файл окружения:
