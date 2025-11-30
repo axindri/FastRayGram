@@ -156,12 +156,9 @@ services:
       - VITE_API_URL=${VITE_API_URL}
       - VITE_TELEGRAM_GROUP_URL=${VITE_TELEGRAM_GROUP_URL:-''}
       - VITE_TELEGRAM_BOT_URL=${VITE_TELEGRAM_BOT_URL:-''}
-      - VITE_DONATION_URL=${VITE_DONATION_URL:-''}
-      - VITE_GITHUB_URL=${VITE_GITHUB_URL:-''}
     restart: unless-stopped
     logging:
       driver: "json-file"
       options:
         max-size: "500m"
         max-file: "2"
-
