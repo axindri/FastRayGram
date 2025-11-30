@@ -13,7 +13,7 @@ class BaseSettingsConfig(BaseSettings):
 class DBSettings(BaseSettingsConfig):
     model_config = SettingsConfigDict(env_prefix='DB_')
 
-    echo: bool = Field(default=True)
+    echo: bool = Field(default=False)
 
     engine: str = Field(default='postgresql+asyncpg')
     host: str = Field(default='localhost')

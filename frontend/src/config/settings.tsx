@@ -8,7 +8,7 @@ export const GITHUB_URL = 'https://github.com/axindri/FastRayGram';
 export const DONATION_URL = 'https://boosty.to/axindri/donate';
 
 // Constants
-export const APP_VERSION = '0.9';
+export const APP_VERSION = '1.0';
 
 export const LANGUAGES = {
   EN: 'en',

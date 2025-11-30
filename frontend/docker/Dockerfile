@@ -12,6 +12,16 @@ RUN npm ci
 # Copy source code
 COPY . .
 
+# Accept build arguments
+ARG VITE_API_URL
+ARG VITE_TELEGRAM_GROUP_URL
+ARG VITE_TELEGRAM_BOT_URL
+
+# Set environment variables for build
+ENV VITE_API_URL=${VITE_API_URL}
+ENV VITE_TELEGRAM_GROUP_URL=${VITE_TELEGRAM_GROUP_URL}
+ENV VITE_TELEGRAM_BOT_URL=${VITE_TELEGRAM_BOT_URL}
+
 # Build the application
 RUN npm run build
 

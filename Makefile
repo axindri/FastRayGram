@@ -61,24 +61,24 @@ logs: ## Show logs from all services
 	docker compose $(COMPOSE_FILE) logs -f
 
 logs-api: ## Show logs from API service
-	docker compose $(COMPOSE_FILE) logs -f api
+	docker compose $(COMPOSE_FILE) logs -f frg-api
 
 logs-website: ## Show logs from Frontend service
-	docker compose $(COMPOSE_FILE) logs -f website
+	docker compose $(COMPOSE_FILE) logs -f frg-website
 
 logs-notificator: ## Show logs from Notificator service
 	@if [ "$(mode)" = "lite" ]; then \
 		echo "Notificator service is not available in lite mode"; \
 		exit 1; \
 	fi
-	docker compose $(COMPOSE_FILE) logs -f notificator
+	docker compose $(COMPOSE_FILE) logs -f frg-notificator
 
 logs-tg-bot: ## Show logs from Telegram Bot service
 	@if [ "$(mode)" = "lite" ]; then \
 		echo "Telegram Bot service is not available in lite mode"; \
 		exit 1; \
 	fi
-	docker compose $(COMPOSE_FILE) logs -f tg-bot
+	docker compose $(COMPOSE_FILE) logs -f frg-tg-bot
 
 ps: ## Show status of all services
 	docker compose $(COMPOSE_FILE) ps

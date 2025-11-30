@@ -124,9 +124,8 @@ services:
     build:
       context: ./backend
       dockerfile: ./docker/Dockerfile
-    environment:
-      - DB_ECHO=false
-      - APP_DEBUG=false
+    env_file:
+      - .env
     ports:
       - "127.0.0.1:8080:8000"
     volumes:
@@ -149,13 +148,15 @@ services:
     build:
       context: ./frontend
       dockerfile: ./docker/Dockerfile
+      args:
+        - VITE_API_URL=${VITE_API_URL}
+        - VITE_TELEGRAM_GROUP_URL=${VITE_TELEGRAM_GROUP_URL:-''}
+        - VITE_TELEGRAM_BOT_URL=${VITE_TELEGRAM_BOT_URL:-''}
     container_name: website
     ports:
       - "127.0.0.1:3000:80"
-    environment:
-      - VITE_API_URL=${VITE_API_URL}
-      - VITE_TELEGRAM_GROUP_URL=${VITE_TELEGRAM_GROUP_URL:-''}
-      - VITE_TELEGRAM_BOT_URL=${VITE_TELEGRAM_BOT_URL:-''}
+    depends_on:
+      - frg-api
     restart: unless-stopped
     logging:
       driver: "json-file"
@@ -169,8 +170,13 @@ services:
       context: ./notificator
       dockerfile: ./docker/Dockerfile
     restart: always
+    depends_on:
+      frg-db:
+        condition: service_healthy
+      frg-api:
+        condition: service_started
     environment:
-      - DB_HOST=${DB_HOST}
+      - DB_HOST=frg-db
       - DB_PORT=${DB_PORT}
       - DB_NAME=${DB_NAME}
       - DB_USER=${DB_USER}
@@ -194,6 +200,8 @@ services:
       context: ./tg_bot
       dockerfile: ./docker/Dockerfile
     restart: always
+    depends_on:
+      - frg-api
     environment:
       - BOT_TOKEN=${BOT_TOKEN}
       - WEB_APP_URL=${WEB_APP_URL}
