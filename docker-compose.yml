@@ -171,9 +171,12 @@ services:
       dockerfile: ./docker/Dockerfile
     restart: always
     depends_on:
-      - frg-api
+      frg-db:
+        condition: service_healthy
+      frg-api:
+        condition: service_started
     environment:
-      - DB_HOST=${DB_HOST}
+      - DB_HOST=frg-db
       - DB_PORT=${DB_PORT}
       - DB_NAME=${DB_NAME}
       - DB_USER=${DB_USER}
