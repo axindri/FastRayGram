@@ -1,0 +1,44 @@
+[project]
+name = "Fast_Ray_Gram"
+version = "1.0.0"
+description = "Fast Ray Gram API"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "asyncpg>=0.30.0",
+    "bcrypt>=4.3.0",
+    "fastapi[standard]>=0.115.12",
+    "mypy>=1.18.2",
+    "passlib>=1.7.4",
+    "pydantic>=2.11.3",
+    "pydantic-settings>=2.8.1",
+    "python-jose>=3.5.0",
+    "redis>=6.4.0",
+    "ruff>=0.12.10",
+    "sqlalchemy[asyncio]>=2.0.40",
+    "types-passlib>=1.7.7.20250602",
+    "types-python-jose>=3.5.0.20250531",
+]
+
+[tool.ruff]
+fix = true
+line-length = 120
+target-version = "py312"
+
+[tool.ruff.format]
+quote-style = "single"
+docstring-code-format = true
+
+[tool.ruff.lint]
+ignore = ["I001"]
+preview = true
+
+[tool.mypy]
+plugins = ['pydantic.mypy']
+strict=true
+
+[tool.isort]
+line_length = 120
+src_paths = ["src", "tests"]
+known_first_party = ["src", "tests"]
+known_third_party = ["fastapi"]

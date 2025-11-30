@@ -1,0 +1,17 @@
+services:
+  frg-tg-bot:
+    container_name: tg-bot
+    build:
+      dockerfile: ./docker/Dockerfile
+    restart: always
+    environment:
+      - BOT_TOKEN=${BOT_TOKEN}
+      - WEB_APP_URL=${WEB_APP_URL}
+    volumes:
+      - ./main.py:/opt/app/main.py
+      - ./settings.py:/opt/app/settings.py
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "500m"
+        max-file: "2"

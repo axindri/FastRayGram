@@ -1,0 +1,35 @@
+.section {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: var(--spacing-md);
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.title {
+  margin-left: var(--spacing-md);
+  margin-bottom: var(--spacing-xs);
+  color: var(--color-text-secondary);
+  font-family: var(--color-font-family);
+  text-transform: uppercase;
+  font-size: 0.8rem;
+}
+
+.section {
+  color: var(--color-text-secondary);
+  font-family: var(--color-font-family);
+}

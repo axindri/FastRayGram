@@ -1,0 +1,487 @@
+{
+  "common": {
+    "login": "Login",
+    "password": "Password",
+    "email": "Email",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "language": "Language",
+    "theme": "Theme",
+    "cancel": "Cancel",
+    "save": "Save",
+    "edit": "Edit",
+    "delete": "Delete",
+    "create": "Create",
+    "update": "Update",
+    "back": "Back",
+    "submit": "Submit",
+    "loading": "Loading...",
+    "unknown": "Unknown",
+    "optional": "optional",
+    "english": "English",
+    "russian": "Русский",
+    "yes": "Yes",
+    "no": "No",
+    "updating": "Updating...",
+    "saveChanges": "Save Changes",
+    "loggingIn": "Logging in...",
+    "registering": "Registering...",
+    "changingPassword": "Changing password..."
+  },
+  "pages": {
+    "home": {
+      "title": "Home",
+      "description": "Home page with important information",
+      "news": "News",
+      "about": "About",
+      "communitySupport": "Community & Support",
+      "appVersion": "App version: v{{version}}",
+      "tapToShowDebug": "Tap {{count}} times to show debug menu"
+    },
+    "account": {
+      "title": "Account",
+      "description": "Account page with your account information and settings",
+      "appSettings": "App settings",
+      "activeSessions": "Active Sessions",
+      "loadingAccountInfo": "Loading account information...",
+      "accountInformation": "Account Information",
+      "editProfile": "Edit profile",
+      "changePassword": "Change password",
+      "social": "Social",
+      "username": "Username:",
+      "loginLabel": "Login:",
+      "emailLabel": "Email:",
+      "passwordLabel": "Password:"
+    },
+    "configs": {
+      "title": "Configs",
+      "description": "Configs page with all your configs",
+      "loadingConfigs": "Loading configs...",
+      "profileNotLoaded": "Profile not loaded",
+      "profiles": "Profiles",
+      "availableConfigs": "Available configs",
+      "tapToCreate": "Tap to the button below to create a new config"
+    },
+    "updateProfile": {
+      "title": "Update Profile",
+      "lastNamePlaceholder": "Last Name (optional)",
+      "emailPlaceholder": "Enter your email (optional)",
+      "updating": "Updating...",
+      "saveChanges": "Save Changes",
+      "loadingProfile": "Loading profile...",
+      "failedToLoadProfile": "Failed to load profile"
+    },
+    "notFound": {
+      "title": "Oops! - Page Not Found",
+      "message": "Looks like this page went on vacation! 🍸",
+      "comeBack": "Come back next time. See you!",
+      "backButton": "Chao! 👋"
+    },
+    "notAllowed": {
+      "title": "Permission denied",
+      "message": "You are not allowed to access this page. Please contact the administrator.",
+      "goToHome": "Go to Home"
+    },
+    "admin": {
+      "title": "Admin panel",
+      "description": "Manage your admin panel",
+      "news": "News",
+      "appSettings": "App Settings"
+    }
+  },
+  "forms": {
+    "validation": {
+      "fieldRequired": "Field required",
+      "pleaseFixErrors": "Please fix validation errors",
+      "oldPasswordRequired": "Old password is required",
+      "enterLogin": "Please enter your login"
+    },
+    "errors": {
+      "loginFailed": "Login failed",
+      "registrationFailed": "Registration failed",
+      "failedToUpdateProfile": "Failed to update profile",
+      "failedToChangePassword": "Failed to change password",
+      "emailAlreadyInUse": "Email is already in use",
+      "telegramLoginNotAvailable": "Automatic Telegram login is not available. Please open this page in Telegram.",
+      "telegramLoginFailed": "Telegram login failed",
+      "resetPasswordFailed": "Failed to reset password",
+      "failedToLoadProfile": "Failed to load profile",
+      "failedToLoadNews": "Failed to load news",
+      "failedToLoadConfigs": "Failed to get configs",
+      "failedToGetAppSettings": "Failed to get app settings",
+      "failedToUpdateLanguage": "Failed to update language",
+      "invalidOldPassword": "Invalid old password",
+      "validationError": "Validation error:"
+    },
+    "success": {
+      "loggedIn": "Successfully logged in",
+      "registered": "Successfully registered",
+      "profileUpdated": "Profile updated successfully",
+      "passwordChanged": "Password changed successfully",
+      "resetPasswordRequested": "Reset password requested",
+      "languageUpdated": "Language updated successfully"
+    }
+  },
+  "profile": {
+    "updateProfile": "Update Profile",
+    "loadingProfile": "Loading profile...",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "lastNameOptional": "Last Name (optional)",
+    "email": "Email",
+    "emailOptional": "Email (optional)",
+    "language": "Language:"
+  },
+  "changePassword": {
+    "title": "Change Password",
+    "currentPasswordLabel": "Current Password",
+    "currentPasswordPlaceholder": "Enter your current password",
+    "newPasswordLabel": "New Password",
+    "newPasswordPlaceholder": "Enter new password (min 6 chars)",
+    "changePasswordButton": "Change Password"
+  },
+  "login": {
+    "title": "Login",
+    "loginLabel": "Login",
+    "loginPlaceholder": "Login",
+    "passwordLabel": "Password",
+    "passwordPlaceholder": "Password",
+    "forgotPassword": "Forgot your password?",
+    "reset": "Reset",
+    "loginButton": "Login",
+    "loginWithTelegram": "Login with Telegram",
+    "noAccount": "Don't have an account?",
+    "registerLink": "Register"
+  },
+  "register": {
+    "title": "Register",
+    "loginLabel": "Login",
+    "loginPlaceholder": "Login (6-20 chars, starts with letter)",
+    "passwordLabel": "Password",
+    "passwordPlaceholder": "Password (min 6 chars)",
+    "firstNameLabel": "First Name",
+    "firstNamePlaceholder": "First Name",
+    "lastNameLabel": "Last Name",
+    "lastNamePlaceholder": "Last Name (optional)",
+    "emailLabel": "Email",
+    "emailPlaceholder": "Email (optional)",
+    "languageLabel": "Language:",
+    "alreadyHaveAccount": "Already have an account?",
+    "loginLink": "Login",
+    "registerButton": "Register"
+  },
+  "status": {
+    "verified": "Verified",
+    "verificationPending": "Verification Pending",
+    "notVerified": "Not verified"
+  },
+  "admin": {
+    "news": {
+      "list": "List of all news items",
+      "create": "Create News",
+      "createDescription": "Create a new news item",
+      "details": "News Details",
+      "detailsDescription": "View and manage news item details",
+      "backToNews": "Back to news",
+      "edit": "Edit",
+      "delete": "Delete",
+      "save": "Save",
+      "cancel": "Cancel",
+      "title": "Title",
+      "content": "Content",
+      "titleEn": "Title (English)",
+      "titleRu": "Title (Russian)",
+      "contentEn": "Content (English)",
+      "contentRu": "Content (Russian)",
+      "metadata": "Metadata",
+      "created": "Created:",
+      "actions": "Actions",
+      "initializing": "Initializing new news item...",
+      "loading": "Loading news item...",
+      "createdSuccess": "News item created successfully",
+      "updatedSuccess": "News item updated successfully",
+      "deletedSuccess": "News item deleted successfully",
+      "failedToLoad": "Failed to load news item",
+      "failedToSave": "Failed to save news item",
+      "failedToDelete": "Failed to delete news item",
+      "confirmDelete": "Are you sure you want to delete this news item?"
+    },
+    "appSettings": {
+      "appSettings": "App Settings",
+      "appSettingsDescription": "Manage application settings",
+      "basicSettings": "Basic Settings",
+      "basicSettingsDescription": "Registration and basic application settings",
+      "serviceSettings": "Service Settings",
+      "serviceSettingsDescription": "Service limits and configuration",
+      "editBasicSettings": "Edit Basic Settings",
+      "editServiceSettings": "Edit Service Settings",
+      "backToSettings": "Back to settings",
+      "loadingSettings": "Loading settings...",
+      "failedToLoadSettings": "Failed to load settings",
+      "disableRegistration": "Disable Registration",
+      "disableRegistrationDescription": "When enabled, new user registration will be disabled",
+      "maxLimitIp": "Max Limit IP:",
+      "maxTotalGb": "Max Total GB:",
+      "maxLimitIpDescription": "Maximum allowed IP addresses per config",
+      "maxTotalGbDescription": "Maximum allowed total GB per config",
+      "updatedSuccess": "Settings updated successfully",
+      "failedToUpdate": "Failed to update settings"
+    },
+    "requests": {
+      "list": "List of all available requests",
+      "title": "Request",
+      "description": "Request details",
+      "backToRequests": "Back to requests",
+      "loading": "Loading request...",
+      "appliedSuccess": "Request applied successfully",
+      "deniedSuccess": "Request denied successfully",
+      "failedToLoad": "Failed to load request",
+      "failedToApply": "Failed to apply request",
+      "failedToDeny": "Failed to deny request",
+      "sentNewPassword": "Sent new password to user using a button below",
+      "copyAndSend": "Copy and send",
+      "passwordCopied": "Password copied to clipboard"
+    },
+    "configs": {
+      "list": "List of all users configs",
+      "title": "Config",
+      "description": "Config details",
+      "backToConfigs": "Back to configs",
+      "loading": "Loading config...",
+      "failedToLoad": "Failed to load config",
+      "timeAddedSuccess": "Time added to config successfully",
+      "timeRemovedSuccess": "Time removed from config successfully",
+      "failedToAddTime": "Failed to add time to config",
+      "failedToRemoveTime": "Failed to remove time from config"
+    },
+    "users": {
+      "list": "List of all users in the system",
+      "title": "User profile",
+      "description": "User profile details",
+      "backToUsers": "Back to users",
+      "loading": "Loading user profile...",
+      "checkingSuperuser": "Checking superuser status...",
+      "failedToLoad": "Failed to load user profile",
+      "failedToCheckSuperuser": "Failed to check if user is superuser",
+      "verifiedSuccess": "User verified successfully",
+      "unverifiedSuccess": "User unverified successfully",
+      "failedToVerify": "Failed to verify user",
+      "failedToUnverify": "Failed to unverify user",
+      "passwordResetSuccess": "Password reset successfully",
+      "failedToResetPassword": "Failed to reset password",
+      "roleUpdatedSuccess": "User role updated to {{role}} successfully",
+      "failedToUpdateRole": "Failed to update user role",
+      "errorFetchingRoles": "Error fetching roles"
+    }
+  },
+  "ui": {
+    "input": {
+      "showPassword": "Show password",
+      "hidePassword": "Hide password"
+    },
+    "pagination": {
+      "previous": "Previous",
+      "next": "Next"
+    }
+  },
+  "about": {
+    "free": {
+      "text": "This application is completely <highlight>free</highlight> and does not aim to make money. Our goal is to make secure internet access more accessible to everyone."
+    },
+    "openSource": {
+      "text": "The application code is <highlight>open source</highlight> and available for public review. We do not use users' personal information for personal purposes. All responsibility for hosting and operation of the application remains with the hosting provider."
+    },
+    "encryption": {
+      "text": "The service provides various configurations using modern traffic encryption protocols. Within the established period, you can use the connection and renew it upon request and administrator approval."
+    },
+    "heart": {
+      "text": "In today's world, staying connected with each other is not always easy. We want to make it a little more accessible, bringing people closer together through secure and reliable internet access.",
+      "textBeforeLink": "In today's world, staying connected with each other is not always easy. We want to make it a little more accessible, bringing people closer together through secure and reliable internet access. For additional information, please visit the application's",
+      "textAfterLink": ".",
+      "githubPage": "GitHub page"
+    }
+  },
+  "communitySupport": {
+    "needHelp": {
+      "title": "Need help?",
+      "textBeforeLink": "Join our",
+      "textAfterLink": "for support and discussions.",
+      "telegramGroup": "Telegram group"
+    },
+    "supportDevelopment": {
+      "title": "Support development",
+      "text": "This project is open-source and free. Your support helps us continue development.",
+      "donate": "Donate"
+    },
+    "contributors": {
+      "title": "Contributors",
+      "wantToContributeBefore": "Want to contribute? Check out",
+      "wantToContributeAfter": ".",
+      "github": "GitHub"
+    }
+  },
+  "layout": {
+    "entitiesPage": {
+      "backToMenu": "Back to menu",
+      "create": "Create {{entityName}}",
+      "loading": "Loading {{entityName}}...",
+      "noItemsFound": "No {{entityName}} found",
+      "failedToLoad": "Failed to load {{entityName}}s"
+    },
+    "appLayout": {
+      "home": "Home",
+      "configs": "Configs",
+      "account": "Account",
+      "admin": "Admin",
+      "requests": "Requests",
+      "users": "Users"
+    }
+  },
+  "feedback": {
+    "notVerified": {
+      "verifyingRequested": "Verifing requested",
+      "accountNotVerified": "Account is not verified",
+      "verifying": "Verifying...",
+      "verifyAccount": "Verify Account",
+      "waitForVerification": "Please wait for the account to be verified.",
+      "pleaseVerify": "Your account is not verified. Please verify your account to continue.",
+      "failedToVerify": "Failed to verify account"
+    }
+  },
+  "features": {
+    "debugMenu": {
+      "title": "Debug menu",
+      "userId": "User ID:",
+      "userRole": "User Role:",
+      "user": "User:",
+      "notLoggedIn": "Not logged in",
+      "isTelegramInitialized": "Is Telegram initialized:",
+      "refreshTokenExpiresAt": "Refresh exp. at:"
+    },
+    "userActions": {
+      "verify": "Verify",
+      "unverify": "Unverify",
+      "setAdmin": "Set Admin",
+      "setUser": "Set User",
+      "resetPassword": "Reset Password",
+      "copyNewPassword": "Copy new password",
+      "passwordCopied": "Password copied to clipboard"
+    },
+    "configActions": {
+      "addDays": "Add {{days}} days",
+      "removeDays": "Remove {{days}} days"
+    }
+  },
+  "entities": {
+    "userProfile": {
+      "accountInformation": "Account Information",
+      "login": "Login:",
+      "email": "Email:",
+      "password": "Password:",
+      "editProfile": "Edit profile",
+      "changePassword": "Change password",
+      "social": "Social",
+      "username": "Username:"
+    },
+    "userMenuItem": {
+      "role": "Role:"
+    },
+    "requestDetail": {
+      "failedToLoadUserProfile": "Failed to load user profile",
+      "failedToLoadRelatedEntity": "Failed to load related entity",
+      "loadingRequestDetails": "Loading request details...",
+      "created": "Created:",
+      "id": "ID:",
+      "requestedBy": "Requested by:",
+      "relatedId": "Related ID:",
+      "requestedByUser": "Requested by user",
+      "userName": "User name:",
+      "userLogin": "User login:",
+      "usersConfig": "User's config",
+      "name": "Name:",
+      "validTo": "Valid to:",
+      "used": "Used:",
+      "changes": "Changes",
+      "totalGb": "Total GB:",
+      "limitIp": "Limit IP:",
+      "data": "Data:",
+      "apply": "Apply",
+      "deny": "Deny"
+    },
+    "requestMenuItem": {
+      "created": "Created:"
+    },
+    "config": {
+      "connectionUrlCopied": "Connection URL copied to clipboard",
+      "configUpdateRequested": "Config update requested",
+      "failedToUpdateConfig": "Failed to update config",
+      "configRenewRequested": "Config renew requested",
+      "failedToRenewConfig": "Failed to renew config",
+      "updateRequested": "Update requested",
+      "validTo": "Valid to:",
+      "devicesLimit": "Devices limit:",
+      "totalGb": "Total GB:",
+      "used": "Used:",
+      "connection": "Connection:",
+      "copyToClipboard": "Copy to clipboard",
+      "minus": "Minus",
+      "plus": "Plus",
+      "renew": "Renew",
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "configDetail": {
+      "updated": "Updated",
+      "updatePending": "Update Pending",
+      "notUpdated": "Not Updated",
+      "active": "Active",
+      "inactive": "Inactive",
+      "status": "Status:",
+      "configId": "Config ID:",
+      "userId": "User ID:",
+      "dates": "Dates",
+      "lastUpdated": "Last Updated:",
+      "validFrom": "Valid From:",
+      "validTo": "Valid To:",
+      "client": "Client",
+      "clientEmail": "Client Email:",
+      "clientId": "Client ID:",
+      "limits": "Limits",
+      "usedGb": "Used GB:",
+      "ipLimit": "IP Limit:",
+      "urls": "URLs",
+      "subscriptionUrl": "Subscription URL:",
+      "connectionUrl": "Connection URL:"
+    },
+    "configMenuItem": {
+      "active": "Active",
+      "inactive": "Inactive",
+      "userId": "User ID:",
+      "clientEmail": "Client email:",
+      "validTo": "Valid to:"
+    },
+    "configNew": {
+      "configCreatedSuccess": "Config {{name}} created successfully",
+      "failedToCreateConfig": "Failed to create config",
+      "creating": "Creating..."
+    },
+    "session": {
+      "sessionTerminated": "Session terminated",
+      "failedToLogout": "Failed to logout",
+      "current": "Current",
+      "loggingOut": "Logging out...",
+      "logout": "Logout",
+      "device": "Device:",
+      "ip": "IP:",
+      "lastActivity": "Last activity:",
+      "expiresAt": "Expires at:"
+    },
+    "newsDetail": {
+      "id": "ID:",
+      "enterTitleEn": "Enter title in English",
+      "enterTitleRu": "Введите заголовок на русском",
+      "enterContentEn": "Enter content in English",
+      "enterContentRu": "Введите содержимое на русском"
+    }
+  }
+}

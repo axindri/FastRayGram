@@ -1,0 +1,194 @@
+{
+  "common": {
+    "login": "Login",
+    "password": "Password",
+    "email": "Email",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "language": "Language",
+    "theme": "Theme",
+    "cancel": "Cancel",
+    "save": "Save",
+    "edit": "Edit",
+    "delete": "Delete",
+    "create": "Create",
+    "update": "Update",
+    "back": "Back",
+    "submit": "Submit",
+    "loading": "Loading...",
+    "unknown": "Unknown",
+    "optional": "optional"
+  },
+  "pages": {
+    "home": {
+      "title": "Home",
+      "description": "Home page with important information",
+      "news": "News",
+      "about": "About",
+      "communitySupport": "Community & Support",
+      "appVersion": "App version: v{{version}}",
+      "tapToShowDebug": "Tap {{count}} times to show debug menu"
+    },
+    "account": {
+      "title": "Account",
+      "description": "Account page with your account information and settings",
+      "appSettings": "App settings",
+      "activeSessions": "Active Sessions",
+      "loadingAccountInfo": "Loading account information...",
+      "accountInformation": "Account Information",
+      "editProfile": "Edit profile",
+      "changePassword": "Change password",
+      "social": "Social",
+      "username": "Username:",
+      "loginLabel": "Login:",
+      "emailLabel": "Email:",
+      "passwordLabel": "Password:"
+    },
+    "configs": {
+      "title": "Configs",
+      "description": "Configs page with all your configs",
+      "loadingConfigs": "Loading configs...",
+      "profileNotLoaded": "Profile not loaded",
+      "profiles": "Profiles",
+      "availableConfigs": "Available configs",
+      "tapToCreate": "Tap to the button below to create a new config"
+    },
+    "login": {
+      "title": "Login",
+      "forgotPassword": "Forgot your password?",
+      "reset": "Reset",
+      "loggingIn": "Logging in...",
+      "loginWithTelegram": "Login with Telegram",
+      "dontHaveAccount": "Don't have an account?",
+      "register": "Register",
+      "fieldRequired": "Field required",
+      "pleaseEnterLogin": "Please enter your login"
+    },
+    "register": {
+      "title": "Register",
+      "loginPlaceholder": "Login (6-20 chars, starts with letter)",
+      "passwordPlaceholder": "Password (min 6 chars)",
+      "lastNamePlaceholder": "Last Name (optional)",
+      "emailPlaceholder": "Email (optional)",
+      "alreadyHaveAccount": "Already have an account?",
+      "registering": "Registering...",
+      "pleaseFixErrors": "Please fix validation errors"
+    },
+    "changePassword": {
+      "title": "Change Password",
+      "currentPassword": "Current Password",
+      "currentPasswordPlaceholder": "Enter your current password",
+      "newPassword": "New Password",
+      "newPasswordPlaceholder": "Enter new password (min 6 chars)",
+      "changingPassword": "Changing password...",
+      "oldPasswordRequired": "Old password is required",
+      "invalidOldPassword": "Invalid old password"
+    },
+    "updateProfile": {
+      "title": "Update Profile",
+      "lastNamePlaceholder": "Last Name (optional)",
+      "emailPlaceholder": "Enter your email (optional)",
+      "updating": "Updating...",
+      "saveChanges": "Save Changes",
+      "loadingProfile": "Loading profile...",
+      "failedToLoadProfile": "Failed to load profile"
+    },
+    "notFound": {
+      "title": "Oops! - Page Not Found",
+      "message": "Looks like this page went on vacation! 🍸",
+      "comeBack": "Come back next time. See you!",
+      "backButton": "Chao! 👋"
+    },
+    "admin": {
+      "title": "Admin panel",
+      "description": "Manage your admin panel",
+      "news": "News",
+      "appSettings": "App Settings",
+      "appSettingsDescription": "Manage application settings",
+      "basicSettings": "Basic Settings",
+      "basicSettingsDescription": "Registration and basic application settings",
+      "serviceSettings": "Service Settings",
+      "serviceSettingsDescription": "Service limits and configuration",
+      "editBasicSettings": "Edit Basic Settings",
+      "editServiceSettings": "Edit Service Settings"
+    }
+  },
+  "forms": {
+    "validation": {
+      "fieldRequired": "Field required",
+      "pleaseFixErrors": "Please fix validation errors"
+    },
+    "errors": {
+      "loginFailed": "Login failed",
+      "registrationFailed": "Registration failed",
+      "failedToUpdateProfile": "Failed to update profile",
+      "failedToChangePassword": "Failed to change password",
+      "emailAlreadyInUse": "Email is already in use",
+      "telegramLoginNotAvailable": "Automatic Telegram login is not available. Please open this page in Telegram.",
+      "telegramLoginFailed": "Telegram login failed",
+      "resetPasswordFailed": "Failed to reset password",
+      "failedToLoadProfile": "Failed to load profile",
+      "failedToLoadNews": "Failed to load news",
+      "failedToLoadConfigs": "Failed to get configs",
+      "failedToGetAppSettings": "Failed to get app settings",
+      "failedToUpdateLanguage": "Failed to update language"
+    },
+    "success": {
+      "loggedIn": "Successfully logged in",
+      "registered": "Successfully registered",
+      "profileUpdated": "Profile updated successfully",
+      "passwordChanged": "Password changed successfully",
+      "resetPasswordRequested": "Reset password requested",
+      "languageUpdated": "Language updated successfully"
+    }
+  },
+  "status": {
+    "verified": "Verified",
+    "verificationPending": "Verification Pending",
+    "notVerified": "Not verified"
+  },
+  "admin": {
+    "news": {
+      "list": "List of all news items",
+      "create": "Create News",
+      "createDescription": "Create a new news item",
+      "details": "News Details",
+      "detailsDescription": "View and manage news item details",
+      "backToNews": "Back to news",
+      "edit": "Edit",
+      "delete": "Delete",
+      "save": "Save",
+      "cancel": "Cancel",
+      "title": "Title",
+      "content": "Content",
+      "titleEn": "Title (English)",
+      "titleRu": "Title (Russian)",
+      "contentEn": "Content (English)",
+      "contentRu": "Content (Russian)",
+      "metadata": "Metadata",
+      "created": "Created:",
+      "actions": "Actions",
+      "initializing": "Initializing new news item...",
+      "loading": "Loading news item...",
+      "createdSuccess": "News item created successfully",
+      "updatedSuccess": "News item updated successfully",
+      "deletedSuccess": "News item deleted successfully",
+      "failedToLoad": "Failed to load news item",
+      "failedToSave": "Failed to save news item",
+      "failedToDelete": "Failed to delete news item",
+      "confirmDelete": "Are you sure you want to delete this news item?"
+    },
+    "appSettings": {
+      "disableRegistration": "Disable Registration",
+      "disableRegistrationDescription": "When enabled, new user registration will be disabled",
+      "maxLimitIp": "Max Limit IP:",
+      "maxTotalGb": "Max Total GB:",
+      "maxLimitIpDescription": "Maximum allowed IP addresses per config",
+      "maxTotalGbDescription": "Maximum allowed total GB per config",
+      "updatedSuccess": "Settings updated successfully",
+      "failedToUpdate": "Failed to update settings",
+      "loadingSettings": "Loading settings..."
+    }
+  }
+}
+

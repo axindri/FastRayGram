@@ -1,0 +1,165 @@
+.config {
+  background-color: var(--color-bg-primary);
+  border-radius: var(--card-radius);
+  padding: var(--card-padding);
+  border: var(--border-width-thin) solid var(--color-border);
+  transition: box-shadow 0.2s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.config:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 0.5rem;
+}
+
+.title {
+  color: var(--color-text-primary);
+  font-size: 1.25rem;
+  font-weight: 600;
+  font-family: var(--color-font-family);
+  text-transform: uppercase;
+}
+
+.status {
+  font-weight: 500;
+  color: var(--color-text-primary);
+  max-width: 10rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.status.active {
+  color: var(--color-success);
+}
+
+.status.inactive {
+  color: var(--color-error);
+}
+
+.action.cancel {
+  color: var(--color-error);
+}
+
+.status.update_pending {
+  color: var(--color-text-secondary);
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+}
+
+.actionContainer {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.separator {
+  width: 1px;
+  height: 1rem;
+  background-color: var(--color-border);
+  margin: 0 var(--spacing-sm);
+}
+
+.action {
+  color: var(--color-accent);
+  cursor: pointer;
+}
+
+.item {
+  display: flex;
+  flex-direction: row;
+  gap: var(--spacing-sm);
+  height: 2.8rem;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: var(--border-width-thin) solid var(--color-border);
+  padding: var(--spacing-sm) 0;
+}
+
+.item button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-xs);
+  min-width: 2rem;
+  height: 2rem;
+}
+
+.item button svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.label {
+  font-family: var(--color-font-family);
+  font-weight: 500;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  align-self: center;
+}
+
+.value {
+  font-family: var(--color-font-family);
+  font-weight: 400;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  overflow-x: auto;
+  align-self: center;
+  animation: fadeIn var(--animation-duration) ease-in-out;
+}
+
+.editContainer {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--spacing-xs);
+  margin-left: var(--spacing-sm);
+}
+
+.editContainer button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-xs);
+  min-width: 2rem;
+  height: 2rem;
+  animation: fadeIn var(--animation-duration) ease-in-out;
+}
+
+.editContainer .value {
+  margin-right: 0.5rem;
+}
+
+.progressContainer {
+  display: flex;
+  flex-direction: column;
+}
+
+.footer {
+  display: flex;
+  flex-direction: row;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-md);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

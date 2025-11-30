@@ -1,0 +1,23 @@
+.info {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--spacing-sm);
+  min-width: 0;
+  flex: 1;
+}
+
+.title {
+  font-weight: 500;
+  color: var(--color-text-primary);
+  text-wrap: nowrap;
+}
+
+.value {
+  font-weight: 400;
+  white-space: nowrap;
+  overflow: hidden;
+  overflow-x: auto;
+  min-width: 0;
+  flex: 1;
+}

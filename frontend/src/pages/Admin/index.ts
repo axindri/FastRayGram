@@ -1,0 +1,11 @@
+export { Admin } from '@/pages/Admin/Admin';
+export { Requests } from '@/pages/Admin/Entities/Requests';
+export { Users } from '@/pages/Admin/Entities/Users';
+export { Configs } from '@/pages/Admin/Entities/Configs';
+export { RequestDetail } from '@/pages/Admin/Entities/RequestDetail';
+export { UserDetail } from '@/pages/Admin/Entities/UserDetail';
+export { ConfigDetail } from '@/pages/Admin/Entities/ConfigDetail';
+export { News } from '@/pages/Admin/Entities/News';
+export { NewsDetail } from '@/pages/Admin/Entities/NewsDetail';
+export { AppSettings } from '@/pages/Admin/Entities/AppSettings';
+export { AppSettingsDetail } from '@/pages/Admin/Entities/AppSettingsDetail';

@@ -1,0 +1,20 @@
+.inlineSetting {
+  display: flex;
+  flex-direction: row;
+  gap: var(--spacing-sm);
+  min-height: 2rem;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-sm) 0;
+  border-bottom: var(--border-width-thin) solid var(--color-border);
+}
+
+.inlineSetting:first-child {
+  padding-top: 0;
+}
+
+.label {
+  font-family: var(--color-font-family);
+  font-weight: 500;
+  color: var(--color-text-primary);
+}

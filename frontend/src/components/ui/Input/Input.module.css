@@ -1,0 +1,106 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.inputContainer {
+  position: relative;
+  width: 100%;
+}
+
+.label {
+  font-family: var(--color-font-family);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+.input {
+  width: 100%;
+  height: var(--input-height);
+  padding: var(--input-padding-y) var(--input-padding-x);
+  background-color: var(--color-input-bg);
+  border: var(--input-border-width) solid var(--color-input-border);
+  border-radius: var(--input-radius);
+  font-family: var(--color-font-family);
+  font-size: 1rem;
+  color: var(--color-input-text);
+  transition: border-color 0.2s ease;
+  box-sizing: border-box;
+}
+
+.inputWithIcon {
+  padding-right: calc(var(--input-padding-x) + 32px);
+}
+
+.input::placeholder {
+  color: var(--color-input-placeholder);
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--color-input-focus);
+}
+
+.input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background-color: var(--color-bg-secondary);
+}
+
+.inputError {
+  border-color: var(--color-error);
+}
+
+.inputError:focus {
+  border-color: var(--color-error);
+}
+
+.textarea {
+  height: auto;
+  min-height: 100px;
+  resize: vertical;
+  font-family: var(--color-font-family);
+}
+
+.errorMessage {
+  font-family: var(--color-font-family);
+  font-size: 0.875rem;
+  color: var(--color-error);
+}
+
+.passwordToggle {
+  position: absolute;
+  top: 50%;
+  right: var(--input-padding-x);
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  transition: color 0.2s ease;
+}
+
+.passwordToggle svg {
+  display: block;
+}
+
+.passwordToggle:hover {
+  color: var(--color-text-primary);
+}
+
+.passwordToggle:focus-visible {
+  outline: 2px solid var(--color-accent);
+  border-radius: var(--radius-sm);
+}
+
+.passwordToggle:disabled {
+  cursor: not-allowed;
+  color: var(--color-text-tertiary);
+}
+

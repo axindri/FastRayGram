@@ -1,0 +1,44 @@
+h1 {
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-xl);
+  font-size: 2rem;
+  font-weight: 600;
+}
+
+h2 {
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-md);
+  font-size: 1.5rem;
+  font-weight: 500;
+}
+
+/* Global link styles */
+a {
+  color: var(--color-link);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+a:hover {
+  color: var(--color-link-hover);
+}
+
+a:active {
+  color: var(--color-link-active);
+}
+
+.link {
+  color: var(--color-text-primary);
+  text-decoration: none;
+  font-family: var(--color-font-family);
+  font-weight: 500;
+}
+
+.link:hover {
+  color: var(--color-link-hover);
+}
+
+.link:active {
+  color: var(--color-link-active);
+}

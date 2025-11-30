@@ -1,0 +1,55 @@
+.segmentControl {
+  display: flex;
+  flex-direction: row;
+  gap: var(--spacing-xs);
+  align-items: center;
+  background-color: var(--color-bg-tertiary);
+  border-radius: var(--radius-md);
+  padding: 0.1rem;
+}
+
+.item {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  gap: var(--spacing-xs);
+  cursor: pointer;
+  align-items: center;
+  padding: 0.2rem 0.4rem;
+  background-color: var(--color-bg-tertiary);
+  border-radius: var(--radius-md);
+  text-align: center;
+  min-width: 2.5rem;
+  min-height: 2rem;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.item.selected {
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-primary);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+  animation: fadeIn var(--animation-duration) ease-out;
+}
+
+.item.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (max-width: 440px) {
+  .labelWithIcon {
+    display: none;
+  }
+}

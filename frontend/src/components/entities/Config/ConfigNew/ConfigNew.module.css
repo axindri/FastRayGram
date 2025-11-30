@@ -1,0 +1,21 @@
+.newConfig {
+  display: flex;
+  border: var(--border-width-medium) dashed var(--color-text-hint);
+  border-radius: var(--radius-md);
+  align-items: center;
+  justify-content: center;
+  height: 5rem;
+  width: 100%;
+  color: var(--color-text-hint);
+  font-weight: 500;
+  font-size: 1.25rem;
+  font-family: var(--color-font-family);
+  text-transform: uppercase;
+  transition: border-color 0.2s ease-in-out, color 0.2s ease-in-out, background-color 0.2s ease-in-out;
+}
+
+.newConfig:hover {
+  border-color: var(--color-accent-hover);
+  color: var(--color-accent-hover);
+  cursor: pointer;
+}

@@ -1,0 +1,117 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.loader {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  animation: rotate 1s linear infinite;
+  margin: auto auto;
+}
+
+.loader svg {
+  display: block;
+}
+
+.text {
+  display: block;
+  margin-top: var(--spacing-sm, 0.5rem);
+  text-align: center;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+.loader :global(.loader-line) {
+  animation: fadeInOut 1.2s ease-in-out infinite;
+  transform-origin: 12px 12px;
+}
+
+.loader :global(.loader-line-0) {
+  animation-delay: 0s;
+}
+.loader :global(.loader-line-1) {
+  animation-delay: 0.1s;
+}
+.loader :global(.loader-line-2) {
+  animation-delay: 0.2s;
+}
+.loader :global(.loader-line-3) {
+  animation-delay: 0.3s;
+}
+.loader :global(.loader-line-4) {
+  animation-delay: 0.4s;
+}
+.loader :global(.loader-line-5) {
+  animation-delay: 0.5s;
+}
+.loader :global(.loader-line-6) {
+  animation-delay: 0.6s;
+}
+.loader :global(.loader-line-7) {
+  animation-delay: 0.7s;
+}
+.loader :global(.loader-line-8) {
+  animation-delay: 0.8s;
+}
+.loader :global(.loader-line-9) {
+  animation-delay: 0.9s;
+}
+.loader :global(.loader-line-10) {
+  animation-delay: 1s;
+}
+.loader :global(.loader-line-11) {
+  animation-delay: 1.1s;
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes fadeInOut {
+  0%,
+  100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.small {
+  width: 16px;
+  height: 16px;
+}
+
+.small svg {
+  width: 16px;
+  height: 16px;
+}
+
+.medium {
+  width: 24px;
+  height: 24px;
+}
+
+.medium svg {
+  width: 24px;
+  height: 24px;
+}
+
+.large {
+  width: 32px;
+  height: 32px;
+}
+
+.large svg {
+  width: 30px;
+  height: 30px;
+}

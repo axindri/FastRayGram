@@ -1,0 +1,38 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  line-height: 1.6;
+  color: var(--color-text-secondary);
+}
+
+.paragraph {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.icon {
+  flex-shrink: 0;
+  margin-top: 0.27rem;
+  color: var(--color-accent);
+}
+
+.icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.highlight {
+  color: var(--color-text-primary);
+}
+
+.link {
+  color: var(--color-accent);
+  text-decoration: underline;
+  transition: opacity 0.2s ease;
+}
+
+.link:hover {
+  opacity: 0.8;
+}

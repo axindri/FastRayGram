@@ -1,0 +1,10 @@
+export { Home } from '@/pages/Home';
+export { Configs } from '@/pages/Configs';
+export { Account } from '@/pages/Account';
+export { NotFound } from '@/pages/NotFound';
+export { Login } from '@/pages/Login';
+export { Register } from '@/pages/Register';
+export { Admin } from '@/pages/Admin';
+export { NotAllowed } from '@/pages/NotAllowed';
+export { ChangePassword } from '@/pages/ChangePassword';
+export { UpdateProfile } from '@/pages/UpdateProfile';

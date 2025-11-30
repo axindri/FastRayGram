@@ -1,0 +1,19 @@
+FROM python:3.12.9-slim-bookworm
+
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+
+ENV PYTHONUNBUFFERED=1
+ENV UV_LINK_MODE=copy
+
+WORKDIR /opt/app
+
+COPY . .
+
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --no-dev --locked --no-install-project --compile-bytecode
+
+EXPOSE 8000
+
+# CMD ["uv", "run", "--no-dev", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uv", "run", "--no-dev", "uvicorn", "main:app",  "--host", "0.0.0.0", "--port", "8000", "--reload", "--log-level", "debug"]
+

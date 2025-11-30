@@ -1,0 +1,18 @@
+services:
+  frg-website:
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile
+    container_name: website
+    ports:
+      - "127.0.0.1:3000:80"
+    environment:
+      - VITE_API_URL=${VITE_API_URL}
+      - VITE_TELEGRAM_GROUP_URL=${VITE_TELEGRAM_GROUP_URL:-''}
+      - VITE_TELEGRAM_BOT_URL=${VITE_TELEGRAM_BOT_URL:-''}
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "500m"
+        max-file: "2"

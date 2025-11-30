@@ -1,0 +1,216 @@
+:root {
+  /* Main Colors */
+  --color-accent: #007aff;
+  --color-accent-hover: #005ce6;
+  --color-accent-active: #0047b3;
+
+  /* Light Theme Variables */
+  --light-bg-primary: #ffffff;
+  --light-bg-secondary: #f1f1f1;
+  --light-bg-tertiary: #e5e5e5;
+  --light-text-primary: #000000;
+  --light-text-secondary: #707579;
+  --light-text-hint: #999999;
+  --light-link: #007aff;
+  --light-link-hover: #005ce6;
+  --light-border: #e5e5e5;
+  --light-divider: #e5e5e5;
+  --light-button-secondary: #f5f5f5;
+  --light-button-secondary-hover: #f7f7f7;
+  --light-input-bg: #ffffff;
+  --light-input-border: #e5e5e5;
+  --light-input-text: #000000;
+  --light-input-placeholder: #999999;
+
+  /* Dark Theme Variables */
+  --dark-bg-primary: #1a1a1a;
+  --dark-bg-secondary: #20201f;
+  --dark-bg-tertiary: #3a3a3a;
+  --dark-text-primary: #ffffff;
+  --dark-text-secondary: #a0a0a0;
+  --dark-text-hint: #707070;
+  --dark-link: #007aff;
+  --dark-link-hover: #0468ff;
+  --dark-border: #3a3a3a;
+  --dark-divider: #3a3a3a;
+  --dark-button-secondary: #252525;
+  --dark-button-secondary-hover: #303030;
+  --dark-input-bg: #2c2c2c;
+  --dark-input-border: #3a3a3a;
+  --dark-input-text: #ffffff;
+  --dark-input-placeholder: #707070;
+
+  /* Light Theme Colors (default) */
+  --color-bg-primary: var(--light-bg-primary);
+  --color-bg-secondary: var(--light-bg-secondary);
+  --color-bg-tertiary: var(--light-bg-tertiary);
+  --color-text-primary: var(--light-text-primary);
+  --color-text-secondary: var(--light-text-secondary);
+  --color-text-hint: var(--light-text-hint);
+  --color-link: var(--light-link);
+  --color-link-hover: var(--light-link-hover);
+  --color-border: var(--light-border);
+  --color-divider: var(--light-divider);
+
+  /* Status Colors */
+  --color-success: #4caf50;
+  --color-error: #e53935;
+  --color-warning: #ff9800;
+  --color-info: #2196f3;
+
+  /* Button Colors */
+  --color-button-primary: var(--color-accent);
+  --color-button-primary-hover: var(--color-accent-hover);
+  --color-button-primary-active: var(--color-accent-active);
+  --color-button-secondary: var(--light-button-secondary);
+  --color-button-secondary-hover: var(--light-button-secondary-hover);
+  --color-button-text: #ffffff;
+
+  /* Input Colors */
+  --color-input-bg: var(--light-input-bg);
+  --color-input-border: var(--light-input-border);
+  --color-input-focus: var(--color-accent);
+  --color-input-text: var(--light-input-text);
+  --color-input-placeholder: var(--light-input-placeholder);
+
+  /* Link Colors */
+  --color-link: var(--color-accent);
+  --color-link-hover: var(--color-accent-hover);
+  --color-link-active: var(--color-accent-active);
+
+  /* Border Width */
+  --border-width-thin: 1px;
+  --border-width-medium: 2px;
+  --border-width-thick: 3px;
+
+  /* Border Radius */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 9999px;
+
+  /* Spacing */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+
+  /* Animation */
+  --animation-duration: 0.2s;
+
+  /* Button Specific */
+  --button-radius: var(--radius-md);
+  --button-border-width: var(--border-width-thin);
+  --button-padding-x: 16px;
+  --button-padding-y: 10px;
+  --button-height: 40px;
+
+  /* Input Specific */
+  --input-radius: var(--radius-md);
+  --input-border-width: var(--border-width-thin);
+  --input-padding-x: 12px;
+  --input-padding-y: 10px;
+  --input-height: 40px;
+
+  /* Card/Container */
+  --card-radius: var(--radius-lg);
+  --card-padding: var(--spacing-md);
+
+  /* Font Stack */
+  --color-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+
+  font-family: var(--color-font-family);
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: light dark;
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-secondary);
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Hide scrollbar for webkit browsers (Chrome, Safari, Edge) */
+::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for Firefox */
+* {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+/* System theme - use media query */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --color-bg-primary: var(--dark-bg-primary);
+    --color-bg-secondary: var(--dark-bg-secondary);
+    --color-bg-tertiary: var(--dark-bg-tertiary);
+    --color-text-primary: var(--dark-text-primary);
+    --color-text-secondary: var(--dark-text-secondary);
+    --color-text-hint: var(--dark-text-hint);
+    --color-link: var(--dark-link);
+    --color-link-hover: var(--dark-link-hover);
+    --color-border: var(--dark-border);
+    --color-divider: var(--dark-divider);
+
+    --color-button-secondary: var(--dark-button-secondary);
+    --color-button-secondary-hover: var(--dark-button-secondary-hover);
+
+    --color-input-bg: var(--dark-input-bg);
+    --color-input-border: var(--dark-input-border);
+    --color-input-text: var(--dark-input-text);
+    --color-input-placeholder: var(--dark-input-placeholder);
+  }
+}
+
+/* Force dark theme when data-theme='dark' */
+:root[data-theme='dark'] {
+  --color-bg-primary: var(--dark-bg-primary);
+  --color-bg-secondary: var(--dark-bg-secondary);
+  --color-bg-tertiary: var(--dark-bg-tertiary);
+  --color-text-primary: var(--dark-text-primary);
+  --color-text-secondary: var(--dark-text-secondary);
+  --color-text-hint: var(--dark-text-hint);
+  --color-link: var(--dark-link);
+  --color-link-hover: var(--dark-link-hover);
+  --color-border: var(--dark-border);
+  --color-divider: var(--dark-divider);
+
+  --color-button-secondary: var(--dark-button-secondary);
+  --color-button-secondary-hover: var(--dark-button-secondary-hover);
+
+  --color-input-bg: var(--dark-input-bg);
+  --color-input-border: var(--dark-input-border);
+  --color-input-text: var(--dark-input-text);
+  --color-input-placeholder: var(--dark-input-placeholder);
+}
+
+/* Force light theme when data-theme='light' */
+:root[data-theme='light'] {
+  --color-bg-primary: var(--light-bg-primary);
+  --color-bg-secondary: var(--light-bg-secondary);
+  --color-bg-tertiary: var(--light-bg-tertiary);
+  --color-text-primary: var(--light-text-primary);
+  --color-text-secondary: var(--light-text-secondary);
+  --color-text-hint: var(--light-text-hint);
+  --color-link: var(--light-link);
+  --color-link-hover: var(--light-link-hover);
+  --color-border: var(--light-border);
+  --color-divider: var(--light-divider);
+
+  --color-button-secondary: var(--light-button-secondary);
+  --color-button-secondary-hover: var(--light-button-secondary-hover);
+
+  --color-input-bg: var(--light-input-bg);
+  --color-input-border: var(--light-input-border);
+  --color-input-text: var(--light-input-text);
+  --color-input-placeholder: var(--light-input-placeholder);
+}

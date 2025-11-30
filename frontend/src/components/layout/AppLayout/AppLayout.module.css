@@ -1,0 +1,82 @@
+.layout {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 20rem;
+}
+
+.main {
+  flex: 1;
+  max-width: 36rem;
+  width: 100%;
+  padding: var(--spacing-sm);
+  margin-bottom: var(--spacing-xl);
+  overflow-y: auto;
+  /* Hide scrollbar but keep scrolling */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+.main::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+.nav {
+  background-color: var(--color-bg-primary);
+  padding: var(--spacing-xs);
+  border: var(--border-width-thin) solid var(--color-border);
+  border-radius: var(--radius-xl);
+  display: flex;
+  justify-content: space-around;
+  min-width: 16rem;
+  position: sticky;
+  bottom: var(--spacing-md);
+  gap: 0.2rem;
+  z-index: 10;
+  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.17);
+}
+
+/* More specific selector to override global a styles */
+.nav .link,
+.nav a {
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  font-family: var(--color-font-family);
+  font-weight: 500;
+  font-size: 0.8rem;
+  padding: var(--spacing-xs);
+  padding-top: var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  transition: background-color 0.2s ease, color 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 4rem;
+}
+
+.nav .link:hover,
+.nav a:hover {
+  color: var(--color-text-secondary);
+}
+
+.nav .link.active svg,
+.nav a.active svg {
+  color: var(--color-text-primary);
+}
+
+.nav .link:visited,
+.nav a:visited {
+  color: var(--color-text-secondary);
+}
+
+.nav .link:visited:hover,
+.nav a:visited:hover {
+  color: var(--color-text-primary);
+}
+
+.nav .link.active,
+.nav a.active {
+  color: var(--color-text-primary);
+}

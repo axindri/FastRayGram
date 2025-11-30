@@ -1,0 +1,9 @@
+.pageLoader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  width: 100%;
+  min-height: 70vh;
+  padding: var(--spacing-lg, 2rem);
+}

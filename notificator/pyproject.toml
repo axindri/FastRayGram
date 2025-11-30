@@ -1,0 +1,13 @@
+[project]
+name = "notificator"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "aiogram>=3.22.0",
+    "asyncpg>=0.29.0",
+    "asyncpg-stubs>=0.30.2",
+    "pydantic>=2.0.0",
+    "pydantic-settings>=2.0.0",
+]

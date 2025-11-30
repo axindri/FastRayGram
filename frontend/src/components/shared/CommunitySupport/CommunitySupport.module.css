@@ -1,0 +1,81 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+}
+
+.section:not(:first-child) {
+  padding-top: 1rem;
+  border-top: var(--border-width-thin) solid var(--color-border);
+}
+
+.sectionTitle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+.sectionTitle svg {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  color: var(--color-accent);
+}
+
+.sectionText {
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+}
+
+.contributorsList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.contributor {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.contributorLink {
+  color: var(--color-accent);
+  text-decoration: none;
+  font-weight: 500;
+  transition: text-decoration 0.2s ease;
+}
+
+.contributorLink:hover {
+  text-decoration: underline;
+}
+
+.contributorRole {
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+}
+
+.link {
+  color: var(--color-accent);
+  text-decoration: underline;
+  font-weight: 500;
+  transition: opacity 0.2s ease;
+}
+
+.link:hover {
+  opacity: 0.8;
+}
+
+.donateButton {
+  margin-top: 0.75rem;
+  align-self: flex-start;
+}
