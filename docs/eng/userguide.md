@@ -15,6 +15,11 @@ This guide describes the process of deploying Fast Ray Gram on a single server u
 
 **Important:** 3X-UI v2.8.5 must be installed and configured on a separate server. Integration with 3X-UI is done through API.
 
+**⚠️ CRITICAL 3X-UI Requirements:**
+- **Fail2Ban must be enabled** - required for security and IP blocking
+- **IP limiting logs must be enabled** - required for traffic monitoring and user management
+- **VLESS inbound with remark='vless' must be configured** - required for automatic user addition. The system will add new users to this inbound using the remark field
+
 > **💡 Note:** If you need to distribute services across multiple servers, use separate `docker-compose.yml` files located in each service's folder (`backend/`, `frontend/`, `notificator/`, `tg_bot/`). In this case, you will need to configure network connections between servers and update environment variables to specify remote service addresses.
 
 ### Requirements
@@ -38,6 +43,9 @@ This guide describes the process of deploying Fast Ray Gram on a single server u
 #### External Services
 
 - **3X-UI v2.8.5** - must be installed and accessible on a separate server
+  - **Fail2Ban must be enabled** - required for security and IP blocking
+  - **IP limiting logs must be enabled** - required for traffic monitoring and user management
+  - **VLESS inbound with remark='vless' must be configured** - required for automatic user addition. The system will add new users to this inbound using the remark field
 - **Domain name** - for accessing the application via HTTPS
 
 #### Additional Services (optional, full mode only)
