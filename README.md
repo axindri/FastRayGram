@@ -27,7 +27,7 @@
 
 ---
 
-## 🇬🇧 English
+## English
 
 ### About
 
@@ -92,7 +92,7 @@ Get started quickly with these steps:
 
 ---
 
-## 🇷🇺 Русский
+## Русский
 
 ### О проекте
 
