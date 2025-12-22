@@ -140,6 +140,7 @@ class XuiService:
         inbound = await self.get_inbound(inbound_id)
         for client in inbound.settings.clients:
             if client.id == client_id:
+                client.usedGB = await self.get_client_used_gb(inbound_id, client.email)
                 return client
         return None
 
@@ -150,7 +151,7 @@ class XuiService:
             if inbound.id == inbound_id:
                 for client_stats in inbound.clientStats:
                     if client_stats.email == email:
-                        return client_stats.allTime
+                        return int(client_stats.up + client_stats.down)
                 raise ObjectNotFoundError(log_msg=f'Failed to get client used GB: {email}')
         raise ObjectNotFoundError(log_msg=f'Failed to get inbound: {inbound_id}')
 
@@ -172,6 +173,7 @@ class XuiService:
         inbound = await self.get_inbound(inbound_id)
         for client in inbound.settings.clients:
             if client.email == email:
+                client.usedGB = await self.get_client_used_gb(inbound_id, client.email)
                 return client
         return None
 
