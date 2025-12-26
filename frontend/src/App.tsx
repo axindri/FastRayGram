@@ -1,5 +1,6 @@
 import { Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
+import { Snowfall } from 'react-snowfall';
 import '@/styles/App.css';
 import { AppLayout, ProtectedRoute } from '@/components';
 import { Home, NotFound, Configs, Account, Login, Register, ChangePassword, UpdateProfile } from '@/pages';
@@ -12,6 +13,12 @@ import { isTokenExpiringSoon } from '@/utils/jwt';
 import { apiClient } from '@/services';
 import { KEEPALIVE_INTERVAL_SEC, ACCESS_TOKEN_REFRESH_THRESHOLD_SEC } from '@/config/settings';
 import { Admin, Requests, RequestDetail, Users, UserDetail, Configs as AdminConfigs, ConfigDetail as AdminConfigDetail, News, NewsDetail, AppSettings, AppSettingsDetail } from '@/pages/Admin';
+
+const isWinterSeason = () => {
+  const now = new Date();
+  const month = now.getMonth() + 1;
+  return month === 12 || month === 1 || month === 2;
+};
 
 function App() {
   const { checkAuth, isInitialized } = useAppStore();
@@ -62,6 +69,7 @@ function App() {
 
   return (
     <>
+      {isWinterSeason() && <Snowfall snowflakeCount={100} speed={[0.5, 3]} wind={[-0.5, 2]} radius={[0.5, 3]} />}
       <Toaster
         position="top-right"
         toastOptions={{
