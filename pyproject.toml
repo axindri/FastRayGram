@@ -1,5 +1,5 @@
 [project]
-name = "FastRayGram"
+name = "fastraygram"
 version = "1.0.0"
 description = "Fast Ray Gram API"
 readme = "README.md"
