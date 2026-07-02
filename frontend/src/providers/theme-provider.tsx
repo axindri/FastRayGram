@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 
-type ThemeMode = "light" | "dark" | "system";
+import { type ThemeMode, isThemeMode } from "@/lib/theme-options";
 
 type ThemeContextValue = {
   mode: ThemeMode;
@@ -13,7 +13,7 @@ const THEME_STORAGE_KEY = "theme";
 
 function readStoredThemeMode(): ThemeMode {
   const stored = localStorage.getItem(THEME_STORAGE_KEY);
-  if (stored === "light" || stored === "dark" || stored === "system") {
+  if (stored && isThemeMode(stored)) {
     return stored;
   }
   return "system";

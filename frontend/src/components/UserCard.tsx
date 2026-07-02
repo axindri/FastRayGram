@@ -1,25 +1,15 @@
 import { useEffect, useState } from "react";
 import { Eye, Link, Loader2, Pencil, Trash2 } from "lucide-react";
 
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardAction, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ROLE_LABELS, type AdminUser, type UserRole } from "@/types";
 
-import { CopyableInput } from "@/components/CopyableInput";
 import { ActionIconTooltip } from "@/components/ActionIconTooltip";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { ConfirmIconAction } from "@/components/ConfirmIconAction";
+import { CopyableInput } from "@/components/CopyableInput";
 
 type RoleOption = {
   value: UserRole;
@@ -112,52 +102,27 @@ export function UserCard({
                 </ActionIconTooltip>
               ) : null}
               {onRefreshLink && canManage ? (
-                <AlertDialog>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <AlertDialogTrigger asChild>
-                        <Button type="button" variant="outline" size="icon-sm" aria-label="Обновить ссылку" disabled={isActionLoading}>
-                          {isActionLoading ? <Loader2 className="animate-spin" /> : <Link />}
-                        </Button>
-                      </AlertDialogTrigger>
-                    </TooltipTrigger>
-                    <TooltipContent side="top">Новая ссылка для входа</TooltipContent>
-                  </Tooltip>
-                  <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Получить новую ссылку для входа?</AlertDialogTitle>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Нет</AlertDialogCancel>
-                        <AlertDialogAction onClick={() => void handleRefreshLink()}>Да</AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                </AlertDialog>
+                <ConfirmIconAction
+                  label="Новая ссылка для входа"
+                  title="Получить новую ссылку для входа?"
+                  ariaLabel="Обновить ссылку"
+                  icon={<Link />}
+                  loading={isActionLoading}
+                  disabled={isActionLoading}
+                  onConfirm={() => void handleRefreshLink()}
+                />
               ) : null}
               {onDelete && canManage ? (
-                <AlertDialog>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <AlertDialogTrigger asChild>
-                        <Button type="button" variant="outline" size="icon-sm" aria-label="Удалить" disabled={isActionLoading}>
-                          {isActionLoading ? <Loader2 className="animate-spin" /> : <Trash2 />}
-                        </Button>
-                      </AlertDialogTrigger>
-                    </TooltipTrigger>
-                    <TooltipContent side="top">Удалить</TooltipContent>
-                  </Tooltip>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Удалить пользователя?</AlertDialogTitle>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Нет</AlertDialogCancel>
-                      <AlertDialogAction variant="destructive" onClick={() => onDelete(user.id)}>
-                        Да
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
+                <ConfirmIconAction
+                  label="Удалить"
+                  title="Удалить пользователя?"
+                  ariaLabel="Удалить"
+                  icon={<Trash2 />}
+                  loading={isActionLoading}
+                  disabled={isActionLoading}
+                  destructive
+                  onConfirm={() => onDelete(user.id)}
+                />
               ) : null}
             </div>
           </CardAction>
@@ -182,7 +147,7 @@ export function UserCard({
           ) : null}
         </div>
         {editing ? (
-          <div className="flex flex-col gap-2">
+          <div className="mt-3 flex flex-col gap-2">
             <Label>Новая роль</Label>
             <Select value={selectedRole} onValueChange={(value) => setSelectedRole(value as "user" | "admin")}>
               <SelectTrigger className="w-full">

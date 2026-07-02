@@ -1,24 +1,14 @@
-import { Ban, Loader2 } from "lucide-react";
+import { Ban } from "lucide-react";
 
 import { formatDate } from "@/api";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardAction, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { invoiceStatusBadge, isInvoiceActive, type AccessLevel, type AdminInvoice, type Invoice } from "@/types";
 
+import { ConfirmIconAction } from "@/components/ConfirmIconAction";
 import { CopyableText } from "@/components/CopyableInput";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 function InvoiceStatusBadge({ status }: { status: string }) {
   const badge = invoiceStatusBadge(status);
@@ -41,40 +31,6 @@ type InvoiceCardProps = {
 
 function isAdminInvoice(item: Invoice | AdminInvoice): item is AdminInvoice {
   return "username" in item && typeof (item as AdminInvoice).username === "string";
-}
-
-function CancelInvoiceButton({
-  invoiceId,
-  loading,
-  onCancel,
-}: {
-  invoiceId: number;
-  loading: boolean;
-  onCancel: (id: number) => void;
-}) {
-  return (
-    <AlertDialog>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <AlertDialogTrigger asChild>
-            <Button type="button" variant="outline" size="icon-sm" aria-label="Отменить счёт" disabled={loading}>
-              {loading ? <Loader2 className="animate-spin" /> : <Ban />}
-            </Button>
-          </AlertDialogTrigger>
-        </TooltipTrigger>
-        <TooltipContent side="top">Отменить оплату</TooltipContent>
-      </Tooltip>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Отменить счет?</AlertDialogTitle>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>Нет</AlertDialogCancel>
-          <AlertDialogAction onClick={() => onCancel(invoiceId)}>Да</AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
-  );
 }
 
 export function InvoiceCard({
@@ -106,7 +62,15 @@ export function InvoiceCard({
           <div className="flex flex-wrap items-center gap-2">
             <InvoiceStatusBadge status={status} />
             {canCancel && onCancel ? (
-              <CancelInvoiceButton invoiceId={item.id} loading={cancelLoading} onCancel={onCancel} />
+              <ConfirmIconAction
+                label="Отменить оплату"
+                title="Отменить счет?"
+                ariaLabel="Отменить счёт"
+                icon={<Ban />}
+                loading={cancelLoading}
+                disabled={cancelLoading}
+                onConfirm={() => onCancel(item.id)}
+              />
             ) : null}
           </div>
         </CardAction>

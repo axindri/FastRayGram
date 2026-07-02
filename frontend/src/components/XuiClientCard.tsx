@@ -3,16 +3,6 @@ import { Info, Loader2, Pencil, RotateCcw, Trash2, Wifi } from "lucide-react";
 
 import { formatDate, formatExpiryRemaining } from "@/api";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardAction, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -27,8 +17,8 @@ import type { AccessLevel, XuiClient } from "@/types";
 import { CopyableInput } from "@/components/CopyableInput";
 import { ActionIconTooltip } from "@/components/ActionIconTooltip";
 import { CardTitleWithIcon } from "@/components/CardTitleWithIcon";
+import { ConfirmIconAction } from "@/components/ConfirmIconAction";
 import { HintTooltip } from "@/components/HintTooltip";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 const LIMIT_IP_HINT =
   "Лимит IP — это не число устройств. С одного IP могут подключаться несколько устройств. Ограничение действует на количество разных IP-адресов одновременно.";
@@ -184,52 +174,27 @@ export function XuiClientCard({
                   </ActionIconTooltip>
                 ) : null}
                 {onResetTraffic ? (
-                  <AlertDialog>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <AlertDialogTrigger asChild>
-                          <Button type="button" variant="outline" size="icon-sm" aria-label="Сбросить трафик" disabled={actionLoading}>
-                            {actionLoading ? <Loader2 className="animate-spin" /> : <RotateCcw />}
-                          </Button>
-                        </AlertDialogTrigger>
-                      </TooltipTrigger>
-                      <TooltipContent side="top">Сбросить трафик</TooltipContent>
-                    </Tooltip>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Сбросить трафик?</AlertDialogTitle>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Нет</AlertDialogCancel>
-                        <AlertDialogAction onClick={() => void onResetTraffic(client.email)}>Да</AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
+                  <ConfirmIconAction
+                    label="Сбросить трафик"
+                    title="Сбросить трафик?"
+                    ariaLabel="Сбросить трафик"
+                    icon={<RotateCcw />}
+                    loading={actionLoading}
+                    disabled={actionLoading}
+                    onConfirm={() => void onResetTraffic(client.email)}
+                  />
                 ) : null}
                 {onDelete ? (
-                  <AlertDialog>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <AlertDialogTrigger asChild>
-                          <Button type="button" variant="outline" size="icon-sm" aria-label="Удалить" disabled={actionLoading}>
-                            {actionLoading ? <Loader2 className="animate-spin" /> : <Trash2 />}
-                          </Button>
-                        </AlertDialogTrigger>
-                      </TooltipTrigger>
-                      <TooltipContent side="top">Удалить</TooltipContent>
-                    </Tooltip>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Удалить XUI-клиента?</AlertDialogTitle>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Нет</AlertDialogCancel>
-                        <AlertDialogAction variant="destructive" onClick={() => void onDelete(client.email)}>
-                          Да
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
+                  <ConfirmIconAction
+                    label="Удалить"
+                    title="Удалить XUI-клиента?"
+                    ariaLabel="Удалить"
+                    icon={<Trash2 />}
+                    loading={actionLoading}
+                    disabled={actionLoading}
+                    destructive
+                    onConfirm={() => void onDelete(client.email)}
+                  />
                 ) : null}
               </>
             ) : null}

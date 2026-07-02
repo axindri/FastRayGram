@@ -2,16 +2,6 @@ import { useState } from "react";
 import { Loader2, Trash2 } from "lucide-react";
 
 import { buildRegistrationLink, formatDate } from "@/api";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardAction, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -19,8 +9,8 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import type { RegistrationCode } from "@/types";
 
+import { ConfirmIconAction } from "@/components/ConfirmIconAction";
 import { CopyableInput } from "@/components/CopyableInput";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 type RegistrationCodeCardProps = {
   item: RegistrationCode;
@@ -65,29 +55,16 @@ export function RegistrationCodeCard({
             >
               {status.label}
             </Badge>
-            <AlertDialog>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <AlertDialogTrigger asChild>
-                    <Button type="button" variant="outline" size="icon-sm" aria-label="Удалить код" disabled={deleteLoading}>
-                      {deleteLoading ? <Loader2 className="animate-spin" /> : <Trash2 />}
-                    </Button>
-                  </AlertDialogTrigger>
-                </TooltipTrigger>
-                <TooltipContent side="top">Удалить</TooltipContent>
-              </Tooltip>
-              <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Удалить код регистрации?</AlertDialogTitle>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Нет</AlertDialogCancel>
-                <AlertDialogAction variant="destructive" onClick={() => onDelete(item.id)}>
-                  Да
-                </AlertDialogAction>
-              </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+            <ConfirmIconAction
+              label="Удалить"
+              title="Удалить код регистрации?"
+              ariaLabel="Удалить код"
+              icon={<Trash2 />}
+              loading={deleteLoading}
+              disabled={deleteLoading}
+              destructive
+              onConfirm={() => onDelete(item.id)}
+            />
           </div>
         </CardAction>
       </CardHeader>
