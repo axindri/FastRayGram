@@ -5,7 +5,7 @@
 <h1 align="center">Fast Ray Gram</h1>
 
 <p align="center">
-  Личный кабинет и админка для VPN-подписки на базе <strong>3X-UI</strong> с оплатой через <strong>TimeWeb</strong>.
+  Личный кабинет и админка для VPN-подписки на базе <strong>3X-UI</strong>
 </p>
 
 <p align="center">
@@ -41,13 +41,6 @@
 | [![Регистрация по коду](docs/screenshots/register.png)](docs/screenshots/register.png) | [![Платежи и счета](docs/screenshots/payments.png)](docs/screenshots/payments.png) |
 | Самостоятельная регистрация по ссылке от админа | Проверка оплат, список инвойсов, отмена счетов |
 
-## Возможности
-
-- JWT-авторизация и вход по ссылке `?authToken=…`
-- Управление клиентами 3X-UI (создание, продление, лимит IP, трафик)
-- Инвойсы TimeWeb: `pending` → `processing` → `paid`
-- Многоразовые коды регистрации со сроком действия
-- Тёмная тема, адаптивный интерфейс
 
 ## Запуск на сервере
 
@@ -79,14 +72,6 @@ docker compose up -d --build
 Приложение: `http://<ваш-сервер>:8000` (порт задаётся `APP_PORT`).
 
 Вместе с приложением поднимается **invoice-worker** — периодически проверяет оплаченные счета (`CHECK_INTERVAL_SEC`, по умолчанию 30 с).
-
-### Минимальный чеклист после деплоя
-
-- [ ] `APP__JWT_SECRET` и `APP__SUPERUSER_TOKEN` — уникальные значения
-- [ ] XUI доступен с сервера приложения
-- [ ] TimeWeb токен валиден, `return_url` / `fail_url` ведут на ваш домен
-- [ ] Каталог `database/` на volume (данные SQLite сохраняются между перезапусками)
-- [ ] Бэкап `database/data.db` по расписанию
 
 ### Переменные окружения
 
