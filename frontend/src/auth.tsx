@@ -1,7 +1,8 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { clearAuthToken, fetchMe, setUnauthorizedHandler, TOKEN_KEY } from "@/api";
+import { clearAuthToken, fetchMe, setUnauthorizedHandler } from "@/api";
+import { TOKEN_KEY } from "@/constants";
 import type { UserProfile } from "@/types";
 
 function parseAuthTokenFromUrl(): string {

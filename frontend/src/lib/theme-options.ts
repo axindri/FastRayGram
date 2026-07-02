@@ -1,20 +1,11 @@
-import { Monitor, Moon, Sun, type LucideIcon } from "lucide-react";
+import { THEME_MODES, type ThemeMode } from "@/constants";
 
-export type ThemeMode = "light" | "dark" | "system";
-
-export const THEME_MODES: ThemeMode[] = ["light", "dark", "system"];
-
-export const THEME_MODE_LABELS: Record<ThemeMode, string> = {
-  light: "Светлая",
-  dark: "Тёмная",
-  system: "Системная",
-};
-
-export const THEME_MODE_ICONS: Record<ThemeMode, LucideIcon> = {
-  light: Sun,
-  dark: Moon,
-  system: Monitor,
-};
+export {
+  THEME_MODE_ICONS,
+  THEME_MODE_LABELS,
+  THEME_MODES,
+  type ThemeMode,
+} from "@/constants";
 
 export function isThemeMode(value: string): value is ThemeMode {
   return THEME_MODES.includes(value as ThemeMode);

@@ -11,7 +11,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 
-import { TOKEN_KEY, buildAuthLink, canRenewSubscription, createInvoice, fetchConfig, fetchXuiMe, refreshMyToken } from "@/api";
+import { buildAuthLink, canRenewSubscription, createInvoice, fetchConfig, fetchXuiMe, refreshMyToken } from "@/api";
+import { RENEW_HINT, TOKEN_KEY } from "@/constants";
 import { useAuth } from "@/auth";
 import { AsyncListState } from "@/components/AsyncListState";
 import { CardTitleWithIcon } from "@/components/CardTitleWithIcon";
@@ -27,8 +28,6 @@ import { useServiceStatus } from "@/hooks/useServiceStatus";
 import { getApiErrorMessage } from "@/utils/apiError";
 import { formatJwtExpiryRemaining, isJwtToken, jwtExpiryTagColor } from "@/utils/jwt";
 import { isInvoiceActive, type UserRole } from "@/types";
-
-const RENEW_HINT = "Новый счёт можно выставить, когда до конца подписки останется меньше 24 часов (включая уже истёкшую).";
 
 function expiryBadgeClassName(color: "success" | "error" | "default") {
   if (color === "success") {

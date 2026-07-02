@@ -19,9 +19,7 @@ import { ActionIconTooltip } from "@/components/ActionIconTooltip";
 import { CardTitleWithIcon } from "@/components/CardTitleWithIcon";
 import { ConfirmIconAction } from "@/components/ConfirmIconAction";
 import { HintTooltip } from "@/components/HintTooltip";
-
-const LIMIT_IP_HINT =
-  "Лимит IP — это не число устройств. С одного IP могут подключаться несколько устройств. Ограничение действует на количество разных IP-адресов одновременно.";
+import { LIMIT_IP_HINT } from "@/constants";
 
 type XuiUpdatePayload = {
   expiry_time_days: number;

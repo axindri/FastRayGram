@@ -17,10 +17,14 @@ import {
 } from "@/api";
 import { useAuth } from "@/auth";
 import { getApiErrorMessage } from "@/utils/apiError";
-import { MARK_MAX_LENGTH } from "@/utils/mark";
+import {
+  MARK_MAX_LENGTH,
+  ROLE_LABELS,
+  USERNAME_MAX_LENGTH,
+  USERNAME_PATTERN,
+} from "@/constants";
 import { emptyPaginated } from "@/utils/pagination";
-import { USERNAME_MAX_LENGTH, USERNAME_PATTERN } from "@/utils/username";
-import { ROLE_LABELS, type AdminUser, type Paginated, type UserRole } from "@/types";
+import type { AdminUser, Paginated, UserRole } from "@/types";
 
 export type CreateUserForm = {
   username: string;

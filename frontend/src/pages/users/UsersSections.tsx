@@ -13,18 +13,17 @@ import { SectionCard } from "@/components/SectionCard";
 import { SubscriptionNotFound } from "@/components/SubscriptionNotFound";
 import { UserCard } from "@/components/UserCard";
 import { XuiClientCard } from "@/components/XuiClientCard";
-import { MARK_HINT, MARK_MAX_LENGTH } from "@/utils/mark";
-import { USERNAME_HINT, USERNAME_MAX_LENGTH } from "@/utils/username";
+import {
+  FLOW_NONE,
+  FLOW_OPTIONS,
+  MARK_HINT,
+  MARK_MAX_LENGTH,
+  USERNAME_HINT,
+  USERNAME_MAX_LENGTH,
+} from "@/constants";
 import type { UserRole } from "@/types";
 
 import type { UsersAdminContext } from "@/pages/users/useUsersAdmin";
-
-const FLOW_NONE = "__none__";
-
-const FLOW_OPTIONS = [
-  { value: FLOW_NONE, label: "Пусто" },
-  { value: "xtls-rprx-vision", label: "xtls-rprx-vision" },
-] as const;
 
 function useUsersContext() {
   return useOutletContext<UsersAdminContext>();

@@ -13,8 +13,7 @@ import { useAuth } from "@/auth";
 import { HintTooltip } from "@/components/HintTooltip";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { getApiErrorMessage } from "@/utils/apiError";
-import { MARK_HINT, MARK_MAX_LENGTH } from "@/utils/mark";
-import { USERNAME_HINT, USERNAME_MAX_LENGTH, USERNAME_PATTERN } from "@/utils/username";
+import { MARK_HINT, MARK_MAX_LENGTH, USERNAME_HINT, USERNAME_MAX_LENGTH, USERNAME_PATTERN } from "@/constants";
 
 type FieldErrors = {
   username?: string;

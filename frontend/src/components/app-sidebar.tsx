@@ -24,10 +24,9 @@ import {
 } from "@/components/ui/sidebar";
 import { fetchConfig } from "@/api";
 import { useAuth } from "@/auth";
+import { APP_VERSION } from "@/constants";
 import { NAV_SECTION_LABELS, groupNavItems, type NavChildItem, type NavItem, NAV_ITEMS } from "@/config/navigation";
 import { isAdminRole } from "@/types";
-
-export const APP_VERSION = "v2.8.2";
 
 function closeMobileSidebar(isMobile: boolean, setOpenMobile: (open: boolean) => void) {
   if (isMobile) {
@@ -35,17 +34,7 @@ function closeMobileSidebar(isMobile: boolean, setOpenMobile: (open: boolean) =>
   }
 }
 
-function NavLeafLink({
-  path,
-  label,
-  Icon,
-  isActive,
-}: {
-  path: string;
-  label: string;
-  Icon: NavItem["Icon"];
-  isActive: boolean;
-}) {
+function NavLeafLink({ path, label, Icon, isActive }: { path: string; label: string; Icon: NavItem["Icon"]; isActive: boolean }) {
   const { isMobile, setOpenMobile } = useSidebar();
 
   return (
@@ -60,13 +49,7 @@ function NavLeafLink({
   );
 }
 
-function NavGroupWithChildren({
-  item,
-  pathname,
-}: {
-  item: NavItem;
-  pathname: string;
-}) {
+function NavGroupWithChildren({ item, pathname }: { item: NavItem; pathname: string }) {
   const { isMobile, setOpenMobile } = useSidebar();
   const children = item.children ?? [];
   const isGroupActive = children.some((child) => pathname.startsWith(child.path));
@@ -152,13 +135,7 @@ export function AppSidebar() {
                   item.children?.length ? (
                     <NavGroupWithChildren key={item.path} item={item} pathname={location.pathname} />
                   ) : (
-                    <NavLeafLink
-                      key={item.path}
-                      path={item.path}
-                      label={item.label}
-                      Icon={item.Icon}
-                      isActive={location.pathname.startsWith(item.path)}
-                    />
+                    <NavLeafLink key={item.path} path={item.path} label={item.label} Icon={item.Icon} isActive={location.pathname.startsWith(item.path)} />
                   ),
                 )}
               </SidebarMenu>

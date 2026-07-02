@@ -1,6 +1,6 @@
-export const USERNAME_MAX_LENGTH = 32;
-export const USERNAME_PATTERN = /^[a-zA-Z0-9]+$/;
-export const USERNAME_HINT = "Только латинские буквы и цифры, до 32 символов";
+import { USERNAME_MAX_LENGTH, USERNAME_PATTERN } from "@/constants";
+
+export { USERNAME_HINT, USERNAME_MAX_LENGTH, USERNAME_PATTERN } from "@/constants";
 
 export const usernameFormRules = [
   { required: true, message: "Введите username" },

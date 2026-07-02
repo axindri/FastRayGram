@@ -1,7 +1,8 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
 
-import { type ThemeMode, isThemeMode } from "@/lib/theme-options";
+import { THEME_STORAGE_KEY, type ThemeMode } from "@/constants";
+import { isThemeMode } from "@/lib/theme-options";
 
 type ThemeContextValue = {
   mode: ThemeMode;
@@ -9,7 +10,6 @@ type ThemeContextValue = {
 };
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
-const THEME_STORAGE_KEY = "theme";
 
 function readStoredThemeMode(): ThemeMode {
   const stored = localStorage.getItem(THEME_STORAGE_KEY);

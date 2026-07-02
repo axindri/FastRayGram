@@ -11,20 +11,15 @@ import { fetchAdminLinks, fetchStatus } from "@/api";
 import { AdminPageColumn, AdminPageLayout } from "@/components/AdminPageLayout";
 import { SectionCard } from "@/components/SectionCard";
 import { getApiErrorMessage } from "@/utils/apiError";
-import { ADMIN_LINKS_META, getStatusServices, type AdminLinks, type StatusResponse } from "@/types";
-
-const STATUS_LABELS: Record<string, string> = {
-  ok: "OK",
-  error: "Ошибка",
-  warning: "Предупреждение",
-};
+import { ADMIN_LINKS_META, SERVICE_STATUS_LABELS } from "@/constants";
+import { getStatusServices, type AdminLinks, type StatusResponse } from "@/types";
 
 function serviceStatusBadge(status: string) {
   const normalized = status.toLowerCase();
 
   if (normalized === "ok") {
     return {
-      label: STATUS_LABELS.ok,
+      label: SERVICE_STATUS_LABELS.ok,
       variant: "outline" as const,
       className: "border-green-600/25 bg-green-600/10 text-green-700 dark:text-green-400",
     };
@@ -32,14 +27,14 @@ function serviceStatusBadge(status: string) {
 
   if (normalized === "error") {
     return {
-      label: STATUS_LABELS.error,
+      label: SERVICE_STATUS_LABELS.error,
       variant: "destructive" as const,
       className: undefined,
     };
   }
 
   return {
-    label: STATUS_LABELS[normalized] ?? status,
+    label: SERVICE_STATUS_LABELS[normalized] ?? status,
     variant: "outline" as const,
     className: "border-amber-600/25 bg-amber-600/10 text-amber-800 dark:text-amber-400",
   };
@@ -118,20 +113,20 @@ export function MonitoringPage() {
             {links ? (
               <div className="flex flex-col gap-4">
                 {ADMIN_LINKS_META.map(({ key, title, hint }) => (
-                  <Card key={key}>
+                  <Card key={key} className="min-w-0">
                     <CardHeader>
                       <CardTitle>{title}</CardTitle>
                       <CardDescription>{hint}</CardDescription>
                     </CardHeader>
-                    <CardFooter>
+                    <CardFooter className="min-w-0 items-start">
                       <a
                         href={links[key]}
                         target="_blank"
                         rel="noreferrer"
-                        className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
+                        className="flex min-w-0 w-full items-start gap-1.5 text-sm text-primary hover:underline"
                       >
-                        <ExternalLink className="size-3.5" />
-                        {links[key]}
+                        <ExternalLink className="mt-0.5 size-3.5 shrink-0" />
+                        <span className="min-w-0 break-all">{links[key]}</span>
                       </a>
                     </CardFooter>
                   </Card>

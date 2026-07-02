@@ -6,16 +6,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { getApiErrorMessage } from "@/utils/apiError";
 import { emptyPaginated } from "@/utils/pagination";
-import { ROLE_LABELS, type AdminInvoice, type AdminUser, type Paginated, type XuiClient } from "@/types";
-
+import { INVOICES_PAGE_LIMIT, ROLE_LABELS } from "@/constants";
+import type { AdminInvoice, AdminUser, Paginated, XuiClient } from "@/types";
 import { CardTitleWithIcon } from "@/components/CardTitleWithIcon";
 import { InvoiceCard } from "@/components/InvoiceCard";
 import { PaginatedList } from "@/components/PaginatedList";
 import { SubscriptionNotFound } from "@/components/SubscriptionNotFound";
 import { UserAvatar } from "@/components/UserAvatar";
 import { XuiClientCard } from "@/components/XuiClientCard";
-
-const INVOICES_PAGE_LIMIT = 3;
 
 type UserDetailModalProps = {
   open: boolean;
@@ -112,7 +110,11 @@ export function UserDetailModal({ open, user, onClose }: UserDetailModalProps) {
                 </CardDescription>
               </CardHeader>
               <CardContent className="flex flex-col gap-2 text-sm text-muted-foreground">
-                {user.mark ? <p>Заметка: {user.mark}</p> : null}
+                {user.mark ? (
+                  <p>
+                    Заметка: <span className="font-semibold text-foreground">{user.mark}</span>
+                  </p>
+                ) : null}
                 {user.sub_url ? (
                   <a href={user.sub_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-primary hover:underline">
                     <Link className="size-3.5" />

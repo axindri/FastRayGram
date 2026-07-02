@@ -1,9 +1,8 @@
 import { AlertTriangle } from "lucide-react";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { CONTACT_MESSAGE } from "@/constants";
 import { useServiceStatus } from "@/hooks/useServiceStatus";
-
-const CONTACT_MESSAGE = "По всем вопросам обращайтесь к администратору или в личные сообщения группы.";
 
 export function ServiceStatusBanner() {
   const { loading, statusError, paymentBlocked } = useServiceStatus();

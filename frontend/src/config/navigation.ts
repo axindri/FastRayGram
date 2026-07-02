@@ -9,8 +9,11 @@ import {
 } from "lucide-react";
 
 import type { UserRole } from "@/types";
+import type { NavSection } from "@/constants";
+import { NAV_SECTION_LABELS } from "@/constants";
 
-export type NavSection = "main" | "admin" | "settings";
+export type { NavSection } from "@/constants";
+export { NAV_SECTION_LABELS };
 
 export type NavChildItem = {
   path: string;
@@ -25,12 +28,6 @@ export type NavItem = {
   section: NavSection;
   adminOnly?: boolean;
   children?: NavChildItem[];
-};
-
-export const NAV_SECTION_LABELS: Record<NavSection, string> = {
-  main: "Основное",
-  admin: "Администрирование",
-  settings: "Настройки",
 };
 
 export const NAV_ITEMS: NavItem[] = [

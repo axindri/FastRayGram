@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardAction, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ROLE_LABELS, type AdminUser, type UserRole } from "@/types";
+import { ROLE_LABELS } from "@/constants";
+import type { AdminUser, UserRole } from "@/types";
 
 import { ActionIconTooltip } from "@/components/ActionIconTooltip";
 import { ConfirmIconAction } from "@/components/ConfirmIconAction";
@@ -138,7 +139,11 @@ export function UserCard({
               Роль: <span className="font-semibold text-foreground">{ROLE_LABELS[user.role]}</span>
             </p>
           ) : null}
-          {!editing && user.mark ? <p>Заметка: {user.mark}</p> : null}
+          {!editing && user.mark ? (
+            <p>
+              Заметка: <span className="font-semibold text-foreground">{user.mark}</span>
+            </p>
+          ) : null}
           {!editing && user.sub_url ? (
             <a href={user.sub_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-primary hover:underline">
               <Link className="size-3.5" />

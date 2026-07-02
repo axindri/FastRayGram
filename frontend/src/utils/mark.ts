@@ -1,5 +1,6 @@
-export const MARK_MAX_LENGTH = 64;
-export const MARK_HINT = `До ${MARK_MAX_LENGTH} символов`;
+import { MARK_MAX_LENGTH } from "@/constants";
+
+export { MARK_HINT, MARK_MAX_LENGTH } from "@/constants";
 
 export const optionalMarkFormRules = [{ max: MARK_MAX_LENGTH, message: `Не более ${MARK_MAX_LENGTH} символов` }];
 

@@ -1,9 +1,8 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 
+import { STATUS_POLL_MS } from "@/constants";
 import { fetchStatus } from "@/api";
 import { getUnavailableServiceNames } from "@/types";
-
-export const STATUS_POLL_MS = 60_000;
 
 type ServiceStatusContextValue = {
   loading: boolean;

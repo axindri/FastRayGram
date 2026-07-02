@@ -13,16 +13,8 @@ import { PaginatedList } from "@/components/PaginatedList";
 import { SectionCard } from "@/components/SectionCard";
 import { getApiErrorMessage } from "@/utils/apiError";
 import { emptyPaginated } from "@/utils/pagination";
-import { USERNAME_MAX_LENGTH } from "@/utils/username";
+import { PAYMENT_SEARCH_FIELD_LABELS, USERNAME_MAX_LENGTH, type PaymentSearchField } from "@/constants";
 import type { AdminInvoice, Invoice, Paginated } from "@/types";
-
-type PaymentSearchField = "invoiceId" | "id" | "username";
-
-const SEARCH_FIELD_LABELS: Record<PaymentSearchField, string> = {
-  invoiceId: "Номер платежа",
-  id: "ID платежа",
-  username: "Имя пользователя",
-};
 
 export function PaymentsAllPage() {
   const [allInvoices, setAllInvoices] = useState<Paginated<AdminInvoice>>(() => emptyPaginated(3));
@@ -113,7 +105,7 @@ export function PaymentsAllPage() {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {Object.entries(SEARCH_FIELD_LABELS).map(([value, label]) => (
+              {Object.entries(PAYMENT_SEARCH_FIELD_LABELS).map(([value, label]) => (
                 <SelectItem key={value} value={value}>
                   {label}
                 </SelectItem>
@@ -123,7 +115,7 @@ export function PaymentsAllPage() {
           <div className="flex min-w-0 flex-1">
             <Input
               value={searchValue}
-              placeholder={`Поиск: ${SEARCH_FIELD_LABELS[searchField]}`}
+              placeholder={`Поиск: ${PAYMENT_SEARCH_FIELD_LABELS[searchField]}`}
               maxLength={searchField === "username" ? USERNAME_MAX_LENGTH : undefined}
               className="rounded-r-none sm:rounded-none"
               onChange={(event) => {

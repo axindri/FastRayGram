@@ -14,9 +14,11 @@ import type {
   XuiClient,
 } from "@/types";
 
-export const TOKEN_KEY = "authToken";
-
-const API_PREFIX = "/api";
+import {
+  API_PREFIX,
+  RENEWAL_WINDOW_MS,
+  TOKEN_KEY,
+} from "@/constants";
 
 export class ApiError extends Error {
   readonly status: number;
@@ -126,7 +128,6 @@ export function formatExpiryRemaining(value?: string): string | null {
   return `(осталось ${hours} ${pluralRu(hours, "час", "часа", "часов")})`;
 }
 
-const RENEWAL_WINDOW_MS = 24 * 60 * 60 * 1000;
 
 export function canRenewSubscription(expiryDatetime?: string): boolean {
   if (!expiryDatetime) {

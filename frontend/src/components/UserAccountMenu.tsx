@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ROLE_LABELS } from "@/types";
+import { ROLE_LABELS } from "@/constants";
 import { displayName } from "@/utils/format";
 
 export function UserAccountMenu() {

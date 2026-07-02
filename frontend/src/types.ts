@@ -1,4 +1,6 @@
-export type UserRole = "user" | "admin" | "superuser";
+import { INVOICE_STATUS_LABELS, STATUS_META_KEYS, type UserRole } from "@/constants";
+
+export type { UserRole } from "@/constants";
 
 export type UserProfile = {
   id: number;
@@ -6,12 +8,6 @@ export type UserProfile = {
   role: UserRole;
   sub_url: string;
   invoices: Invoice[];
-};
-
-export const ROLE_LABELS: Record<UserRole, string> = {
-  user: "Пользователь",
-  admin: "Администратор",
-  superuser: "Суперпользователь",
 };
 
 export function isAdminRole(role: UserRole): boolean {
@@ -30,8 +26,6 @@ export type ServiceStatusItem = {
 };
 
 export type StatusResponse = Record<string, ServiceStatusItem | string[]>;
-
-export const STATUS_META_KEYS = new Set(["avilable_statuses", "available_statuses"]);
 
 export function getStatusServices(status: StatusResponse): [string, ServiceStatusItem][] {
   return Object.entries(status).filter(
@@ -52,13 +46,6 @@ export type AdminLinks = {
   xui_panel_url: string;
   servers_url: string;
 };
-
-export const ADMIN_LINKS_META = [
-  { key: "swagger_url" as const, title: "Swagger", hint: "Документация API" },
-  { key: "services_status_url" as const, title: "Services Status", hint: "Статус сервисов в Uptime Kuma" },
-  { key: "xui_panel_url" as const, title: "XUI Panel", hint: "Панель управления" },
-  { key: "servers_url" as const, title: "TimeWeb Servers", hint: "Серверы в панели TimeWeb" },
-];
 
 export type Invoice = {
   id: number;
@@ -85,13 +72,6 @@ export type Paginated<T> = {
   page: number;
   limit: number;
   pages: number;
-};
-
-export const INVOICE_STATUS_LABELS: Record<string, string> = {
-  pending: "Ожидает оплаты",
-  processing: "В обработке",
-  paid: "Оплачено",
-  cancelled: "Отменён",
 };
 
 export function invoiceStatusBadge(status: string): {
