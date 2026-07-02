@@ -64,6 +64,11 @@ html[data-theme="dark"] {
   margin-inline: auto;
 }
 
+.app-main-inner > .ant-row {
+  margin-inline: 0;
+  max-width: 100%;
+}
+
 .profile-logout-anchor {
   margin-top: 16px;
   padding-block: 24px 8px;

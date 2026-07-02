@@ -1,4 +1,4 @@
-import { Col, Row, Typography } from "antd";
+import { Col, Flex, Row, Typography } from "antd";
 import type { ReactNode } from "react";
 
 const { Title } = Typography;
@@ -10,14 +10,14 @@ type AdminPageLayoutProps = {
 
 export function AdminPageLayout({ title, children }: AdminPageLayoutProps) {
   return (
-    <>
+    <Flex vertical gap={16} style={{ width: "100%" }}>
       <Title level={3} style={{ marginTop: 0 }}>
         {title}
       </Title>
-      <Row gutter={[16, 16]} align="top" style={{ width: "100%" }}>
+      <Row gutter={[0, 16]} align="top" style={{ width: "100%", marginInline: 0 }}>
         {children}
       </Row>
-    </>
+    </Flex>
   );
 }
 
