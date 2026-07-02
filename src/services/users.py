@@ -71,14 +71,24 @@ class UserService:
         return result.scalar_one_or_none()
 
     async def list_users(
-        self, db: AsyncSession, page: int = 1, limit: int = 20
+        self, db: AsyncSession, page: int = 1, limit: int = 20, search: str | None = None
     ) -> tuple[list[AdminUserResponse], int, int]:
-        total_result = await db.execute(select(func.count()).select_from(User))
+        filters = []
+        if search:
+            filters.append(User.username.ilike(f"%{search.strip()}%"))
+
+        total_query = select(func.count()).select_from(User)
+        if filters:
+            total_query = total_query.where(*filters)
+        total_result = await db.execute(total_query)
         total = total_result.scalar_one()
         pages = max(1, ceil(total / limit)) if total else 1
         page = min(max(page, 1), pages)
         offset = (page - 1) * limit
-        result = await db.execute(select(User).order_by(User.id.asc()).offset(offset).limit(limit))
+        users_query = select(User).order_by(User.id.asc()).offset(offset).limit(limit)
+        if filters:
+            users_query = users_query.where(*filters)
+        result = await db.execute(users_query)
         items = [AdminUserResponse.model_validate(user) for user in result.scalars().all()]
         return items, total, page
 

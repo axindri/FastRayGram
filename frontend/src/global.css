@@ -45,8 +45,27 @@ html[data-theme="dark"] {
   flex-shrink: 0;
 }
 
-.app-layout-footer.ant-layout-footer {
-  padding: 0 16px;
-  line-height: 1;
+.app-sidebar-chrome {
+  height: auto;
+  min-height: auto;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+  padding-block: 12px;
+}
+
+.app-sidebar-chrome--mobile {
+  align-items: stretch;
+}
+
+.app-main-inner {
+  width: 100%;
+  max-width: 1080px;
+  margin-inline: auto;
+}
+
+.profile-logout-anchor {
+  margin-top: 16px;
+  padding-block: 24px 8px;
 }
 

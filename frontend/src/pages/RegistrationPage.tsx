@@ -92,55 +92,55 @@ export function RegistrationPage() {
 
   return (
     <AdminPageLayout title="Регистрация">
-      <AdminPageColumn>
-        <SectionCard title="Создать код" hint="Сгенерируйте ссылку и отправьте её новому пользователю">
-          <Form form={createForm} layout="vertical" onFinish={onCreate} initialValues={{ valid_days: 7 }}>
-            <Form.Item
-              label="Срок действия кода, дней"
-              name="valid_days"
-              rules={[
-                { required: true, message: "Введите срок" },
-                { type: "number", min: 1, max: 365, message: "От 1 до 365 дней" },
-              ]}
-            >
-              <InputNumber style={{ width: "100%" }} />
-            </Form.Item>
+      <AdminPageColumn span={24}>
+        <Space orientation="vertical" size="middle" style={{ width: "100%" }}>
+          <SectionCard title="Создать код" hint="Сгенерируйте ссылку и отправьте её новому пользователю">
+            <Form form={createForm} layout="vertical" onFinish={onCreate} initialValues={{ valid_days: 7 }}>
+              <Form.Item
+                label="Срок действия кода, дней"
+                name="valid_days"
+                rules={[
+                  { required: true, message: "Введите срок" },
+                  { type: "number", min: 1, max: 365, message: "От 1 до 365 дней" },
+                ]}
+              >
+                <InputNumber style={{ width: "100%" }} />
+              </Form.Item>
 
-            <Button type="primary" htmlType="submit" loading={createLoading}>
-              Создать
-            </Button>
-          </Form>
+              <Button type="primary" htmlType="submit" loading={createLoading}>
+                Создать
+              </Button>
+            </Form>
 
-          {createdLink ? <CopyableInput label="Ссылка для регистрации" value={createdLink} /> : null}
-        </SectionCard>
-      </AdminPageColumn>
+            {createdLink ? <CopyableInput label="Ссылка для регистрации" value={createdLink} /> : null}
+          </SectionCard>
 
-      <AdminPageColumn>
-        <SectionCard
-          title="Коды регистрации"
-          extra={
-            <Button icon={<ReloadOutlined />} loading={codesLoading} onClick={() => void loadCodes(codes.page)}>
-              Обновить
-            </Button>
-          }
-        >
-          <Space orientation="vertical" size="middle" style={{ width: "100%" }}>
-            <AsyncListState loading={codesLoading} empty={!codes.items.length} emptyDescription="Кодов пока нет" minHeight={80}>
-              {codes.items.map((item) => (
-                <RegistrationCodeCard
-                  key={item.id}
-                  item={item}
-                  onExtend={onExtend}
-                  onDelete={onDelete}
-                  extendLoading={actionId === item.id}
-                  deleteLoading={actionId === item.id}
-                />
-              ))}
-            </AsyncListState>
+          <SectionCard
+            title="Коды регистрации"
+            extra={
+              <Button icon={<ReloadOutlined />} loading={codesLoading} onClick={() => void loadCodes(codes.page)}>
+                Обновить
+              </Button>
+            }
+          >
+            <Space orientation="vertical" size="middle" style={{ width: "100%" }}>
+              <AsyncListState loading={codesLoading} empty={!codes.items.length} emptyDescription="Кодов пока нет" minHeight={80}>
+                {codes.items.map((item) => (
+                  <RegistrationCodeCard
+                    key={item.id}
+                    item={item}
+                    onExtend={onExtend}
+                    onDelete={onDelete}
+                    extendLoading={actionId === item.id}
+                    deleteLoading={actionId === item.id}
+                  />
+                ))}
+              </AsyncListState>
 
-            <PaginationFooter page={codes.page} pages={codes.pages} total={codes.total} loading={codesLoading} onPageChange={(page) => void loadCodes(page)} />
-          </Space>
-        </SectionCard>
+              <PaginationFooter page={codes.page} pages={codes.pages} total={codes.total} loading={codesLoading} onPageChange={(page) => void loadCodes(page)} />
+            </Space>
+          </SectionCard>
+        </Space>
       </AdminPageColumn>
     </AdminPageLayout>
   );

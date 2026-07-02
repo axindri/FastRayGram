@@ -12,16 +12,17 @@ import { isAdminRole } from "../types";
 
 const { Text } = Typography;
 
-export const APP_VERSION = "v2.7.0";
+export const APP_VERSION = "v2.8.0";
 
 type AppSidebarMenuProps = {
   menuTheme: "light" | "dark";
   resolved: "light" | "dark";
   selectedKey: string[];
+  mobile?: boolean;
   onNavigate?: () => void;
 };
 
-export function AppSidebarMenu({ menuTheme, resolved, selectedKey, onNavigate }: AppSidebarMenuProps) {
+export function AppSidebarMenu({ menuTheme, resolved, selectedKey, mobile = false, onNavigate }: AppSidebarMenuProps) {
   const { token } = theme.useToken();
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -55,7 +56,7 @@ export function AppSidebarMenu({ menuTheme, resolved, selectedKey, onNavigate }:
       <Menu className="app-menu" mode="inline" theme={menuTheme} selectedKeys={selectedKey} items={menuItems} onClick={onMenuClick} style={{ flex: 1, borderInlineEnd: 0, background: sidebarBg }} />
 
       <div
-        className="app-chrome-bar app-sidebar-chrome"
+        className={`app-chrome-bar app-sidebar-chrome${mobile ? " app-sidebar-chrome--mobile" : ""}`}
         style={{
           borderTop: `1px solid ${token.colorBorderSecondary}`,
           background: sidebarBg,

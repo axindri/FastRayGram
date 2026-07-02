@@ -1,7 +1,7 @@
-import { AppstoreOutlined, CopyOutlined, DollarOutlined, FileOutlined, LinkOutlined, LoadingOutlined, ReloadOutlined } from "@ant-design/icons";
-import { Alert, App, Button, Card, Flex, Form, InputNumber, Space, Spin, Tag, Typography } from "antd";
+import { AppstoreOutlined, CopyOutlined, DollarOutlined, FileOutlined, LinkOutlined, LoadingOutlined, LogoutOutlined, ReloadOutlined } from "@ant-design/icons";
+import { Alert, App, Button, Card, Flex, Form, InputNumber, Space, Spin, Tag, Typography, theme } from "antd";
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import { TOKEN_KEY, buildAuthLink, createInvoice, fetchConfig, fetchXuiMe, canRenewSubscription, refreshMyToken } from "../api";
 import { AsyncListState } from "../components/AsyncListState";
@@ -64,7 +64,9 @@ type PaymentForm = {
 
 export function ProfilePage() {
   const { message } = App.useApp();
-  const { user, refreshUser, login } = useAuth();
+  const { token } = theme.useToken();
+  const navigate = useNavigate();
+  const { user, refreshUser, login, logout } = useAuth();
   const copy = useCopyToClipboard();
   const [paymentForm] = Form.useForm<PaymentForm>();
   const [authToken, setAuthToken] = useState(() => localStorage.getItem(TOKEN_KEY) || "");
@@ -143,6 +145,11 @@ export function ProfilePage() {
   const authLink = useMemo(() => (authToken ? buildAuthLink(authToken) : ""), [authToken]);
   const tokenExpiryLabel = useMemo(() => formatJwtExpiryRemaining(authToken), [authToken]);
   const showAuthTokenControls = user.role !== "superuser" && isJwtToken(authToken);
+
+  const onLogout = () => {
+    logout();
+    navigate("/login");
+  };
 
   const onRefreshAuthToken = async () => {
     setTokenRefreshLoading(true);
@@ -301,6 +308,25 @@ export function ProfilePage() {
       ) : (
         <AvailableSectionsCard role={user.role} />
       )}
+
+      <Flex justify="center" className="profile-logout-anchor">
+        <Button
+          type="default"
+          danger
+          icon={<LogoutOutlined />}
+          onClick={onLogout}
+          className="profile-logout-float"
+          style={{
+            borderRadius: 999,
+            paddingInline: 20,
+            height: 40,
+            background: token.colorBgElevated,
+            boxShadow: token.boxShadowSecondary,
+          }}
+        >
+          Выйти
+        </Button>
+      </Flex>
     </Space>
   );
 }

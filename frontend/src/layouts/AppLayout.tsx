@@ -1,19 +1,17 @@
 import { useMemo, useState } from "react";
-import { LogoutOutlined, MenuOutlined } from "@ant-design/icons";
+import { MenuOutlined } from "@ant-design/icons";
 import { Button, Drawer, Flex, Layout, Typography, theme } from "antd";
-import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 
 import { AppSidebarMenu } from "../components/AppSidebarMenu";
 import { ServiceStatusBanner } from "../components/ServiceStatusBanner";
-import { ThemeFooterControls } from "../components/ThemeFooterControls";
-import { useAuth } from "../auth";
 import { NAV_ITEMS } from "../config/navigation";
 import { ServiceStatusProvider } from "../hooks/useServiceStatus";
 import { useMediaQuery } from "../hooks/useMediaQuery";
 import { useTheme } from "../theme/ThemeProvider";
 import { getSidebarBg } from "../theme/config";
 
-const { Header, Sider, Content, Footer } = Layout;
+const { Header, Sider, Content } = Layout;
 const { Title } = Typography;
 
 const HEADER_BG = "#000000";
@@ -22,9 +20,7 @@ const MOBILE_BREAKPOINT = "(max-width: 991.98px)";
 
 export function AppLayout() {
   const { token } = theme.useToken();
-  const { logout } = useAuth();
   const { resolved } = useTheme();
-  const navigate = useNavigate();
   const location = useLocation();
   const mobile = useMediaQuery(MOBILE_BREAKPOINT);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -37,7 +33,9 @@ export function AppLayout() {
     return match ? [match.path] : [];
   }, [location.pathname]);
 
-  const sidebar = <AppSidebarMenu menuTheme={menuTheme} resolved={resolved} selectedKey={selectedKey} onNavigate={mobile ? () => setMenuOpen(false) : undefined} />;
+  const sidebar = (
+    <AppSidebarMenu menuTheme={menuTheme} resolved={resolved} selectedKey={selectedKey} mobile={mobile} onNavigate={mobile ? () => setMenuOpen(false) : undefined} />
+  );
 
   const headerStyle = {
     display: "flex",
@@ -50,11 +48,6 @@ export function AppLayout() {
   } as const;
 
   const headerTextColor = resolved === "dark" ? token.colorText : HEADER_TEXT;
-
-  const onLogout = () => {
-    logout();
-    navigate("/login");
-  };
 
   return (
     <ServiceStatusProvider>
@@ -84,23 +77,10 @@ export function AppLayout() {
 
           <Layout style={{ background: token.colorBgLayout }}>
             <Content style={{ padding: "24px 16px", boxSizing: "border-box" }}>
-              <Outlet />
+              <div className="app-main-inner">
+                <Outlet />
+              </div>
             </Content>
-
-            <Footer
-              className="app-chrome-bar app-layout-footer"
-              style={{
-                background: token.colorBgContainer,
-                borderTop: `1px solid ${token.colorBorderSecondary}`,
-              }}
-            >
-              <Flex align="center" justify="space-between" style={{ width: "100%" }}>
-                <ThemeFooterControls />
-                <Button type="text" icon={<LogoutOutlined />} onClick={onLogout}>
-                  Выйти
-                </Button>
-              </Flex>
-            </Footer>
           </Layout>
         </Layout>
       </Layout>

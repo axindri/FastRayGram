@@ -8,8 +8,8 @@ type LookupActionFormProps = {
   input: ReactNode;
   loading: boolean;
   onGet: () => void;
-  onDelete: () => void;
-  deleteConfirmTitle: string;
+  onDelete?: () => void;
+  deleteConfirmTitle?: string;
   rules?: Rule[];
   result?: ReactNode;
 };
@@ -25,11 +25,13 @@ export function LookupActionForm({ label, name, input, loading, onGet, onDelete,
           <Button loading={loading} onClick={onGet}>
             Получить
           </Button>
-          <Popconfirm title={deleteConfirmTitle} okText="Да" cancelText="Нет" okButtonProps={{ danger: true }} onConfirm={onDelete}>
-            <Button danger loading={loading}>
-              Удалить
-            </Button>
-          </Popconfirm>
+          {onDelete ? (
+            <Popconfirm title={deleteConfirmTitle ?? "Удалить?"} okText="Да" cancelText="Нет" okButtonProps={{ danger: true }} onConfirm={onDelete}>
+              <Button danger loading={loading}>
+                Удалить
+              </Button>
+            </Popconfirm>
+          ) : null}
         </Space.Compact>
       </Form.Item>
       {result}

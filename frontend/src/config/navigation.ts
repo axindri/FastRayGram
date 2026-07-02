@@ -1,4 +1,4 @@
-import { KeyOutlined, DollarOutlined, MonitorOutlined, TeamOutlined, UserOutlined } from "@ant-design/icons";
+import { BgColorsOutlined, KeyOutlined, DollarOutlined, MonitorOutlined, TeamOutlined, UserOutlined } from "@ant-design/icons";
 import type { ComponentType } from "react";
 
 import type { UserRole } from "../types";
@@ -19,6 +19,7 @@ export const NAV_ITEMS: NavItem[] = [
   { path: "/payments", label: "Платежи", hint: "Проверка и управление счетами к оплате", Icon: DollarOutlined, adminOnly: true },
   { path: "/users", label: "Пользователи", hint: "Создание пользователей и XUI-клиентов", Icon: TeamOutlined, adminOnly: true },
   { path: "/registration", label: "Регистрация", hint: "Коды и ссылки для регистрации новых пользователей", Icon: KeyOutlined, adminOnly: true },
+  { path: "/appearance", label: "Оформление", hint: "Тема и акцентный цвет интерфейса", Icon: BgColorsOutlined },
 ];
 
 export function filterNavItems(role: UserRole, options?: { excludePaths?: string[] }): NavItem[] {

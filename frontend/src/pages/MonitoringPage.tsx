@@ -49,55 +49,55 @@ export function MonitoringPage() {
 
   return (
     <AdminPageLayout title="Мониторинг">
-      <AdminPageColumn span={12}>
-        <SectionCard
-          title="Статус"
-          extra={
-            <Button icon={<ReloadOutlined />} onClick={() => void load()} loading={loading}>
-              Обновить
-            </Button>
-          }
-        >
-          {status ? (
-            <Space orientation="vertical" size="middle" style={{ width: "100%" }}>
-              {getStatusServices(status).map(([name, item]) => (
-                <Space key={name}>
-                  <Badge status={statusColor(item.status)} />
-                  <Text strong>{name}</Text>
-                  {item.status === "ok" ? <Text type="secondary">{item.version ? ` · v${item.version}` : ""}</Text> : null}
-                </Space>
-              ))}
-            </Space>
-          ) : null}
-          {!status && loading ? (
-            <div style={{ display: "flex", justifyContent: "center", padding: "24px 0" }}>
-              <Spin indicator={<LoadingOutlined spin />} size="large" />
-            </div>
-          ) : null}
-        </SectionCard>
-      </AdminPageColumn>
+      <AdminPageColumn span={24}>
+        <Space orientation="vertical" size="middle" style={{ width: "100%" }}>
+          <SectionCard
+            title="Статус"
+            extra={
+              <Button icon={<ReloadOutlined />} onClick={() => void load()} loading={loading}>
+                Обновить
+              </Button>
+            }
+          >
+            {status ? (
+              <Space orientation="vertical" size="middle" style={{ width: "100%" }}>
+                {getStatusServices(status).map(([name, item]) => (
+                  <Space key={name}>
+                    <Badge status={statusColor(item.status)} />
+                    <Text strong>{name}</Text>
+                    {item.status === "ok" ? <Text type="secondary">{item.version ? ` · v${item.version}` : ""}</Text> : null}
+                  </Space>
+                ))}
+              </Space>
+            ) : null}
+            {!status && loading ? (
+              <div style={{ display: "flex", justifyContent: "center", padding: "24px 0" }}>
+                <Spin indicator={<LoadingOutlined spin />} size="large" />
+              </div>
+            ) : null}
+          </SectionCard>
 
-      <AdminPageColumn span={12}>
-        <SectionCard title="Ссылки">
-          {links ? (
-            <Space orientation="vertical" size="middle" style={{ width: "100%" }}>
-              {ADMIN_LINKS_META.map(({ key, title, hint }) => (
-                <Space key={key} orientation="vertical" size={0}>
-                  <Text strong>{title}</Text>
-                  <Text type="secondary">{hint}</Text>
-                  <Link href={links[key]} target="_blank">
-                    <LinkOutlined /> {links[key]}
-                  </Link>
-                </Space>
-              ))}
-            </Space>
-          ) : null}
-          {!links && loading ? (
-            <div style={{ display: "flex", justifyContent: "center", padding: "24px 0" }}>
-              <Spin indicator={<LoadingOutlined spin />} size="large" />
-            </div>
-          ) : null}
-        </SectionCard>
+          <SectionCard title="Ссылки">
+            {links ? (
+              <Space orientation="vertical" size="middle" style={{ width: "100%" }}>
+                {ADMIN_LINKS_META.map(({ key, title, hint }) => (
+                  <Space key={key} orientation="vertical" size={0}>
+                    <Text strong>{title}</Text>
+                    <Text type="secondary">{hint}</Text>
+                    <Link href={links[key]} target="_blank">
+                      <LinkOutlined /> {links[key]}
+                    </Link>
+                  </Space>
+                ))}
+              </Space>
+            ) : null}
+            {!links && loading ? (
+              <div style={{ display: "flex", justifyContent: "center", padding: "24px 0" }}>
+                <Spin indicator={<LoadingOutlined spin />} size="large" />
+              </div>
+            ) : null}
+          </SectionCard>
+        </Space>
       </AdminPageColumn>
     </AdminPageLayout>
   );

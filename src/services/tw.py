@@ -186,14 +186,37 @@ class TimeWebService:
         return InvoiceResponse.model_validate(invoice)
 
     async def list_invoices(
-        self, db: AsyncSession, page: int = 1, limit: int = 20
+        self,
+        db: AsyncSession,
+        page: int = 1,
+        limit: int = 20,
+        user_id: int | None = None,
+        invoice_id: int | None = None,
+        invoice_db_id: int | None = None,
+        username: str | None = None,
     ) -> tuple[list[AdminInvoiceResponse], int, int]:
-        total_result = await db.execute(select(func.count()).select_from(Invoice))
+        filters = []
+        if user_id is not None:
+            filters.append(Invoice.user_id == user_id)
+        if invoice_id is not None:
+            filters.append(Invoice.invoice_id == invoice_id)
+        if invoice_db_id is not None:
+            filters.append(Invoice.id == invoice_db_id)
+        if username is not None:
+            filters.append(User.username.ilike(f"%{username.strip()}%"))
+
+        needs_user_join = username is not None
+        total_query = select(func.count()).select_from(Invoice)
+        if needs_user_join:
+            total_query = total_query.join(User, Invoice.user_id == User.id)
+        if filters:
+            total_query = total_query.where(*filters)
+        total_result = await db.execute(total_query)
         total = total_result.scalar_one()
         pages = max(1, ceil(total / limit)) if total else 1
         page = min(max(page, 1), pages)
         offset = (page - 1) * limit
-        result = await db.execute(
+        invoices_query = (
             select(Invoice, User.username, User.mark, User.sub_url)
             .outerjoin(User, Invoice.user_id == User.id)
             .order_by(
@@ -203,6 +226,9 @@ class TimeWebService:
             .offset(offset)
             .limit(limit)
         )
+        if filters:
+            invoices_query = invoices_query.where(*filters)
+        result = await db.execute(invoices_query)
 
         items = [
             AdminInvoiceResponse(

@@ -185,12 +185,49 @@ export async function fetchAdminLinks(): Promise<AdminLinks> {
   return request<AdminLinks>(`${API_PREFIX}/admin/links`);
 }
 
-export async function fetchInvoices(page = 1, limit = 3): Promise<Paginated<AdminInvoice>> {
-  return request<Paginated<AdminInvoice>>(`${API_PREFIX}/admin/invoices?page=${page}&limit=${limit}`);
+export type InvoiceListFilters = {
+  userId?: number;
+  invoiceId?: number;
+  id?: number;
+  username?: string;
+};
+
+export async function fetchInvoices(page = 1, limit = 3, filters?: InvoiceListFilters): Promise<Paginated<AdminInvoice>> {
+  const params = new URLSearchParams({
+    page: String(page),
+    limit: String(limit),
+  });
+
+  if (filters?.userId) {
+    params.set("user_id", String(filters.userId));
+  }
+
+  if (filters?.invoiceId) {
+    params.set("invoice_id", String(filters.invoiceId));
+  }
+
+  if (filters?.id) {
+    params.set("id", String(filters.id));
+  }
+
+  if (filters?.username?.trim()) {
+    params.set("username", filters.username.trim());
+  }
+
+  return request<Paginated<AdminInvoice>>(`${API_PREFIX}/admin/invoices?${params.toString()}`);
 }
 
-export async function fetchUsers(page = 1, limit = 4): Promise<Paginated<AdminUser>> {
-  return request<Paginated<AdminUser>>(`${API_PREFIX}/admin/users?page=${page}&limit=${limit}`);
+export async function fetchUsers(page = 1, limit = 4, search?: string): Promise<Paginated<AdminUser>> {
+  const params = new URLSearchParams({
+    page: String(page),
+    limit: String(limit),
+  });
+
+  if (search?.trim()) {
+    params.set("search", search.trim());
+  }
+
+  return request<Paginated<AdminUser>>(`${API_PREFIX}/admin/users?${params.toString()}`);
 }
 
 export async function checkInvoices(): Promise<Invoice[]> {

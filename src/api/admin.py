@@ -5,6 +5,7 @@ from src.core.deps import get_current_user, require_roles
 from src.core.enums import Role
 from src.core.settings import settings
 from src.models.common import PaginatedResponse, build_paginated_response
+from src.models.fields import USERNAME_MAX_LENGTH
 from src.models.registration import (
     CreateRegistrationCodeRequest,
     ExtendRegistrationCodeRequest,
@@ -37,10 +38,11 @@ async def admin_links() -> dict[str, str]:
 async def list_users(
     page: int = Query(default=1, ge=1),
     limit: int = Query(default=20, ge=1, le=100),
+    search: str | None = Query(default=None, max_length=USERNAME_MAX_LENGTH),
     db: AsyncSession = Depends(get_db),
     user_service: UserService = Depends(get_user_service),
 ) -> PaginatedResponse[AdminUserResponse]:
-    items, total, page = await user_service.list_users(db, page=page, limit=limit)
+    items, total, page = await user_service.list_users(db, page=page, limit=limit, search=search)
     return build_paginated_response(items, total, page, limit)
 
 
@@ -103,10 +105,22 @@ async def delete_user(
 async def list_invoices(
     page: int = Query(default=1, ge=1),
     limit: int = Query(default=20, ge=1, le=100),
+    user_id: int | None = Query(default=None, ge=1),
+    invoice_id: int | None = Query(default=None, ge=1),
+    id: int | None = Query(default=None, ge=1),
+    username: str | None = Query(default=None, max_length=USERNAME_MAX_LENGTH),
     db: AsyncSession = Depends(get_db),
     tw_service: TimeWebService = Depends(get_timeweb_service),
 ) -> PaginatedResponse[AdminInvoiceResponse]:
-    items, total, page = await tw_service.list_invoices(db, page=page, limit=limit)
+    items, total, page = await tw_service.list_invoices(
+        db,
+        page=page,
+        limit=limit,
+        user_id=user_id,
+        invoice_id=invoice_id,
+        invoice_db_id=id,
+        username=username,
+    )
     return build_paginated_response(items, total, page, limit)
 
 

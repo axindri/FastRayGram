@@ -1,21 +1,9 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { ReloadOutlined } from "@ant-design/icons";
-import { App, Button, Col, Form, Input, InputNumber, Row, Select, Space } from "antd";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { DeleteOutlined, EditOutlined, EyeOutlined, LinkOutlined, ReloadOutlined, SearchOutlined } from "@ant-design/icons";
+import { App, Button, Col, Form, Input, InputNumber, Row, Select, Space, Tabs } from "antd";
 
-import {
-  buildAuthLink,
-  createUser,
-  deleteUser,
-  deleteXuiClient,
-  fetchConfig,
-  fetchUserById,
-  fetchUsers,
-  fetchXuiClient,
-  refreshUserToken,
-  resetXuiClientTraffic,
-  updateUserRole,
-  updateXuiClient,
-} from "../api";
+import { buildAuthLink, createUser, deleteUser, deleteXuiClient, fetchConfig, fetchUsers, fetchXuiClient, refreshUserToken, resetXuiClientTraffic, updateUserRole, updateXuiClient } from "../api";
+import { ActionLegend } from "../components/ActionLegend";
 import { AdminPageColumn, AdminPageLayout } from "../components/AdminPageLayout";
 import { AsyncListState } from "../components/AsyncListState";
 import { CopyableInput } from "../components/CopyableInput";
@@ -23,7 +11,7 @@ import { LookupActionForm } from "../components/LookupActionForm";
 import { PaginationFooter } from "../components/PaginationFooter";
 import { SectionCard } from "../components/SectionCard";
 import { UserCard } from "../components/UserCard";
-import { UserLookupPanel, type UserLookupState } from "../components/UserLookupPanel";
+import { UserDetailModal } from "../components/UserDetailModal";
 import { XuiClientCard } from "../components/XuiClientCard";
 import { useAuth } from "../auth";
 import { getApiErrorMessage } from "../utils/apiError";
@@ -42,20 +30,20 @@ type CreateUserForm = {
   expiry_time_days?: number;
 };
 
-type UserGetForm = { id: number };
-
-type UserActionsForm = {
-  id: number;
-  role: UserRole;
-};
-
 type XuiGetForm = { email: string };
 
-type XuiUpdateForm = {
-  email: string;
-  expiry_time_days?: number;
-  enable: boolean;
-};
+const USER_ACTION_LEGEND = [
+  { icon: <EyeOutlined />, label: "просмотр" },
+  { icon: <EditOutlined />, label: "смена роли" },
+  { icon: <LinkOutlined />, label: "новая ссылка для входа" },
+  { icon: <DeleteOutlined />, label: "удаление" },
+] as const;
+
+const XUI_ACTION_LEGEND = [
+  { icon: <EditOutlined />, label: "срок и статус подписки" },
+  { icon: <ReloadOutlined />, label: "сброс трафика" },
+  { icon: <DeleteOutlined />, label: "удаление клиента" },
+] as const;
 
 export function UsersPage() {
   const { message } = App.useApp();
@@ -66,31 +54,26 @@ export function UsersPage() {
   const [createdAuthLink, setCreatedAuthLink] = useState("");
   const [createForm] = Form.useForm<CreateUserForm>();
 
-  const [userGetLoading, setUserGetLoading] = useState(false);
-  const [managedUser, setManagedUser] = useState<AdminUser | null>(null);
-  const [userLookup, setUserLookup] = useState<UserLookupState>("idle");
-  const [userGetForm] = Form.useForm<UserGetForm>();
-  const [userActionsLoading, setUserActionsLoading] = useState(false);
-  const [updatedRoleUser, setUpdatedRoleUser] = useState<AdminUser | null>(null);
-  const [roleAuthLink, setRoleAuthLink] = useState("");
-  const [authLink, setAuthLink] = useState("");
-  const [userActionsForm] = Form.useForm<UserActionsForm>();
-
   const [xuiGetLoading, setXuiGetLoading] = useState(false);
-  const [xuiUpdateLoading, setXuiUpdateLoading] = useState(false);
+  const [xuiActionLoading, setXuiActionLoading] = useState(false);
   const [xuiClient, setXuiClient] = useState<Awaited<ReturnType<typeof fetchXuiClient>> | null>(null);
   const [xuiGetForm] = Form.useForm<XuiGetForm>();
-  const [xuiUpdateForm] = Form.useForm<XuiUpdateForm>();
 
   const [allUsers, setAllUsers] = useState<Paginated<AdminUser>>(emptyPaginated);
   const [allUsersLoading, setAllUsersLoading] = useState(false);
+  const [usersSearch, setUsersSearch] = useState("");
+  const usersSearchRef = useRef(usersSearch);
+  usersSearchRef.current = usersSearch;
+  const [actionUserId, setActionUserId] = useState<number | null>(null);
+  const [detailUser, setDetailUser] = useState<AdminUser | null>(null);
 
   const loadAllUsers = useCallback(
-    async (page: number) => {
+    async (page: number, search?: string) => {
+      const query = search ?? usersSearchRef.current;
       setAllUsersLoading(true);
 
       try {
-        setAllUsers(await fetchUsers(page, allUsers.limit));
+        setAllUsers(await fetchUsers(page, allUsers.limit, query));
       } catch (error) {
         message.error(getApiErrorMessage(error, "Не удалось загрузить пользователей"));
       } finally {
@@ -107,11 +90,11 @@ export function UsersPage() {
   const roleOptions = useMemo(() => {
     if (currentUser?.role === "superuser") {
       return [
-        { value: "user", label: ROLE_LABELS.user },
-        { value: "admin", label: ROLE_LABELS.admin },
+        { value: "user" as const, label: ROLE_LABELS.user },
+        { value: "admin" as const, label: ROLE_LABELS.admin },
       ];
     }
-    return [{ value: "user", label: ROLE_LABELS.user }];
+    return [{ value: "user" as const, label: ROLE_LABELS.user }];
   }, [currentUser?.role]);
 
   useEffect(() => {
@@ -119,10 +102,9 @@ export function UsersPage() {
       .then((config) => {
         setDefaultExpiryDays(config.default_expiry_time_days);
         createForm.setFieldValue("expiry_time_days", config.default_expiry_time_days);
-        xuiUpdateForm.setFieldValue("expiry_time_days", config.default_expiry_time_days);
       })
       .catch(() => undefined);
-  }, [createForm, xuiUpdateForm]);
+  }, [createForm]);
 
   const onCreateUser = async (values: CreateUserForm) => {
     setCreateLoading(true);
@@ -148,290 +130,172 @@ export function UsersPage() {
     }
   };
 
-  const runUserGetAction = async (action: "get" | "delete") => {
-    const { id } = await userGetForm.validateFields();
-    setUserGetLoading(true);
-
-    if (action === "get") {
-      setManagedUser(null);
-      setUserLookup("idle");
-    }
+  const onDeleteUser = async (id: number) => {
+    setActionUserId(id);
 
     try {
-      if (action === "get") {
-        const user = await fetchUserById(id);
-        setManagedUser(user);
-        setUserLookup("found");
-        return;
-      }
-
       await deleteUser(id);
-      setManagedUser(null);
-      setUserLookup("idle");
       message.success("Пользователь удалён");
       await loadAllUsers(allUsers.page);
     } catch (error) {
-      if (action === "get") {
-        setManagedUser(null);
-        setUserLookup("not_found");
-      }
-      message.error(getApiErrorMessage(error, "Не удалось выполнить действие"));
+      message.error(getApiErrorMessage(error, "Не удалось удалить пользователя"));
     } finally {
-      setUserGetLoading(false);
+      setActionUserId(null);
     }
   };
 
-  const runUserRefreshAction = async () => {
-    const { id } = await userActionsForm.validateFields(["id"]);
-    setUserActionsLoading(true);
-    setAuthLink("");
+  const onRefreshUserLink = async (id: number) => {
+    setActionUserId(id);
 
     try {
-      setAuthLink(buildAuthLink(await refreshUserToken(id)));
-      message.success("Токен обновлён");
+      const link = buildAuthLink(await refreshUserToken(id));
+      message.success("Ссылка для входа обновлена");
+      return link;
     } catch (error) {
-      message.error(getApiErrorMessage(error, "Не удалось выполнить действие"));
+      message.error(getApiErrorMessage(error, "Не удалось получить ссылку"));
+      throw error;
     } finally {
-      setUserActionsLoading(false);
+      setActionUserId(null);
     }
   };
 
-  const onUpdateUserRole = async () => {
-    const values = await userActionsForm.validateFields();
-
-    if (values.role === "superuser") {
-      return;
-    }
-
-    setUserActionsLoading(true);
-    setUpdatedRoleUser(null);
-    setRoleAuthLink("");
+  const onUpdateUserRole = async (id: number, role: "user" | "admin") => {
+    setActionUserId(id);
 
     try {
-      const result = await updateUserRole(values.id, values.role);
-      setUpdatedRoleUser(result.user);
-      setRoleAuthLink(buildAuthLink(result.token));
+      const result = await updateUserRole(id, role);
       message.success("Роль обновлена");
       await loadAllUsers(allUsers.page);
+      return {
+        user: result.user,
+        authLink: buildAuthLink(result.token),
+      };
     } catch (error) {
       message.error(getApiErrorMessage(error, "Не удалось обновить роль"));
+      throw error;
     } finally {
-      setUserActionsLoading(false);
+      setActionUserId(null);
     }
   };
 
-  const runXuiGetAction = async (action: "get" | "delete") => {
+  const reloadXuiClient = async (email: string) => {
+    setXuiClient(await fetchXuiClient(email));
+  };
+
+  const onFetchXuiClient = async () => {
     const { email } = await xuiGetForm.validateFields();
     setXuiGetLoading(true);
-
-    if (action === "get") {
-      setXuiClient(null);
-    }
+    setXuiClient(null);
 
     try {
-      if (action === "get") {
-        setXuiClient(await fetchXuiClient(email));
-        return;
-      }
-
-      await deleteXuiClient(email);
-      setXuiClient(null);
-      message.success("Клиент удалён");
+      await reloadXuiClient(email);
     } catch (error) {
-      if (action === "get") {
-        setXuiClient(null);
-      }
-      message.error(getApiErrorMessage(error, "Не удалось выполнить действие"));
+      setXuiClient(null);
+      message.error(getApiErrorMessage(error, "Не удалось получить клиента"));
     } finally {
       setXuiGetLoading(false);
     }
   };
 
-  const runXuiUpdateAction = async (action: "update" | "reset") => {
-    const values = await xuiUpdateForm.validateFields();
-    setXuiUpdateLoading(true);
+  const onDeleteXuiClient = async (email: string) => {
+    setXuiActionLoading(true);
 
     try {
-      if (action === "update") {
-        await updateXuiClient(values.email, {
-          expiry_time_days: values.expiry_time_days ?? defaultExpiryDays,
-          enable: values.enable,
-        });
-        message.success("Клиент обновлён");
-        return;
-      }
-
-      await resetXuiClientTraffic(values.email);
-      message.success("Трафик сброшен");
+      await deleteXuiClient(email);
+      setXuiClient(null);
+      message.success("Клиент удалён");
     } catch (error) {
-      message.error(getApiErrorMessage(error, "Не удалось выполнить действие"));
+      message.error(getApiErrorMessage(error, "Не удалось удалить клиента"));
     } finally {
-      setXuiUpdateLoading(false);
+      setXuiActionLoading(false);
     }
   };
 
-  return (
-    <AdminPageLayout title="Пользователи">
-      <AdminPageColumn>
+  const onUpdateXuiClient = async (email: string, payload: { expiry_time_days: number; enable: boolean }) => {
+    setXuiActionLoading(true);
+
+    try {
+      await updateXuiClient(email, payload);
+      await reloadXuiClient(email);
+      message.success("Клиент обновлён");
+    } catch (error) {
+      message.error(getApiErrorMessage(error, "Не удалось обновить клиента"));
+      throw error;
+    } finally {
+      setXuiActionLoading(false);
+    }
+  };
+
+  const onResetXuiTraffic = async (email: string) => {
+    setXuiActionLoading(true);
+
+    try {
+      await resetXuiClientTraffic(email);
+      await reloadXuiClient(email);
+      message.success("Трафик сброшен");
+    } catch (error) {
+      message.error(getApiErrorMessage(error, "Не удалось сбросить трафик"));
+    } finally {
+      setXuiActionLoading(false);
+    }
+  };
+
+  const tabItems = [
+    {
+      key: "create",
+      label: "Создать пользователя",
+      children: (
+        <SectionCard title="Создать пользователя" hint="Будет создан пользователь и его XUI-клиент">
+          <Form form={createForm} layout="vertical" onFinish={onCreateUser} initialValues={{ role: "user" }}>
+            <Form.Item label="Username" name="username" extra={USERNAME_HINT} rules={usernameFormRules}>
+              <Input placeholder="Alex" maxLength={USERNAME_MAX_LENGTH} />
+            </Form.Item>
+
+            <Form.Item label="Роль" name="role" rules={[{ required: true }]}>
+              <Select options={roleOptions} />
+            </Form.Item>
+
+            <Form.Item label="Заметка" name="mark" extra={MARK_HINT} rules={optionalMarkFormRules}>
+              <Input placeholder="Заметка или комментарий" maxLength={MARK_MAX_LENGTH} />
+            </Form.Item>
+
+            <Form.Item label="Flow" name="flow">
+              <Input placeholder="xtls-rprx-vision" />
+            </Form.Item>
+
+            <Row gutter={12}>
+              <Col xs={24} md={8}>
+                <Form.Item label="Лимит IP" name="limit_ips">
+                  <InputNumber style={{ width: "100%" }} placeholder="0" />
+                </Form.Item>
+              </Col>
+              <Col xs={24} md={8}>
+                <Form.Item label="Объем трафика" name="total_gb">
+                  <InputNumber style={{ width: "100%" }} placeholder="0" />
+                </Form.Item>
+              </Col>
+              <Col xs={24} md={8}>
+                <Form.Item label="Срок действия" name="expiry_time_days">
+                  <InputNumber style={{ width: "100%" }} placeholder={String(defaultExpiryDays)} />
+                </Form.Item>
+              </Col>
+            </Row>
+
+            <Button type="primary" htmlType="submit" loading={createLoading}>
+              Создать
+            </Button>
+          </Form>
+
+          {createdAuthLink ? <CopyableInput label="Ссылка для входа" value={createdAuthLink} /> : null}
+        </SectionCard>
+      ),
+    },
+    {
+      key: "all",
+      label: "Все пользователи",
+      children: (
         <Space orientation="vertical" size="middle" style={{ width: "100%" }}>
-          <SectionCard title="Создать пользователя" hint="Будет создан пользователь и его XUI-клиент">
-            <Form form={createForm} layout="vertical" onFinish={onCreateUser} initialValues={{ role: "user" }}>
-              <Form.Item label="Username" name="username" extra={USERNAME_HINT} rules={usernameFormRules}>
-                <Input placeholder="Alex" maxLength={USERNAME_MAX_LENGTH} />
-              </Form.Item>
-
-              <Form.Item label="Роль" name="role" rules={[{ required: true }]}>
-                <Select options={roleOptions} />
-              </Form.Item>
-
-              <Form.Item label="Заметка" name="mark" extra={MARK_HINT} rules={optionalMarkFormRules}>
-                <Input placeholder="Заметка или комментарий" maxLength={MARK_MAX_LENGTH} />
-              </Form.Item>
-
-              <Form.Item label="Flow" name="flow">
-                <Input placeholder="xtls-rprx-vision" />
-              </Form.Item>
-
-              <Row gutter={12}>
-                <Col xs={24} md={8}>
-                  <Form.Item label="Лимит IP" name="limit_ips">
-                    <InputNumber style={{ width: "100%" }} placeholder="0" />
-                  </Form.Item>
-                </Col>
-                <Col xs={24} md={8}>
-                  <Form.Item label="Объем трафика" name="total_gb">
-                    <InputNumber style={{ width: "100%" }} placeholder="0" />
-                  </Form.Item>
-                </Col>
-                <Col xs={24} md={8}>
-                  <Form.Item label="Срок действия" name="expiry_time_days">
-                    <InputNumber style={{ width: "100%" }} placeholder={String(defaultExpiryDays)} />
-                  </Form.Item>
-                </Col>
-              </Row>
-
-              <Button type="primary" htmlType="submit" loading={createLoading}>
-                Создать
-              </Button>
-            </Form>
-
-            {createdAuthLink ? <CopyableInput label="Ссылка для входа" value={createdAuthLink} /> : null}
-          </SectionCard>
-
-          <SectionCard title="Получить пользователя" hint="Просмотр данных пользователя и удаление">
-            <Form form={userGetForm} layout="vertical">
-              <LookupActionForm
-                label="User ID"
-                name="id"
-                input={<InputNumber placeholder="1" style={{ width: "100%" }} />}
-                loading={userGetLoading}
-                onGet={() => void runUserGetAction("get")}
-                onDelete={() => void runUserGetAction("delete")}
-                deleteConfirmTitle="Удалить пользователя?"
-                rules={[{ required: true, message: "Введите ID" }]}
-                result={<UserLookupPanel loading={userGetLoading} lookup={userLookup} user={managedUser} />}
-              />
-            </Form>
-          </SectionCard>
-
-          <SectionCard title="Действия с пользователем" hint="Новая ссылка для входа и смена роли по ID">
-            <Form form={userActionsForm} layout="vertical" initialValues={{ role: "user" }}>
-              <Form.Item label="User ID" name="id" rules={[{ required: true, message: "Введите ID" }]}>
-                <InputNumber style={{ width: "100%" }} placeholder="1" />
-              </Form.Item>
-
-              <Button type="primary" loading={userActionsLoading} onClick={() => void runUserRefreshAction()} style={{ marginBottom: authLink ? 0 : 16 }}>
-                Новая ссылка для входа
-              </Button>
-
-              {authLink ? (
-                <div style={{ marginTop: 16, marginBottom: 16 }}>
-                  <CopyableInput label="Ссылка для входа" value={authLink} />
-                </div>
-              ) : null}
-
-              <Form.Item label="Роль" name="role" rules={[{ required: true }]}>
-                <Select options={roleOptions} />
-              </Form.Item>
-
-              <Button type="primary" loading={userActionsLoading} onClick={() => void onUpdateUserRole()}>
-                Сохранить роль
-              </Button>
-
-              {updatedRoleUser ? (
-                <div style={{ marginTop: 16 }}>
-                  <UserCard user={updatedRoleUser} />
-                </div>
-              ) : null}
-
-              {roleAuthLink ? (
-                <div style={{ marginTop: 16 }}>
-                  <CopyableInput label="Ссылка для входа" value={roleAuthLink} />
-                </div>
-              ) : null}
-            </Form>
-          </SectionCard>
-        </Space>
-      </AdminPageColumn>
-
-      <AdminPageColumn>
-        <Space orientation="vertical" size="middle" style={{ width: "100%" }}>
-          <SectionCard title="Просмотр XUI клиента" hint="Просмотр данных клиента и удаление">
-            <Form form={xuiGetForm} layout="vertical">
-              <LookupActionForm
-                label="Username"
-                name="email"
-                input={<Input placeholder="Alex" style={{ width: "100%" }} />}
-                loading={xuiGetLoading}
-                onGet={() => void runXuiGetAction("get")}
-                onDelete={() => void runXuiGetAction("delete")}
-                deleteConfirmTitle="Удалить XUI-клиента?"
-                rules={[{ required: true, message: "Введите имя пользователя" }]}
-                result={
-                  xuiClient ? (
-                    <div style={{ marginTop: 16 }}>
-                      <XuiClientCard client={xuiClient} variant="admin" />
-                    </div>
-                  ) : null
-                }
-              />
-            </Form>
-          </SectionCard>
-
-          <SectionCard title="Действия с XUI клиентом" hint="Срок действия, статус и сброс трафика">
-            <Form form={xuiUpdateForm} layout="vertical" initialValues={{ enable: true }}>
-              <Form.Item label="Username" name="email" rules={[{ required: true, message: "Введите имя пользователя" }]}>
-                <Input placeholder="Alex" />
-              </Form.Item>
-
-              <Row gutter={12}>
-                <Col xs={24} md={12}>
-                  <Form.Item label="Срок действия, дней" name="expiry_time_days">
-                    <InputNumber style={{ width: "100%" }} placeholder={String(defaultExpiryDays)} />
-                  </Form.Item>
-                </Col>
-                <Col xs={24} md={12}>
-                  <Form.Item label="Включен по-умолчанию" name="enable">
-                    <Select
-                      options={[
-                        { value: true, label: "Да" },
-                        { value: false, label: "Нет" },
-                      ]}
-                    />
-                  </Form.Item>
-                </Col>
-              </Row>
-
-              <Space wrap>
-                <Button type="primary" loading={xuiUpdateLoading} onClick={() => void runXuiUpdateAction("update")}>
-                  Обновить
-                </Button>
-                <Button loading={xuiUpdateLoading} onClick={() => void runXuiUpdateAction("reset")}>
-                  Сбросить трафик
-                </Button>
-              </Space>
-            </Form>
-          </SectionCard>
+          <ActionLegend title="Действия в карточке пользователя" items={[...USER_ACTION_LEGEND]} />
 
           <SectionCard
             title="Все пользователи"
@@ -442,9 +306,34 @@ export function UsersPage() {
             }
           >
             <Space orientation="vertical" size="middle" style={{ width: "100%" }}>
+              <Input.Search
+                allowClear
+                placeholder="Поиск по имени пользователя"
+                enterButton={<SearchOutlined />}
+                maxLength={USERNAME_MAX_LENGTH}
+                onSearch={(value) => {
+                  const query = value.trim();
+                  setUsersSearch(query);
+                  void loadAllUsers(1, query);
+                }}
+                onClear={() => {
+                  setUsersSearch("");
+                  void loadAllUsers(1, "");
+                }}
+              />
+
               <AsyncListState loading={allUsersLoading} empty={!allUsers.items.length} emptyDescription="Пользователей нет" minHeight={80}>
                 {allUsers.items.map((item) => (
-                  <UserCard key={item.id} user={item} />
+                  <UserCard
+                    key={item.id}
+                    user={item}
+                    roleOptions={roleOptions}
+                    actionUserId={actionUserId}
+                    onView={setDetailUser}
+                    onDelete={onDeleteUser}
+                    onRefreshLink={onRefreshUserLink}
+                    onUpdateRole={onUpdateUserRole}
+                  />
                 ))}
               </AsyncListState>
 
@@ -452,7 +341,54 @@ export function UsersPage() {
             </Space>
           </SectionCard>
         </Space>
+      ),
+    },
+    {
+      key: "xui",
+      label: "XUI клиент",
+      children: (
+        <Space orientation="vertical" size="middle" style={{ width: "100%" }}>
+          <ActionLegend title="Действия в карточке подписки" items={[...XUI_ACTION_LEGEND]} />
+
+          <SectionCard title="XUI клиент" hint="Поиск клиента по username и управление подпиской">
+            <Form form={xuiGetForm} layout="vertical">
+              <LookupActionForm
+                label="Username"
+                name="email"
+                input={<Input placeholder="Alex" style={{ width: "100%" }} />}
+                loading={xuiGetLoading}
+                onGet={() => void onFetchXuiClient()}
+                rules={[{ required: true, message: "Введите имя пользователя" }]}
+                result={
+                  xuiClient ? (
+                    <div style={{ marginTop: 16 }}>
+                      <XuiClientCard
+                        client={xuiClient}
+                        variant="profile"
+                        defaultExpiryDays={defaultExpiryDays}
+                        actionLoading={xuiActionLoading}
+                        onUpdate={onUpdateXuiClient}
+                        onResetTraffic={onResetXuiTraffic}
+                        onDelete={onDeleteXuiClient}
+                      />
+                    </div>
+                  ) : null
+                }
+              />
+            </Form>
+          </SectionCard>
+        </Space>
+      ),
+    },
+  ];
+
+  return (
+    <AdminPageLayout title="Пользователи">
+      <AdminPageColumn span={24}>
+        <Tabs items={tabItems} />
       </AdminPageColumn>
+
+      <UserDetailModal open={detailUser !== null} user={detailUser} onClose={() => setDetailUser(null)} />
     </AdminPageLayout>
   );
 }

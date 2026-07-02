@@ -11,6 +11,7 @@ import { MonitoringPage } from "./pages/MonitoringPage";
 import { PaymentFailPage } from "./pages/PaymentFailPage";
 import { PaymentSuccessPage } from "./pages/PaymentSuccessPage";
 import { PaymentsPage } from "./pages/PaymentsPage";
+import { AppearancePage } from "./pages/AppearancePage";
 import { ProfilePage } from "./pages/ProfilePage";
 import { RegisterPage } from "./pages/RegisterPage";
 import { RegistrationPage } from "./pages/RegistrationPage";
@@ -56,6 +57,7 @@ export default function App() {
 
       <Route element={<ProtectedLayout />}>
         <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/appearance" element={<AppearancePage />} />
         <Route path="/payment/success" element={<PaymentSuccessPage />} />
         <Route path="/payment/fail" element={<PaymentFailPage />} />
         <Route path="/forbidden" element={<ForbiddenPage />} />

@@ -11,7 +11,7 @@ class CacheSettings(BaseModel):
 
 class AppSettings(BaseModel):
     name: str = Field(default="Fast Ray Gram API")
-    version: str = Field(default="1.6.0")
+    version: str = Field(default="1.7.0")
     host: str = Field(default="0.0.0.0")
     port: int = Field(default=8000)
     debug: bool = Field(default=False)
