@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 
-import { fetchStatus } from "../api";
-import { getUnavailableServiceNames } from "../types";
+import { fetchStatus } from "@/api";
+import { getUnavailableServiceNames } from "@/types";
 
 export const STATUS_POLL_MS = 60_000;
 

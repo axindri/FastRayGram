@@ -1,12 +1,26 @@
 import { useState } from "react";
-import { DeleteOutlined } from "@ant-design/icons";
-import { Button, Card, InputNumber, Popconfirm, Space, Tag, Typography } from "antd";
+import { Loader2, Trash2 } from "lucide-react";
 
-import { buildRegistrationLink, formatDate } from "../api";
-import type { RegistrationCode } from "../types";
-import { CopyableInput } from "./CopyableInput";
+import { buildRegistrationLink, formatDate } from "@/api";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardAction, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
+import type { RegistrationCode } from "@/types";
 
-const { Text } = Typography;
+import { CopyableInput } from "@/components/CopyableInput";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 type RegistrationCodeCardProps = {
   item: RegistrationCode;
@@ -16,49 +30,89 @@ type RegistrationCodeCardProps = {
   deleteLoading?: boolean;
 };
 
-function codeStatus(item: RegistrationCode): { label: string; color: string } {
+function codeStatus(item: RegistrationCode): { label: string; active: boolean } {
   if (new Date(item.expires_at).getTime() <= Date.now()) {
-    return { label: "Истёк", color: "red" };
+    return { label: "Истёк", active: false };
   }
 
-  return { label: "Активен", color: "green" };
+  return { label: "Активен", active: true };
 }
 
-export function RegistrationCodeCard({ item, onExtend, onDelete, extendLoading = false, deleteLoading = false }: RegistrationCodeCardProps) {
+export function RegistrationCodeCard({
+  item,
+  onExtend,
+  onDelete,
+  extendLoading = false,
+  deleteLoading = false,
+}: RegistrationCodeCardProps) {
   const [extendDays, setExtendDays] = useState(7);
   const status = codeStatus(item);
   const registrationLink = buildRegistrationLink(item.code);
 
   return (
-    <Card
-      size="small"
-      title={
-        <Space>
-          <Text strong>{item.code}</Text>
-          <Tag color={status.color}>{status.label} </Tag>
-        </Space>
-      }
-      extra={
-        <Space>
-          <Popconfirm title="Удалить код регистрации?" onConfirm={() => onDelete(item.id)}>
-            <Button size="small" loading={deleteLoading} icon={<DeleteOutlined />} />
-          </Popconfirm>
-        </Space>
-      }
-    >
-      <Space orientation="vertical" size={8} style={{ width: "100%" }}>
-        <Text type="secondary">Действует до: {formatDate(item.expires_at)}</Text>
-        <Text type="secondary">Создан: {formatDate(item.created_at)}</Text>
-
-        <Space wrap align="center">
-          <InputNumber min={1} max={365} value={extendDays} onChange={(value) => setExtendDays(value ?? 1)} style={{ width: 48 }} />
-          <Text type="secondary">дней</Text>
-          <Button loading={extendLoading} onClick={() => onExtend(item.id, extendDays)}>
+    <Card>
+      <CardHeader>
+        <CardTitle>{item.code}</CardTitle>
+        <CardAction>
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge
+              variant="outline"
+              className={cn(
+                status.active
+                  ? "border-green-600/20 bg-green-600/10 text-green-700 dark:text-green-400"
+                  : "border-destructive/20 bg-destructive/10 text-destructive",
+              )}
+            >
+              {status.label}
+            </Badge>
+            <AlertDialog>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <AlertDialogTrigger asChild>
+                    <Button type="button" variant="outline" size="icon-sm" aria-label="Удалить код" disabled={deleteLoading}>
+                      {deleteLoading ? <Loader2 className="animate-spin" /> : <Trash2 />}
+                    </Button>
+                  </AlertDialogTrigger>
+                </TooltipTrigger>
+                <TooltipContent side="top">Удалить</TooltipContent>
+              </Tooltip>
+              <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Удалить код регистрации?</AlertDialogTitle>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Нет</AlertDialogCancel>
+                <AlertDialogAction variant="destructive" onClick={() => onDelete(item.id)}>
+                  Да
+                </AlertDialogAction>
+              </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
+        </CardAction>
+      </CardHeader>
+      <CardContent className="text-sm text-muted-foreground">
+        <p>Действует до: {formatDate(item.expires_at)}</p>
+        <p>Создан: {formatDate(item.created_at)}</p>
+      </CardContent>
+      <CardFooter className="flex-col items-stretch gap-4">
+        <div className="flex flex-wrap items-center gap-2">
+          <Input
+            type="number"
+            min={1}
+            max={365}
+            value={extendDays}
+            onChange={(event) => setExtendDays(Number(event.target.value) || 1)}
+            className="w-16"
+          />
+          <span className="text-sm text-muted-foreground">дней</span>
+          <Button type="button" variant="outline" disabled={extendLoading} onClick={() => onExtend(item.id, extendDays)}>
+            {extendLoading ? <Loader2 className="animate-spin" /> : null}
             Продлить
           </Button>
-        </Space>
+        </div>
         <CopyableInput label="Ссылка для регистрации" value={registrationLink} />
-      </Space>
+      </CardFooter>
     </Card>
   );
 }

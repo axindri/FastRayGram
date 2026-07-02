@@ -1,9 +1,9 @@
 import { useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 
-import { confirmPaymentReturn } from "../api";
-import { ProfileResultPage } from "../components/ProfileResultPage";
-import { useAuth } from "../auth";
+import { confirmPaymentReturn } from "@/api";
+import { useAuth } from "@/auth";
+import { ProfileResultPage } from "@/components/ProfileResultPage";
 
 export function PaymentSuccessPage() {
   const [searchParams] = useSearchParams();
@@ -30,7 +30,8 @@ export function PaymentSuccessPage() {
   return (
     <ProfileResultPage
       status="success"
-      title="Оплата прошла успешно. Нужно еще немного времени на обработу платежа в нашей системе, пожалуйста, подождите."
+      title="Оплата прошла успешно"
+      subTitle="Нужно ещё немного времени на обработку платежа в нашей системе, пожалуйста, подождите."
     />
   );
 }

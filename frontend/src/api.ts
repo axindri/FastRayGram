@@ -12,7 +12,7 @@ import type {
   UpdateUserRoleResponse,
   UserProfile,
   XuiClient,
-} from "./types";
+} from "@/types";
 
 export const TOKEN_KEY = "authToken";
 

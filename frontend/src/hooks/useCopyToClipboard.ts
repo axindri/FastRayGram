@@ -1,17 +1,12 @@
-import { App } from "antd";
+import { toast } from "sonner";
 import { useCallback } from "react";
 
-import { copyToClipboard } from "../utils/clipboard";
+import { copyToClipboard } from "@/utils/clipboard";
 
 export function useCopyToClipboard() {
-  const { message } = App.useApp();
-
-  return useCallback(
-    (value: string) => {
-      void copyToClipboard(value)
-        .then(() => message.success("Скопировано"))
-        .catch(() => message.error("Не удалось скопировать"));
-    },
-    [message],
-  );
+  return useCallback((value: string) => {
+    void copyToClipboard(value)
+      .then(() => toast.success("Скопировано"))
+      .catch(() => toast.error("Не удалось скопировать"));
+  }, []);
 }

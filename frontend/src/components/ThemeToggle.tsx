@@ -1,31 +1,56 @@
-import { BgColorsOutlined } from "@ant-design/icons";
-import { Button, Dropdown, theme } from "antd";
+import { Monitor, Moon, Palette, Sun } from "lucide-react";
+import type { ReactNode } from "react";
 
-import { AppearanceSettingsPanel } from "./AppearanceSettings";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useThemeMode } from "@/providers/theme-provider";
+import { cn } from "@/lib/utils";
+
+type ThemeMode = "light" | "dark" | "system";
+
+const MODE_LABELS: Record<ThemeMode, string> = {
+  light: "Светлая",
+  dark: "Тёмная",
+  system: "Системная",
+};
+
+const MODE_ICONS: Record<ThemeMode, ReactNode> = {
+  light: <Sun />,
+  dark: <Moon />,
+  system: <Monitor />,
+};
 
 export function ThemeToggle({ block = false }: { block?: boolean }) {
-  const { token } = theme.useToken();
-
-  const panel = (
-    <div
-      onClick={(event) => event.stopPropagation()}
-      style={{
-        padding: "12px 12px 8px",
-        minWidth: 220,
-        background: token.colorBgElevated,
-        borderRadius: token.borderRadiusLG,
-        boxShadow: token.boxShadowSecondary,
-      }}
-    >
-      <AppearanceSettingsPanel />
-    </div>
-  );
+  const { mode, setMode } = useThemeMode();
 
   return (
-    <Dropdown popupRender={() => panel} trigger={["click"]} placement="top">
-      <Button type="text" block={block} icon={<BgColorsOutlined />} aria-label="Оформление">
-        Оформление
-      </Button>
-    </Dropdown>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button type="button" variant="ghost" className={cn(block && "w-full")} aria-label="Оформление">
+          <Palette />
+          Оформление
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent side="top" align="start" className="min-w-[220px]">
+        <DropdownMenuLabel>Тема</DropdownMenuLabel>
+        <DropdownMenuRadioGroup value={mode} onValueChange={(value) => setMode(value as ThemeMode)}>
+          {(Object.keys(MODE_LABELS) as ThemeMode[]).map((value) => (
+            <DropdownMenuRadioItem key={value} value={value}>
+              <span className="flex items-center gap-2">
+                {MODE_ICONS[value]}
+                {MODE_LABELS[value]}
+              </span>
+            </DropdownMenuRadioItem>
+          ))}
+        </DropdownMenuRadioGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

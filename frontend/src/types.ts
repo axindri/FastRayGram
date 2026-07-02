@@ -18,6 +18,12 @@ export function isAdminRole(role: UserRole): boolean {
   return role === "admin" || role === "superuser";
 }
 
+export type AccessLevel = "user" | "admin";
+
+export function accessFromRole(role: UserRole): AccessLevel {
+  return isAdminRole(role) ? "admin" : "user";
+}
+
 export type ServiceStatusItem = {
   status: string;
   version?: string;
@@ -88,11 +94,42 @@ export const INVOICE_STATUS_LABELS: Record<string, string> = {
   cancelled: "Отменён",
 };
 
-export function invoiceStatusColor(status: string) {
-  if (status === "pending") return "gold";
-  if (status === "processing") return "blue";
-  if (status === "paid") return "green";
-  return "default";
+export function invoiceStatusBadge(status: string): {
+  label: string;
+  variant: "outline" | "destructive" | "secondary";
+  className?: string;
+} {
+  const normalized = String(status || "").toLowerCase();
+  const label = INVOICE_STATUS_LABELS[normalized] || status || "—";
+
+  switch (normalized) {
+    case "pending":
+      return {
+        label,
+        variant: "outline",
+        className: "border-amber-600/25 bg-amber-600/10 text-amber-800 dark:text-amber-400",
+      };
+    case "processing":
+      return {
+        label,
+        variant: "outline",
+        className: "border-blue-600/25 bg-blue-600/10 text-blue-700 dark:text-blue-400",
+      };
+    case "paid":
+      return {
+        label,
+        variant: "outline",
+        className: "border-green-600/25 bg-green-600/10 text-green-700 dark:text-green-400",
+      };
+    case "cancelled":
+      return {
+        label,
+        variant: "outline",
+        className: "border-border bg-muted text-muted-foreground",
+      };
+    default:
+      return { label, variant: "secondary" };
+  }
 }
 
 export function isInvoiceActive(status: string) {

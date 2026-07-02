@@ -1,6 +1,7 @@
-import { Alert } from "antd";
+import { AlertTriangle } from "lucide-react";
 
-import { useServiceStatus } from "../hooks/useServiceStatus";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { useServiceStatus } from "@/hooks/useServiceStatus";
 
 const CONTACT_MESSAGE = "По всем вопросам обращайтесь к администратору или в личные сообщения группы.";
 
@@ -21,5 +22,11 @@ export function ServiceStatusBanner() {
         description: `Платежи отключены до восстановления работоспособности. ${CONTACT_MESSAGE}`,
       };
 
-  return <Alert type="warning" title={warning.title} description={warning.description} banner showIcon style={{ padding: 12 }} />;
+  return (
+    <Alert className="mx-auto w-full border-amber-500/50 bg-amber-50 text-amber-950 dark:border-amber-500/30 dark:bg-amber-950/40 dark:text-amber-50">
+      <AlertTriangle className="text-amber-600 dark:text-amber-400" />
+      <AlertTitle>{warning.title}</AlertTitle>
+      <AlertDescription>{warning.description}</AlertDescription>
+    </Alert>
+  );
 }

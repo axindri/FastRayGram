@@ -1,84 +1,89 @@
-import { AppstoreOutlined, CopyOutlined, DollarOutlined, FileOutlined, LinkOutlined, LoadingOutlined, LogoutOutlined, ReloadOutlined } from "@ant-design/icons";
-import { Alert, App, Button, Card, Flex, Form, InputNumber, Space, Spin, Tag, Typography, theme } from "antd";
-import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Copy, FileText, Link as LinkIcon, Loader2, RefreshCw, TriangleAlert, Wallet } from "lucide-react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { Link } from "react-router-dom";
+import { toast } from "sonner";
 
-import { TOKEN_KEY, buildAuthLink, createInvoice, fetchConfig, fetchXuiMe, canRenewSubscription, refreshMyToken } from "../api";
-import { AsyncListState } from "../components/AsyncListState";
-import { HintTooltip } from "../components/HintTooltip";
-import { InvoiceCard } from "../components/InvoiceCard";
-import { SectionCard } from "../components/SectionCard";
-import { ThemedIconAvatar } from "../components/ThemedIconAvatar";
-import { XuiClientCard } from "../components/XuiClientCard";
-import { filterNavItems } from "../config/navigation";
-import { useAuth } from "../auth";
-import { useCopyToClipboard } from "../hooks/useCopyToClipboard";
-import { useServiceStatus } from "../hooks/useServiceStatus";
-import { getApiErrorMessage } from "../utils/apiError";
-import { displayName } from "../utils/format";
-import { formatJwtExpiryRemaining, isJwtToken, jwtExpiryTagColor } from "../utils/jwt";
-import { ROLE_LABELS, isInvoiceActive, type UserRole } from "../types";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardAction, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
 
-const { Title, Text } = Typography;
+import { TOKEN_KEY, buildAuthLink, canRenewSubscription, createInvoice, fetchConfig, fetchXuiMe, refreshMyToken } from "@/api";
+import { useAuth } from "@/auth";
+import { AsyncListState } from "@/components/AsyncListState";
+import { CardTitleWithIcon } from "@/components/CardTitleWithIcon";
+import { HintTooltip } from "@/components/HintTooltip";
+import { InvoiceCard } from "@/components/InvoiceCard";
+import { PageShell } from "@/components/PageShell";
+import { SectionCard } from "@/components/SectionCard";
+import { SubscriptionNotFound } from "@/components/SubscriptionNotFound";
+import { XuiClientCard } from "@/components/XuiClientCard";
+import { filterNavItems, flattenNavLinks } from "@/config/navigation";
+import { useCopyToClipboard } from "@/hooks/useCopyToClipboard";
+import { useServiceStatus } from "@/hooks/useServiceStatus";
+import { getApiErrorMessage } from "@/utils/apiError";
+import { formatJwtExpiryRemaining, isJwtToken, jwtExpiryTagColor } from "@/utils/jwt";
+import { isInvoiceActive, type UserRole } from "@/types";
 
 const RENEW_HINT = "Новый счёт можно выставить, когда до конца подписки останется меньше 24 часов (включая уже истёкшую).";
 
-function AvailableSectionsCard({ role }: { role: UserRole }) {
-  const sections = useMemo(() => filterNavItems(role, { excludePaths: ["/profile", "/appearance"] }), [role]);
+function expiryBadgeClassName(color: "success" | "error" | "default") {
+  if (color === "success") {
+    return "border-green-600/20 bg-green-600/10 text-green-700 dark:text-green-400";
+  }
+
+  return undefined;
+}
+
+function QuickLinks({ role }: { role: UserRole }) {
+  const sections = useMemo(() => flattenNavLinks(filterNavItems(role, { excludePaths: ["/profile", "/settings"] })), [role]);
 
   if (!sections.length) {
     return null;
   }
 
   return (
-    <Card
-      title={
-        <Flex align="center" gap={8}>
-          <ThemedIconAvatar shape="square" size="small" icon={<AppstoreOutlined />} />
-          <span>Для тебя доступны разделы</span>
-        </Flex>
-      }
-    >
-      <Space orientation="vertical" size="middle" style={{ width: "100%" }}>
-        {sections.map(({ path, label, hint, Icon }) => (
-          <Link key={path} to={path} style={{ display: "block", color: "inherit" }}>
-            <Card size="small" styles={{ body: { padding: 12 } }}>
-              <Flex align="center" gap={12}>
-                <ThemedIconAvatar shape="square" size="small" icon={<Icon />} />
-                <Flex vertical gap={0}>
-                  <Text strong>{label}</Text>
-                  <Text type="secondary">{hint}</Text>
-                </Flex>
-              </Flex>
-            </Card>
-          </Link>
+    <SectionCard title="Быстрый переход" hint="Разделы, доступные для вашей роли">
+      <div className="grid gap-2 sm:grid-cols-2">
+        {sections.map((item) => (
+          <Button key={item.path} variant="outline" className="h-auto justify-start px-4 py-3" asChild>
+            <Link to={item.path}>
+              <item.Icon />
+              <span className="flex flex-col items-start gap-0.5 text-left">
+                <span className="font-medium">{item.label}</span>
+                <span className="text-xs font-normal text-muted-foreground">{item.hint}</span>
+              </span>
+            </Link>
+          </Button>
         ))}
-      </Space>
-    </Card>
+      </div>
+    </SectionCard>
   );
 }
 
-type PaymentForm = {
-  amount: number;
-};
-
 export function ProfilePage() {
-  const { message } = App.useApp();
-  const { token } = theme.useToken();
-  const navigate = useNavigate();
-  const { user, refreshUser, login, logout } = useAuth();
+  const { user, refreshUser, login } = useAuth();
   const copy = useCopyToClipboard();
-  const [paymentForm] = Form.useForm<PaymentForm>();
   const [authToken, setAuthToken] = useState(() => localStorage.getItem(TOKEN_KEY) || "");
   const [tokenRefreshLoading, setTokenRefreshLoading] = useState(false);
 
   const [minAmount, setMinAmount] = useState(100);
   const [maxAmount, setMaxAmount] = useState(1000);
+  const [amount, setAmount] = useState(100);
+  const [amountError, setAmountError] = useState("");
   const { loading: statusLoading, paymentBlocked } = useServiceStatus();
   const [profileLoading, setProfileLoading] = useState(false);
   const [paymentLoading, setPaymentLoading] = useState(false);
   const [xuiClient, setXuiClient] = useState<Awaited<ReturnType<typeof fetchXuiMe>> | null>(null);
   const [xuiLoading, setXuiLoading] = useState(false);
+  const [xuiLoaded, setXuiLoaded] = useState(false);
+
+  const authLink = useMemo(() => (authToken ? buildAuthLink(authToken) : ""), [authToken]);
+  const tokenExpiryLabel = useMemo(() => formatJwtExpiryRemaining(authToken), [authToken]);
+  const tokenExpiryColor = useMemo(() => jwtExpiryTagColor(authToken), [authToken]);
 
   const loadXuiClient = async () => {
     setXuiLoading(true);
@@ -89,6 +94,7 @@ export function ProfilePage() {
       setXuiClient(null);
     } finally {
       setXuiLoading(false);
+      setXuiLoaded(true);
     }
   };
 
@@ -103,7 +109,7 @@ export function ProfilePage() {
         setXuiClient(null);
       }
     } catch {
-      message.error("Не удалось обновить профиль");
+      toast.error("Не удалось обновить профиль");
     } finally {
       setProfileLoading(false);
     }
@@ -125,31 +131,23 @@ export function ProfilePage() {
 
       setMinAmount(config.min_invoice_amount);
       setMaxAmount(config.max_invoice_amount);
-      paymentForm.setFieldValue("amount", config.min_invoice_amount);
+      setAmount(config.min_invoice_amount);
     });
 
     return () => {
       cancelled = true;
     };
-  }, [paymentForm]);
+  }, []);
 
   if (!user) {
     return null;
   }
 
-  const name = displayName(user.username);
   const invoices = user.invoices ?? [];
   const hasActiveInvoice = invoices.some((item) => isInvoiceActive(item.status));
   const paymentsDisabled = statusLoading || paymentBlocked;
   const canRenew = xuiClient ? canRenewSubscription(xuiClient.expiry_datetime) : false;
-  const authLink = useMemo(() => (authToken ? buildAuthLink(authToken) : ""), [authToken]);
-  const tokenExpiryLabel = useMemo(() => formatJwtExpiryRemaining(authToken), [authToken]);
   const showAuthTokenControls = user.role !== "superuser" && isJwtToken(authToken);
-
-  const onLogout = () => {
-    logout();
-    navigate("/login");
-  };
 
   const onRefreshAuthToken = async () => {
     setTokenRefreshLoading(true);
@@ -158,175 +156,162 @@ export function ProfilePage() {
       const token = await refreshMyToken();
       await login(token);
       setAuthToken(token);
-      message.success("Токен обновлён. Скопируйте новую ссылку для входа — старая больше не действует");
+      toast.success("Токен обновлён. Скопируйте новую ссылку для входа — старая больше не действует");
     } catch (error) {
-      message.error(getApiErrorMessage(error, "Не удалось обновить токен"));
+      toast.error(getApiErrorMessage(error, "Не удалось обновить токен"));
     } finally {
       setTokenRefreshLoading(false);
     }
   };
 
-  const onCreatePayment = async (values: PaymentForm) => {
+  const onCreatePayment = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
     if (paymentsDisabled || !canRenew) {
       return;
     }
 
+    if (!amount) {
+      setAmountError("Введите сумму");
+      return;
+    }
+
+    if (amount < minAmount || amount > maxAmount) {
+      setAmountError(`От ${minAmount} до ${maxAmount} ₽`);
+      return;
+    }
+
+    setAmountError("");
     setPaymentLoading(true);
 
     try {
-      const invoice = await createInvoice(values.amount);
+      const invoice = await createInvoice(amount);
       window.open(invoice.confirmation_url, "_blank", "noopener,noreferrer");
       await refreshUser();
-      message.success("Счёт создан, открыта страница оплаты");
+      toast.success("Счёт создан, открыта страница оплаты");
     } catch (error) {
-      message.error(getApiErrorMessage(error, "Не удалось создать платёж"));
+      toast.error(getApiErrorMessage(error, "Не удалось создать платёж"));
     } finally {
       setPaymentLoading(false);
     }
   };
 
   return (
-    <Space orientation="vertical" size="large" style={{ width: "100%" }}>
-      <Card>
-        <Flex align="center" gap="large" wrap="wrap">
-          <Flex vertical gap={4}>
-            <Title level={3} style={{ margin: 0 }}>
-              Привет, {name}!
-            </Title>
-            <Space>
-              <Tag color="blue">{ROLE_LABELS[user.role]}</Tag>
-              <Tag>ID {user.id}</Tag>
-            </Space>
-          </Flex>
-        </Flex>
-      </Card>
-
-      {authLink ? (
-        <SectionCard
-          title={
-            <Flex align="center" gap={8}>
-              <ThemedIconAvatar shape="square" size="small" icon={<LinkOutlined />} />
-              <span>Ссылка для входа</span>
-            </Flex>
-          }
-          hint="Сохраните ссылку для входа с другого устройства. После обновления старая ссылка перестаёт работать."
-          extra={showAuthTokenControls && tokenExpiryLabel ? <Tag color={jwtExpiryTagColor(authToken)}>Активна {tokenExpiryLabel}</Tag> : null}
-        >
-          <Space wrap>
-            <Button icon={<CopyOutlined />} onClick={() => copy(authLink)}>
-              Скопировать
-            </Button>
-            {showAuthTokenControls ? (
-              <Button icon={<ReloadOutlined />} loading={tokenRefreshLoading} onClick={() => void onRefreshAuthToken()}>
-                Обновить
-              </Button>
+    <PageShell title="Профиль">
+      {user.role !== "superuser" ? (
+        <>
+          <div className="grid gap-6 lg:grid-cols-2 lg:items-stretch">
+            {authLink ? (
+              <Card className="flex h-full flex-col">
+                <CardHeader>
+                  <CardTitle>
+                    <CardTitleWithIcon icon={LinkIcon}>Ссылка для входа</CardTitleWithIcon>
+                  </CardTitle>
+                  <CardDescription>Сохраните ссылку для другого устройства. После обновления старая перестаёт работать.</CardDescription>
+                  {showAuthTokenControls && tokenExpiryLabel ? (
+                    <CardAction>
+                      <Badge variant={tokenExpiryColor === "error" ? "destructive" : "outline"} className={cn(expiryBadgeClassName(tokenExpiryColor))}>
+                        Активна {tokenExpiryLabel}
+                      </Badge>
+                    </CardAction>
+                  ) : null}
+                </CardHeader>
+                <CardFooter className="mt-auto gap-2">
+                  <Button type="button" variant="outline" onClick={() => copy(authLink)}>
+                    <Copy />
+                    Скопировать
+                  </Button>
+                  {showAuthTokenControls ? (
+                    <Button type="button" variant="outline" disabled={tokenRefreshLoading} onClick={() => void onRefreshAuthToken()}>
+                      {tokenRefreshLoading ? <Loader2 className="animate-spin" /> : <RefreshCw />}
+                      Обновить
+                    </Button>
+                  ) : null}
+                </CardFooter>
+              </Card>
             ) : null}
-          </Space>
-        </SectionCard>
+            {xuiLoading && !xuiClient ? (
+              <Card className="flex h-full min-h-48 flex-col">
+                <CardContent className="flex flex-1 items-center justify-center">
+                  <Loader2 className="size-8 animate-spin text-muted-foreground" />
+                </CardContent>
+              </Card>
+            ) : xuiClient ? (
+              <XuiClientCard client={xuiClient} access="user" className="h-full" />
+            ) : xuiLoaded ? (
+              <SubscriptionNotFound className="h-full min-h-48" />
+            ) : null}
+          </div>
+
+          {canRenew && !hasActiveInvoice ? (
+            <Card>
+              <CardHeader>
+                <CardTitle>
+                  <CardTitleWithIcon icon={Wallet}>Новый счёт</CardTitleWithIcon>
+                </CardTitle>
+                <CardDescription>Создайте счёт для оплаты подписки</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form id="profile-payment-form" className="flex flex-col gap-4" onSubmit={onCreatePayment}>
+                  <div className="flex flex-col gap-2">
+                    <Label htmlFor="profile-amount">Сумма, ₽</Label>
+                    <Input
+                      id="profile-amount"
+                      type="number"
+                      min={minAmount}
+                      max={maxAmount}
+                      value={amount}
+                      disabled={paymentsDisabled}
+                      aria-invalid={Boolean(amountError)}
+                      onChange={(event) => setAmount(Number(event.target.value))}
+                      className="w-32"
+                    />
+                    {amountError ? <p className="text-sm text-destructive">{amountError}</p> : null}
+                  </div>
+                </form>
+              </CardContent>
+              <CardFooter>
+                <Button type="submit" form="profile-payment-form" disabled={paymentsDisabled || paymentLoading}>
+                  {paymentLoading ? <Loader2 className="animate-spin" /> : null}
+                  Создать и оплатить
+                </Button>
+              </CardFooter>
+            </Card>
+          ) : null}
+        </>
       ) : null}
 
       {user.role !== "superuser" ? (
-        <>
-          {xuiLoading && !xuiClient ? (
-            <Card>
-              <Flex justify="center" align="center" style={{ minHeight: 80 }}>
-                <Spin indicator={<LoadingOutlined spin />} />
-              </Flex>
-            </Card>
-          ) : null}
-
-          {xuiClient ? <XuiClientCard client={xuiClient} variant="profile" /> : null}
-
-          {canRenew && !hasActiveInvoice ? (
-            <SectionCard
-              title={
-                <Flex align="center" gap={8}>
-                  <ThemedIconAvatar shape="square" size="small" icon={<DollarOutlined />} />
-                  <span>Новый счет</span>
-                </Flex>
-              }
-              hint="Создайте новый счет для оплаты подписки"
-            >
-              <Form id="profile-payment-form" form={paymentForm} layout="inline" onFinish={onCreatePayment}>
-                <Form.Item
-                  label="Сумма, ₽"
-                  name="amount"
-                  rules={[
-                    { required: true, message: "Введите сумму" },
-                    { type: "number", min: minAmount, max: maxAmount, message: `От ${minAmount} до ${maxAmount} ₽` },
-                  ]}
-                >
-                  <InputNumber min={minAmount} max={maxAmount} disabled={paymentsDisabled} />
-                </Form.Item>
-                <Form.Item>
-                  <Space>
-                    <Button type="primary" htmlType="submit" loading={paymentLoading} disabled={paymentsDisabled}>
-                      Создать и оплатить
-                    </Button>
-                    {statusLoading ? <Spin indicator={<LoadingOutlined spin />} /> : null}
-                  </Space>
-                </Form.Item>
-              </Form>
-            </SectionCard>
-          ) : null}
-
-          <SectionCard
-            title={
-              <Flex align="center" gap={8}>
-                <ThemedIconAvatar shape="square" size="small" icon={<FileOutlined />} />
-                <span>Мои счета</span>
-              </Flex>
-            }
-            hint={
-              <Text type="secondary">
-                Здесь вы можете посмотреть свои оплаченные или отмененные счета, а также оплатить новый счет <HintTooltip title={RENEW_HINT} />
-              </Text>
-            }
-            extra={
-              <Button icon={<ReloadOutlined />} loading={profileLoading} onClick={() => void loadProfile()}>
-                Обновить
-              </Button>
-            }
-          >
-            {hasActiveInvoice ? (
-              <Alert
-                type="warning"
-                showIcon
-                title="Обработка платежа"
-                description="После оплаты статус счёта может оставаться «В обработке» до минуты — платёж ещё подтверждается. Нажмите «Обновить», если статус не изменился."
-                style={{ marginBottom: 16 }}
-              />
-            ) : null}
-            <AsyncListState loading={profileLoading} empty={!invoices.length} emptyDescription="Счетов пока нет">
-              {invoices.map((item) => (
-                <InvoiceCard key={item.id} item={item} variant="profile" paymentBlocked={paymentsDisabled} canRenew={canRenew} />
-              ))}
-            </AsyncListState>
-          </SectionCard>
-          <AvailableSectionsCard role={user.role} />
-        </>
-      ) : (
-        <AvailableSectionsCard role={user.role} />
-      )}
-
-      <Flex justify="center" className="profile-logout-anchor">
-        <Button
-          type="default"
-          danger
-          icon={<LogoutOutlined />}
-          onClick={onLogout}
-          className="profile-logout-float"
-          style={{
-            borderRadius: 999,
-            paddingInline: 20,
-            height: 40,
-            background: token.colorBgElevated,
-            boxShadow: token.boxShadowSecondary,
-          }}
+        <SectionCard
+          title={<CardTitleWithIcon icon={FileText}>Мои счета</CardTitleWithIcon>}
+          hint={
+            <span className="inline-flex flex-wrap items-center gap-1">
+              Оплаченные, отменённые и активные счета <HintTooltip title={RENEW_HINT} />
+            </span>
+          }
+          extra={
+            <Button type="button" variant="outline" size="sm" disabled={profileLoading} onClick={() => void loadProfile()}>
+              {profileLoading ? <Loader2 className="animate-spin" /> : <RefreshCw />}
+              Обновить
+            </Button>
+          }
         >
-          Выйти
-        </Button>
-      </Flex>
-    </Space>
+          {hasActiveInvoice ? (
+            <Alert className="mb-4 border-amber-500/50 bg-amber-50 text-amber-950 dark:border-amber-500/30 dark:bg-amber-950/40 dark:text-amber-50">
+              <TriangleAlert className="text-amber-600 dark:text-amber-400" />
+              <AlertTitle>Обработка платежа</AlertTitle>
+              <AlertDescription>После оплаты статус может оставаться «В обработке» до минуты. Нажмите «Обновить», если статус не изменился.</AlertDescription>
+            </Alert>
+          ) : null}
+          <AsyncListState loading={profileLoading} empty={!invoices.length} emptyDescription="Счетов пока нет" minHeight={80} size="default">
+            {invoices.map((item) => (
+              <InvoiceCard key={item.id} item={item} access="user" paymentBlocked={paymentsDisabled} canRenew={canRenew} />
+            ))}
+          </AsyncListState>
+        </SectionCard>
+      ) : null}
+
+      <QuickLinks role={user.role} />
+    </PageShell>
   );
 }

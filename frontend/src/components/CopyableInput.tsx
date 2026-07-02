@@ -1,34 +1,37 @@
-import { CopyOutlined } from "@ant-design/icons";
-import { Button, Input, Space, Typography } from "antd";
+import { Copy } from "lucide-react";
 import type { ReactNode } from "react";
 
-import { useCopyToClipboard } from "../hooks/useCopyToClipboard";
-
-const { Text } = Typography;
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useCopyToClipboard } from "@/hooks/useCopyToClipboard";
+import { cn } from "@/lib/utils";
 
 type CopyableInputProps = {
   value: string;
   label?: string;
   highlight?: boolean;
   buttonVariant?: "text" | "icon";
-  maxWidth?: number;
 };
 
-export function CopyableInput({ value, label, highlight = false, buttonVariant = "text", maxWidth = 640 }: CopyableInputProps) {
+export function CopyableInput({ value, label, highlight = false, buttonVariant = "text" }: CopyableInputProps) {
   const copy = useCopyToClipboard();
 
   const copyButton =
     buttonVariant === "icon" ? (
-      <Button icon={<CopyOutlined />} aria-label="Скопировать" onClick={() => copy(value)} />
+      <Button type="button" variant="outline" size="icon" className="rounded-l-none" aria-label="Скопировать" onClick={() => copy(value)}>
+        <Copy />
+      </Button>
     ) : (
-      <Button onClick={() => copy(value)}>Скопировать</Button>
+      <Button type="button" variant="outline" className="rounded-l-none" onClick={() => copy(value)}>
+        Скопировать
+      </Button>
     );
 
   const input = (
-    <Space.Compact style={{ width: "100%", maxWidth }}>
-      <Input value={value} readOnly style={highlight ? { fontWeight: 600 } : undefined} />
-      {copyButton}
-    </Space.Compact>
+    <div className="flex w-full">
+      <Input value={value} readOnly className={cn("rounded-r-none text-foreground", highlight && "font-semibold")} />
+      <div className="-ml-px shrink-0">{copyButton}</div>
+    </div>
   );
 
   if (!label) {
@@ -36,10 +39,10 @@ export function CopyableInput({ value, label, highlight = false, buttonVariant =
   }
 
   return (
-    <Space orientation="vertical" size={4} style={{ width: "100%" }}>
-      <Text type="secondary">{label}</Text>
+    <div className="flex w-full flex-col gap-1">
+      <span className="text-sm text-muted-foreground">{label}</span>
       {input}
-    </Space>
+    </div>
   );
 }
 
@@ -47,8 +50,8 @@ export function CopyableText({ value, children }: { value: string; children: Rea
   const copy = useCopyToClipboard();
 
   return (
-    <Text type="secondary" style={{ cursor: "pointer" }} onClick={() => copy(value)}>
+    <button type="button" className="cursor-pointer text-left text-sm text-muted-foreground" onClick={() => copy(value)}>
       {children}
-    </Text>
+    </button>
   );
 }

@@ -1,4 +1,4 @@
-import type { Paginated } from "../types";
+import type { Paginated } from "@/types";
 
 export function emptyPaginated<T>(limit = 4): Paginated<T> {
   return {

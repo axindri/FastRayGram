@@ -1,22 +1,50 @@
-import { useEffect, useState } from "react";
+import { AlertCircle, Loader2 } from "lucide-react";
+import { useEffect, useState, type FormEvent } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { Alert, Button, Card, Form, Input, Spin, Typography } from "antd";
-import { LoadingOutlined } from "@ant-design/icons";
 
-import { buildAuthLink, registerUser, validateRegistrationCode } from "../api";
-import { HintTooltip } from "../components/HintTooltip";
-import { ThemeFooterControls } from "../components/ThemeFooterControls";
-import { useAuth } from "../auth";
-import { getApiErrorMessage } from "../utils/apiError";
-import { MARK_HINT, MARK_MAX_LENGTH, requiredMarkFormRules } from "../utils/mark";
-import { USERNAME_HINT, USERNAME_MAX_LENGTH, usernameFormRules } from "../utils/username";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
-const { Title, Text } = Typography;
+import { buildAuthLink, registerUser, validateRegistrationCode } from "@/api";
+import { useAuth } from "@/auth";
+import { HintTooltip } from "@/components/HintTooltip";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { getApiErrorMessage } from "@/utils/apiError";
+import { MARK_HINT, MARK_MAX_LENGTH } from "@/utils/mark";
+import { USERNAME_HINT, USERNAME_MAX_LENGTH, USERNAME_PATTERN } from "@/utils/username";
 
-type RegisterForm = {
-  username: string;
-  mark: string;
+type FieldErrors = {
+  username?: string;
+  mark?: string;
 };
+
+function validateUsername(value: string): string | undefined {
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return "Введите username";
+  }
+  if (trimmed.length > USERNAME_MAX_LENGTH) {
+    return `Не более ${USERNAME_MAX_LENGTH} символов`;
+  }
+  if (!USERNAME_PATTERN.test(trimmed)) {
+    return "Только латинские буквы и цифры";
+  }
+  return undefined;
+}
+
+function validateMark(value: string): string | undefined {
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return "Укажите контакт для связи";
+  }
+  if (trimmed.length > MARK_MAX_LENGTH) {
+    return `Не более ${MARK_MAX_LENGTH} символов`;
+  }
+  return undefined;
+}
 
 export function RegisterPage() {
   const { user } = useAuth();
@@ -30,6 +58,9 @@ export function RegisterPage() {
   const [validationError, setValidationError] = useState("");
   const [submitError, setSubmitError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [username, setUsername] = useState("");
+  const [mark, setMark] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
 
   useEffect(() => {
     if (user) {
@@ -79,8 +110,21 @@ export function RegisterPage() {
     };
   }, [code]);
 
-  const onFinish = async (values: RegisterForm) => {
+  const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
     if (!codeValid) {
+      return;
+    }
+
+    const nextFieldErrors: FieldErrors = {
+      username: validateUsername(username),
+      mark: validateMark(mark),
+    };
+
+    setFieldErrors(nextFieldErrors);
+
+    if (nextFieldErrors.username || nextFieldErrors.mark) {
       return;
     }
 
@@ -90,8 +134,8 @@ export function RegisterPage() {
     try {
       const token = await registerUser({
         code,
-        username: values.username.trim(),
-        mark: values.mark.trim(),
+        username: username.trim(),
+        mark: mark.trim(),
       });
       window.location.replace(buildAuthLink(token));
     } catch (error) {
@@ -101,68 +145,89 @@ export function RegisterPage() {
   };
 
   return (
-    <main
-      style={{
-        minHeight: "100vh",
-        display: "flex",
-        flexDirection: "column",
-        padding: "64px 16px 24px",
-        boxSizing: "border-box",
-      }}
-    >
-      <Title level={3} style={{ textAlign: "center" }}>
-        Регистрация
-      </Title>
+    <main className="flex min-h-screen flex-col items-center px-4 pb-8 pt-16">
+      <div className="mb-8 text-center">
+        <h1 className="text-2xl font-semibold tracking-tight">Регистрация</h1>
+        <p className="text-sm text-muted-foreground">Создание аккаунта по коду приглашения</p>
+      </div>
 
-      <Card style={{ maxWidth: 440, width: "100%", margin: "0 auto" }}>
-        {validating ? (
-          <div style={{ display: "grid", placeItems: "center", minHeight: 120 }}>
-            <Spin indicator={<LoadingOutlined spin />} />
-          </div>
-        ) : !codeValid ? (
-          <Alert type="error" showIcon title="Регистрация недоступна" description={validationError} />
-        ) : (
-          <Form layout="vertical" onFinish={onFinish}>
-            <Text type="secondary" style={{ display: "block", marginBottom: 16 }}>
-              Заполните данные для создания аккаунта
-            </Text>
+      <Card className="w-full max-w-md">
+        <CardHeader>
+          <CardTitle>Новый пользователь</CardTitle>
+          <CardDescription>Заполните данные для входа в сервис</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {validating ? (
+            <div className="grid min-h-[120px] place-items-center">
+              <Loader2 className="size-6 animate-spin text-muted-foreground" />
+            </div>
+          ) : !codeValid ? (
+            <Alert variant="destructive">
+              <AlertCircle />
+              <AlertTitle>Регистрация недоступна</AlertTitle>
+              <AlertDescription>{validationError}</AlertDescription>
+            </Alert>
+          ) : (
+            <form className="flex flex-col gap-4" onSubmit={onSubmit}>
+              <p className="text-sm text-muted-foreground">Заполните данные для создания аккаунта</p>
 
-            <Form.Item label="Username" name="username" extra={USERNAME_HINT} rules={usernameFormRules}>
-              <Input placeholder="Alex" autoComplete="username" maxLength={USERNAME_MAX_LENGTH} />
-            </Form.Item>
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="username">Username</Label>
+                <Input
+                  id="username"
+                  placeholder="Alex"
+                  autoComplete="username"
+                  maxLength={USERNAME_MAX_LENGTH}
+                  value={username}
+                  onChange={(event) => setUsername(event.target.value)}
+                  aria-invalid={Boolean(fieldErrors.username)}
+                />
+                <p className="text-xs text-muted-foreground">{USERNAME_HINT}</p>
+                {fieldErrors.username ? <p className="text-sm text-destructive">{fieldErrors.username}</p> : null}
+              </div>
 
-            <Form.Item
-              label={
-                <span>
-                  Контакт для связи <HintTooltip title="Укажите Telegram или e-mail, по которому с вами можно связаться. Номер телефона указывать не нужно." />
-                </span>
-              }
-              name="mark"
-              extra={MARK_HINT}
-              rules={requiredMarkFormRules}
-            >
-              <Input placeholder="@username или name@example.com" autoComplete="email" maxLength={MARK_MAX_LENGTH} />
-            </Form.Item>
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="mark" className="inline-flex items-center gap-1">
+                  Контакт для связи
+                  <HintTooltip title="Укажите Telegram или e-mail, по которому с вами можно связаться. Номер телефона указывать не нужно." />
+                </Label>
+                <Input
+                  id="mark"
+                  placeholder="@username или name@example.com"
+                  autoComplete="email"
+                  maxLength={MARK_MAX_LENGTH}
+                  value={mark}
+                  onChange={(event) => setMark(event.target.value)}
+                  aria-invalid={Boolean(fieldErrors.mark)}
+                />
+                <p className="text-xs text-muted-foreground">{MARK_HINT}</p>
+                {fieldErrors.mark ? <p className="text-sm text-destructive">{fieldErrors.mark}</p> : null}
+              </div>
 
-            <Text type="secondary" style={{ display: "block", marginBottom: 8 }}>
-              {`После регистрации подписка будет активна ${registrationExpiryDays} дн.`}
-            </Text>
+              <p className="text-sm text-muted-foreground">
+                {`После регистрации подписка будет активна ${registrationExpiryDays} дн.`}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                После входа ссылку для повторного входа можно скопировать в профиле.
+              </p>
 
-            <Text type="secondary" style={{ display: "block", marginBottom: 16 }}>
-              После входа ссылку для повторного входа можно скопировать в профиле.
-            </Text>
+              {submitError ? (
+                <Alert variant="destructive">
+                  <AlertCircle />
+                  <AlertTitle>{submitError}</AlertTitle>
+                </Alert>
+              ) : null}
 
-            {submitError ? <Alert type="error" title={submitError} showIcon style={{ marginBottom: 16 }} /> : null}
-
-            <Button type="primary" htmlType="submit" loading={loading} block>
-              Зарегистрироваться
-            </Button>
-          </Form>
-        )}
+              <Button type="submit" disabled={loading} className="w-full">
+                {loading ? "Регистрация…" : "Зарегистрироваться"}
+              </Button>
+            </form>
+          )}
+        </CardContent>
       </Card>
 
-      <div style={{ marginTop: "auto", display: "flex", justifyContent: "center", paddingTop: 24 }}>
-        <ThemeFooterControls />
+      <div className="mt-8">
+        <ThemeToggle block />
       </div>
     </main>
   );

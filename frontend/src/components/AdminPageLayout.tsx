@@ -1,30 +1,22 @@
-import { Col, Flex, Row, Typography } from "antd";
 import type { ReactNode } from "react";
 
-const { Title } = Typography;
+import { PageShell } from "@/components/PageShell";
 
 type AdminPageLayoutProps = {
   title: string;
+  description?: ReactNode;
+  action?: ReactNode;
   children: ReactNode;
 };
 
-export function AdminPageLayout({ title, children }: AdminPageLayoutProps) {
+export function AdminPageLayout({ title, description, action, children }: AdminPageLayoutProps) {
   return (
-    <Flex vertical gap={16} style={{ width: "100%" }}>
-      <Title level={3} style={{ marginTop: 0 }}>
-        {title}
-      </Title>
-      <Row gutter={[0, 16]} align="top" style={{ width: "100%", marginInline: 0 }}>
-        {children}
-      </Row>
-    </Flex>
+    <PageShell title={title} description={description} action={action}>
+      <div className="flex w-full flex-col gap-6">{children}</div>
+    </PageShell>
   );
 }
 
-export function AdminPageColumn({ children, span = 12 }: { children: ReactNode; span?: number }) {
-  return (
-    <Col xs={24} lg={span} xl={span}>
-      {children}
-    </Col>
-  );
+export function AdminPageColumn({ children }: { children: ReactNode; span?: number }) {
+  return <div className="min-w-0">{children}</div>;
 }

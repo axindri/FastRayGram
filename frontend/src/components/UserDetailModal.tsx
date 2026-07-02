@@ -1,18 +1,19 @@
 import { useCallback, useEffect, useState } from "react";
-import { FileOutlined, LinkOutlined } from "@ant-design/icons";
-import { Card, Empty, Flex, Modal, Space, Spin, Typography } from "antd";
+import { FileText, Link, Loader2 } from "lucide-react";
 
-import { ApiError, fetchInvoices, fetchXuiClient } from "../api";
-import { getApiErrorMessage } from "../utils/apiError";
-import { emptyPaginated } from "../utils/pagination";
-import { ROLE_LABELS, type AdminInvoice, type AdminUser, type Paginated, type XuiClient } from "../types";
-import { AsyncListState } from "./AsyncListState";
-import { InvoiceCard } from "./InvoiceCard";
-import { PaginationFooter } from "./PaginationFooter";
-import { ThemedIconAvatar } from "./ThemedIconAvatar";
-import { XuiClientCard } from "./XuiClientCard";
+import { fetchInvoices, fetchXuiClient } from "@/api";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { getApiErrorMessage } from "@/utils/apiError";
+import { emptyPaginated } from "@/utils/pagination";
+import { ROLE_LABELS, type AdminInvoice, type AdminUser, type Paginated, type XuiClient } from "@/types";
 
-const { Link, Text } = Typography;
+import { CardTitleWithIcon } from "@/components/CardTitleWithIcon";
+import { InvoiceCard } from "@/components/InvoiceCard";
+import { PaginatedList } from "@/components/PaginatedList";
+import { SubscriptionNotFound } from "@/components/SubscriptionNotFound";
+import { UserAvatar } from "@/components/UserAvatar";
+import { XuiClientCard } from "@/components/XuiClientCard";
 
 const INVOICES_PAGE_LIMIT = 3;
 
@@ -25,7 +26,6 @@ type UserDetailModalProps = {
 export function UserDetailModal({ open, user, onClose }: UserDetailModalProps) {
   const [xuiClient, setXuiClient] = useState<XuiClient | null>(null);
   const [xuiLoading, setXuiLoading] = useState(false);
-  const [xuiError, setXuiError] = useState<string | null>(null);
   const [invoicesError, setInvoicesError] = useState<string | null>(null);
 
   const [invoices, setInvoices] = useState<Paginated<AdminInvoice>>(() => emptyPaginated(INVOICES_PAGE_LIMIT));
@@ -48,7 +48,6 @@ export function UserDetailModal({ open, user, onClose }: UserDetailModalProps) {
   useEffect(() => {
     if (!open || !user) {
       setXuiClient(null);
-      setXuiError(null);
       setInvoicesError(null);
       setInvoices(emptyPaginated(INVOICES_PAGE_LIMIT));
       return;
@@ -57,7 +56,6 @@ export function UserDetailModal({ open, user, onClose }: UserDetailModalProps) {
     let cancelled = false;
     setXuiLoading(true);
     setXuiClient(null);
-    setXuiError(null);
     setInvoices(emptyPaginated(INVOICES_PAGE_LIMIT));
 
     void fetchXuiClient(user.username)
@@ -66,13 +64,9 @@ export function UserDetailModal({ open, user, onClose }: UserDetailModalProps) {
           setXuiClient(client);
         }
       })
-      .catch((error) => {
+      .catch(() => {
         if (!cancelled) {
-          if (error instanceof ApiError && error.status === 404) {
-            setXuiError(null);
-          } else {
-            setXuiError(getApiErrorMessage(error, "Не удалось загрузить XUI-клиента"));
-          }
+          setXuiClient(null);
         }
       })
       .finally(() => {
@@ -89,70 +83,87 @@ export function UserDetailModal({ open, user, onClose }: UserDetailModalProps) {
   }, [loadInvoices, open, user]);
 
   return (
-    <Modal title={user?.username ?? "Пользователь"} open={open} centered onCancel={onClose} footer={null} width={720} destroyOnHidden>
-      {user ? (
-        <Space orientation="vertical" size="middle" style={{ width: "100%" }}>
-          <Card size="small" styles={{ body: { padding: 12 } }}>
-            <Space orientation="vertical" size={8} style={{ width: "100%" }}>
-              <Text type="secondary">ID: {user.id}</Text>
-              <Text type="secondary">Роль: {ROLE_LABELS[user.role]}</Text>
-              {user.mark ? <Text type="secondary">Заметка: {user.mark}</Text> : null}
-              {user.sub_url ? (
-                <Link href={user.sub_url} target="_blank">
-                  <Flex align="center" gap={6}>
-                    <LinkOutlined />
+    <Dialog
+      open={open}
+      onOpenChange={(nextOpen) => {
+        if (!nextOpen) {
+          onClose();
+        }
+      }}
+    >
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            {user ? <UserAvatar username={user.username} /> : null}
+            <span>{user?.username ?? "Пользователь"}</span>
+          </DialogTitle>
+        </DialogHeader>
+
+        {user ? (
+          <div className="flex w-full flex-col gap-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <UserAvatar username={user.username} />
+                  <span>{user.username}</span>
+                </CardTitle>
+                <CardDescription>
+                  ID {user.id} · {ROLE_LABELS[user.role]}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="flex flex-col gap-2 text-sm text-muted-foreground">
+                {user.mark ? <p>Заметка: {user.mark}</p> : null}
+                {user.sub_url ? (
+                  <a href={user.sub_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-primary hover:underline">
+                    <Link className="size-3.5" />
                     <span>Ссылка подписки</span>
-                  </Flex>
-                </Link>
-              ) : null}
-            </Space>
-          </Card>
-
-          {xuiLoading ? (
-            <Card size="small">
-              <div style={{ textAlign: "center", padding: "24px 0" }}>
-                <Spin />
-              </div>
+                  </a>
+                ) : null}
+              </CardContent>
             </Card>
-          ) : xuiClient ? (
-            <XuiClientCard client={xuiClient} variant="profile" />
-          ) : (
-            <Card size="small">
-              <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={xuiError ?? "XUI-клиент не найден"} />
+
+            {xuiLoading ? (
+              <Card>
+                <CardContent className="flex items-center justify-center py-8">
+                  <Loader2 className="size-8 animate-spin text-muted-foreground" />
+                </CardContent>
+              </Card>
+            ) : xuiClient ? (
+              <XuiClientCard client={xuiClient} access="user" />
+            ) : (
+              <SubscriptionNotFound />
+            )}
+
+            <Card>
+              <CardHeader>
+                <CardTitle>
+                  <CardTitleWithIcon icon={FileText}>Счета</CardTitleWithIcon>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {invoicesError ? <p className="text-sm text-destructive">{invoicesError}</p> : null}
+
+                <PaginatedList
+                  page={invoices.page}
+                  pages={invoices.pages}
+                  total={invoices.total}
+                  loading={invoicesLoading}
+                  empty={!invoices.items.length}
+                  emptyDescription="Счетов нет"
+                  minHeight={64}
+                  onPageChange={(page) => void loadInvoices(page, user.id)}
+                >
+                  {invoices.items.map((item) => (
+                    <InvoiceCard key={item.id} item={item} access="user" />
+                  ))}
+                </PaginatedList>
+              </CardContent>
             </Card>
-          )}
-
-          <Card
-            size="small"
-            title={
-              <Flex align="center" gap={8}>
-                <ThemedIconAvatar shape="square" size="small" icon={<FileOutlined />} />
-                <span>Счета</span>
-              </Flex>
-            }
-          >
-            <Space orientation="vertical" size="middle" style={{ width: "100%" }}>
-              {invoicesError ? <Text type="danger">{invoicesError}</Text> : null}
-
-              <AsyncListState loading={invoicesLoading} empty={!invoices.items.length} emptyDescription="Счетов нет" minHeight={64}>
-                {invoices.items.map((item) => (
-                  <InvoiceCard key={item.id} item={item} variant="profile" />
-                ))}
-              </AsyncListState>
-
-              <PaginationFooter
-                page={invoices.page}
-                pages={invoices.pages}
-                total={invoices.total}
-                loading={invoicesLoading}
-                onPageChange={(page) => void loadInvoices(page, user.id)}
-              />
-            </Space>
-          </Card>
-        </Space>
-      ) : (
-        <Text type="secondary">Пользователь не выбран</Text>
-      )}
-    </Modal>
+          </div>
+        ) : (
+          <p className="text-sm text-muted-foreground">Пользователь не выбран</p>
+        )}
+      </DialogContent>
+    </Dialog>
   );
 }

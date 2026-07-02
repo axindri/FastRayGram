@@ -1,4 +1,4 @@
-import { ProfileResultPage } from "../components/ProfileResultPage";
+import { ProfileResultPage } from "@/components/ProfileResultPage";
 
 export function PaymentFailPage() {
   return (

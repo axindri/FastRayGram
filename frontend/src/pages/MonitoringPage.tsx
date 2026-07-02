@@ -1,23 +1,51 @@
+import { ExternalLink, Loader2, RefreshCw } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
-import { LinkOutlined, LoadingOutlined, ReloadOutlined } from "@ant-design/icons";
-import { App, Badge, Button, Space, Spin, Typography } from "antd";
+import { toast } from "sonner";
 
-import { fetchAdminLinks, fetchStatus } from "../api";
-import { AdminPageColumn, AdminPageLayout } from "../components/AdminPageLayout";
-import { SectionCard } from "../components/SectionCard";
-import { getApiErrorMessage } from "../utils/apiError";
-import { ADMIN_LINKS_META, getStatusServices, type AdminLinks, type StatusResponse } from "../types";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
-const { Link, Text } = Typography;
+import { fetchAdminLinks, fetchStatus } from "@/api";
+import { AdminPageColumn, AdminPageLayout } from "@/components/AdminPageLayout";
+import { SectionCard } from "@/components/SectionCard";
+import { getApiErrorMessage } from "@/utils/apiError";
+import { ADMIN_LINKS_META, getStatusServices, type AdminLinks, type StatusResponse } from "@/types";
 
-function statusColor(status: string) {
-  if (status === "ok") return "success";
-  if (status === "error") return "error";
-  return "warning";
+const STATUS_LABELS: Record<string, string> = {
+  ok: "OK",
+  error: "Ошибка",
+  warning: "Предупреждение",
+};
+
+function serviceStatusBadge(status: string) {
+  const normalized = status.toLowerCase();
+
+  if (normalized === "ok") {
+    return {
+      label: STATUS_LABELS.ok,
+      variant: "outline" as const,
+      className: "border-green-600/25 bg-green-600/10 text-green-700 dark:text-green-400",
+    };
+  }
+
+  if (normalized === "error") {
+    return {
+      label: STATUS_LABELS.error,
+      variant: "destructive" as const,
+      className: undefined,
+    };
+  }
+
+  return {
+    label: STATUS_LABELS[normalized] ?? status,
+    variant: "outline" as const,
+    className: "border-amber-600/25 bg-amber-600/10 text-amber-800 dark:text-amber-400",
+  };
 }
 
 export function MonitoringPage() {
-  const { message } = App.useApp();
   const [status, setStatus] = useState<StatusResponse | null>(null);
   const [links, setLinks] = useState<AdminLinks | null>(null);
   const [loading, setLoading] = useState(false);
@@ -30,74 +58,93 @@ export function MonitoringPage() {
         .then(setStatus)
         .catch((error) => {
           setStatus(null);
-          message.error(getApiErrorMessage(error, "Не удалось загрузить статус сервисов"));
+          toast.error(getApiErrorMessage(error, "Не удалось загрузить статус сервисов"));
         }),
       fetchAdminLinks()
         .then(setLinks)
         .catch((error) => {
           setLinks(null);
-          message.error(getApiErrorMessage(error, "Не удалось загрузить ссылки на панели"));
+          toast.error(getApiErrorMessage(error, "Не удалось загрузить ссылки на панели"));
         }),
     ]);
 
     setLoading(false);
-  }, [message]);
+  }, []);
 
   useEffect(() => {
     void load();
   }, [load]);
 
   return (
-    <AdminPageLayout title="Мониторинг">
+    <AdminPageLayout title="Мониторинг" description="Статус сервисов и быстрые ссылки на панели">
       <AdminPageColumn span={24}>
-        <Space orientation="vertical" size="middle" style={{ width: "100%" }}>
+        <div className="flex flex-col gap-4">
           <SectionCard
             title="Статус"
             extra={
-              <Button icon={<ReloadOutlined />} onClick={() => void load()} loading={loading}>
+              <Button type="button" variant="outline" size="sm" onClick={() => void load()} disabled={loading}>
+                <RefreshCw className={loading ? "animate-spin" : undefined} />
                 Обновить
               </Button>
             }
           >
             {status ? (
-              <Space orientation="vertical" size="middle" style={{ width: "100%" }}>
-                {getStatusServices(status).map(([name, item]) => (
-                  <Space key={name}>
-                    <Badge status={statusColor(item.status)} />
-                    <Text strong>{name}</Text>
-                    {item.status === "ok" ? <Text type="secondary">{item.version ? ` · v${item.version}` : ""}</Text> : null}
-                  </Space>
-                ))}
-              </Space>
+              <div className="flex flex-col gap-3">
+                {getStatusServices(status).map(([name, item]) => {
+                  const badge = serviceStatusBadge(item.status);
+
+                  return (
+                    <div key={name} className="flex flex-wrap items-center gap-2">
+                      <Badge variant={badge.variant} className={cn(badge.className)}>
+                        {badge.label}
+                      </Badge>
+                      <span className="font-medium">{name}</span>
+                      {item.status === "ok" && item.version ? (
+                        <span className="text-sm text-muted-foreground">· v{item.version}</span>
+                      ) : null}
+                    </div>
+                  );
+                })}
+              </div>
             ) : null}
             {!status && loading ? (
-              <div style={{ display: "flex", justifyContent: "center", padding: "24px 0" }}>
-                <Spin indicator={<LoadingOutlined spin />} size="large" />
+              <div className="flex justify-center py-6">
+                <Loader2 className="size-8 animate-spin text-muted-foreground" />
               </div>
             ) : null}
           </SectionCard>
 
           <SectionCard title="Ссылки">
             {links ? (
-              <Space orientation="vertical" size="middle" style={{ width: "100%" }}>
+              <div className="flex flex-col gap-4">
                 {ADMIN_LINKS_META.map(({ key, title, hint }) => (
-                  <Space key={key} orientation="vertical" size={0}>
-                    <Text strong>{title}</Text>
-                    <Text type="secondary">{hint}</Text>
-                    <Link href={links[key]} target="_blank">
-                      <LinkOutlined /> {links[key]}
-                    </Link>
-                  </Space>
+                  <Card key={key}>
+                    <CardHeader>
+                      <CardTitle>{title}</CardTitle>
+                      <CardDescription>{hint}</CardDescription>
+                    </CardHeader>
+                    <CardFooter>
+                      <a
+                        href={links[key]}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
+                      >
+                        <ExternalLink className="size-3.5" />
+                        {links[key]}
+                      </a>
+                    </CardFooter>
+                  </Card>
                 ))}
-              </Space>
+              </div>
             ) : null}
             {!links && loading ? (
-              <div style={{ display: "flex", justifyContent: "center", padding: "24px 0" }}>
-                <Spin indicator={<LoadingOutlined spin />} size="large" />
+              <div className="flex justify-center py-6">
+                <Loader2 className="size-8 animate-spin text-muted-foreground" />
               </div>
             ) : null}
           </SectionCard>
-        </Space>
+        </div>
       </AdminPageColumn>
     </AdminPageLayout>
   );

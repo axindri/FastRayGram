@@ -1,29 +1,31 @@
-import { Spin } from "antd";
-import { LoadingOutlined } from "@ant-design/icons";
+import { Loader2 } from "lucide-react";
 import { Navigate, Route, Routes } from "react-router-dom";
 
-import { useAuth } from "./auth";
-import { RequireAdmin } from "./components/RequireAdmin";
-import { AppLayout } from "./layouts/AppLayout";
-import { ForbiddenPage } from "./pages/ForbiddenPage";
-import { LoginPage } from "./pages/LoginPage";
-import { MonitoringPage } from "./pages/MonitoringPage";
-import { PaymentFailPage } from "./pages/PaymentFailPage";
-import { PaymentSuccessPage } from "./pages/PaymentSuccessPage";
-import { PaymentsPage } from "./pages/PaymentsPage";
-import { AppearancePage } from "./pages/AppearancePage";
-import { ProfilePage } from "./pages/ProfilePage";
-import { RegisterPage } from "./pages/RegisterPage";
-import { RegistrationPage } from "./pages/RegistrationPage";
-import { UsersPage } from "./pages/UsersPage";
+import { useAuth } from "@/auth";
+import { RequireAdmin } from "@/components/RequireAdmin";
+import { AppLayout } from "@/layouts/AppLayout";
+import { ForbiddenPage } from "@/pages/ForbiddenPage";
+import { LoginPage } from "@/pages/LoginPage";
+import { MonitoringPage } from "@/pages/MonitoringPage";
+import { PaymentFailPage } from "@/pages/PaymentFailPage";
+import { PaymentSuccessPage } from "@/pages/PaymentSuccessPage";
+import { PaymentsLayout } from "@/pages/PaymentsLayout";
+import { PaymentsAllPage, PaymentsPaidPage } from "@/pages/PaymentsPage";
+import { ProfilePage } from "@/pages/ProfilePage";
+import { RegisterPage } from "@/pages/RegisterPage";
+import { RegistrationPage } from "@/pages/RegistrationPage";
+import { SettingsAppearancePage } from "@/pages/SettingsAppearancePage";
+import { SettingsLayout } from "@/pages/SettingsLayout";
+import { UsersLayout } from "@/pages/UsersLayout";
+import { UsersAllPage, UsersCreatePage, UsersXuiPage } from "@/pages/users/UsersSections";
 
 function ProtectedLayout() {
   const { user, loading } = useAuth();
 
   if (loading) {
     return (
-      <div style={{ display: "grid", placeItems: "center", minHeight: "100vh" }}>
-        <Spin size="large" />
+      <div className="grid min-h-screen place-items-center">
+        <Loader2 className="size-8 animate-spin text-muted-foreground" />
       </div>
     );
   }
@@ -37,8 +39,8 @@ function ProtectedLayout() {
 
 function LoadingScreen() {
   return (
-    <div style={{ display: "grid", placeItems: "center", minHeight: "100vh" }}>
-      <Spin indicator={<LoadingOutlined spin />} size="large" />
+    <div className="grid min-h-screen place-items-center">
+      <Loader2 className="size-8 animate-spin text-muted-foreground" />
     </div>
   );
 }
@@ -57,7 +59,13 @@ export default function App() {
 
       <Route element={<ProtectedLayout />}>
         <Route path="/profile" element={<ProfilePage />} />
-        <Route path="/appearance" element={<AppearancePage />} />
+
+        <Route path="/settings" element={<SettingsLayout />}>
+          <Route index element={<Navigate to="/settings/appearance" replace />} />
+          <Route path="appearance" element={<SettingsAppearancePage />} />
+        </Route>
+        <Route path="/appearance" element={<Navigate to="/settings/appearance" replace />} />
+
         <Route path="/payment/success" element={<PaymentSuccessPage />} />
         <Route path="/payment/fail" element={<PaymentFailPage />} />
         <Route path="/forbidden" element={<ForbiddenPage />} />
@@ -65,8 +73,17 @@ export default function App() {
 
         <Route element={<RequireAdmin />}>
           <Route path="/monitoring" element={<MonitoringPage />} />
-          <Route path="/payments" element={<PaymentsPage />} />
-          <Route path="/users" element={<UsersPage />} />
+          <Route path="/payments" element={<PaymentsLayout />}>
+            <Route index element={<Navigate to="/payments/all" replace />} />
+            <Route path="all" element={<PaymentsAllPage />} />
+            <Route path="paid" element={<PaymentsPaidPage />} />
+          </Route>
+          <Route path="/users" element={<UsersLayout />}>
+            <Route index element={<Navigate to="/users/create" replace />} />
+            <Route path="create" element={<UsersCreatePage />} />
+            <Route path="all" element={<UsersAllPage />} />
+            <Route path="xui" element={<UsersXuiPage />} />
+          </Route>
           <Route path="/registration" element={<RegistrationPage />} />
         </Route>
       </Route>

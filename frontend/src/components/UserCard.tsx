@@ -1,11 +1,25 @@
 import { useEffect, useState } from "react";
-import { DeleteOutlined, EditOutlined, EyeOutlined, LinkOutlined } from "@ant-design/icons";
-import { Button, Card, Flex, Popconfirm, Select, Space, Typography } from "antd";
+import { Eye, Link, Loader2, Pencil, Trash2 } from "lucide-react";
 
-import { ROLE_LABELS, type AdminUser, type UserRole } from "../types";
-import { CopyableInput } from "./CopyableInput";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { Card, CardAction, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ROLE_LABELS, type AdminUser, type UserRole } from "@/types";
 
-const { Text, Link } = Typography;
+import { CopyableInput } from "@/components/CopyableInput";
+import { ActionIconTooltip } from "@/components/ActionIconTooltip";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 type RoleOption = {
   value: UserRole;
@@ -77,70 +91,135 @@ export function UserCard({
   };
 
   return (
-    <Card
-      size="small"
-      title={user.username}
-      extra={
-        showActions ? (
-          <Space wrap>
-            {onView ? <Button size="small" icon={<EyeOutlined />} onClick={() => onView(user)} /> : null}
-            {canEditRole && !editing ? <Button size="small" icon={<EditOutlined />} onClick={() => setEditing(true)} /> : null}
-            {onRefreshLink && canManage ? (
-              <Popconfirm title="Получить новую ссылку для входа?" onConfirm={() => void handleRefreshLink()}>
-                <Button size="small" loading={isActionLoading} icon={<LinkOutlined />} />
-              </Popconfirm>
-            ) : null}
-            {onDelete && canManage ? (
-              <Popconfirm title="Удалить пользователя?" onConfirm={() => onDelete(user.id)}>
-                <Button size="small" loading={isActionLoading} icon={<DeleteOutlined />} />
-              </Popconfirm>
-            ) : null}
-          </Space>
-        ) : null
-      }
-    >
-      {editing ? (
-        <Space orientation="vertical" size={12} style={{ width: "100%" }}>
-          <div>
-            <Text type="secondary" style={{ display: "block", marginBottom: 8 }}>
-              Новая роль
-            </Text>
-            <Select value={selectedRole} options={roleOptions} onChange={setSelectedRole} style={{ width: "100%" }} />
-          </div>
-          <Space wrap>
-            <Button type="primary" loading={roleSaving || isActionLoading} onClick={() => void handleSaveRole()}>
-              Сохранить
-            </Button>
-            <Button
-              onClick={() => {
-                setEditing(false);
-                setSelectedRole(user.role === "admin" ? "admin" : "user");
-              }}
-            >
-              Отмена
-            </Button>
-          </Space>
-        </Space>
-      ) : (
-        <Space orientation="vertical" size={4} style={{ width: "100%" }}>
-          <Text type="secondary">ID: {user.id}</Text>
-          <Text type="secondary">Роль: {ROLE_LABELS[user.role]}</Text>
-          {user.mark ? <Text type="secondary">Заметка: {user.mark}</Text> : null}
-          {user.sub_url ? (
-            <Link href={user.sub_url} target="_blank">
-              <Flex align="center" gap={6}>
-                <LinkOutlined />
-                <span>Ссылка подписки</span>
-              </Flex>
-            </Link>
+    <Card>
+      <CardHeader>
+        <CardTitle>{user.username}</CardTitle>
+        {showActions ? (
+          <CardAction>
+            <div className="flex flex-wrap gap-1">
+              {onView ? (
+                <ActionIconTooltip label="Просмотр">
+                  <Button type="button" variant="outline" size="icon-sm" aria-label="Просмотр" onClick={() => onView(user)}>
+                    <Eye />
+                  </Button>
+                </ActionIconTooltip>
+              ) : null}
+              {canEditRole && !editing ? (
+                <ActionIconTooltip label="Изменить роль">
+                  <Button type="button" variant="outline" size="icon-sm" aria-label="Изменить роль" onClick={() => setEditing(true)}>
+                    <Pencil />
+                  </Button>
+                </ActionIconTooltip>
+              ) : null}
+              {onRefreshLink && canManage ? (
+                <AlertDialog>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <AlertDialogTrigger asChild>
+                        <Button type="button" variant="outline" size="icon-sm" aria-label="Обновить ссылку" disabled={isActionLoading}>
+                          {isActionLoading ? <Loader2 className="animate-spin" /> : <Link />}
+                        </Button>
+                      </AlertDialogTrigger>
+                    </TooltipTrigger>
+                    <TooltipContent side="top">Новая ссылка для входа</TooltipContent>
+                  </Tooltip>
+                  <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Получить новую ссылку для входа?</AlertDialogTitle>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Нет</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => void handleRefreshLink()}>Да</AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
+              ) : null}
+              {onDelete && canManage ? (
+                <AlertDialog>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <AlertDialogTrigger asChild>
+                        <Button type="button" variant="outline" size="icon-sm" aria-label="Удалить" disabled={isActionLoading}>
+                          {isActionLoading ? <Loader2 className="animate-spin" /> : <Trash2 />}
+                        </Button>
+                      </AlertDialogTrigger>
+                    </TooltipTrigger>
+                    <TooltipContent side="top">Удалить</TooltipContent>
+                  </Tooltip>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Удалить пользователя?</AlertDialogTitle>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Нет</AlertDialogCancel>
+                      <AlertDialogAction variant="destructive" onClick={() => onDelete(user.id)}>
+                        Да
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              ) : null}
+            </div>
+          </CardAction>
+        ) : null}
+      </CardHeader>
+      <CardContent>
+        <div className="flex flex-col gap-2 text-sm text-muted-foreground">
+          <p>
+            ID: <span className="font-semibold text-foreground">{user.id}</span>
+          </p>
+          {!editing ? (
+            <p>
+              Роль: <span className="font-semibold text-foreground">{ROLE_LABELS[user.role]}</span>
+            </p>
           ) : null}
-        </Space>
-      )}
-
-      {authLink ? (
-        <div style={{ marginTop: 12 }}>
-          <CopyableInput label="Ссылка для входа" value={authLink} />
+          {!editing && user.mark ? <p>Заметка: {user.mark}</p> : null}
+          {!editing && user.sub_url ? (
+            <a href={user.sub_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-primary hover:underline">
+              <Link className="size-3.5" />
+              <span>Ссылка подписки</span>
+            </a>
+          ) : null}
         </div>
+        {editing ? (
+          <div className="flex flex-col gap-2">
+            <Label>Новая роль</Label>
+            <Select value={selectedRole} onValueChange={(value) => setSelectedRole(value as "user" | "admin")}>
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {roleOptions.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        ) : null}
+      </CardContent>
+      {editing ? (
+        <CardFooter className="gap-2">
+          <Button type="button" disabled={roleSaving || isActionLoading} onClick={() => void handleSaveRole()}>
+            {roleSaving || isActionLoading ? <Loader2 className="animate-spin" /> : null}
+            Сохранить
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => {
+              setEditing(false);
+              setSelectedRole(user.role === "admin" ? "admin" : "user");
+            }}
+          >
+            Отмена
+          </Button>
+        </CardFooter>
+      ) : authLink ? (
+        <CardFooter className="flex-col items-stretch gap-2">
+          <CopyableInput label="Ссылка для входа" value={authLink} />
+        </CardFooter>
       ) : null}
     </Card>
   );

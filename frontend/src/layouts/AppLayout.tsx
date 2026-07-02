@@ -1,89 +1,51 @@
-import { useMemo, useState } from "react";
-import { MenuOutlined } from "@ant-design/icons";
-import { Button, Drawer, Flex, Layout, Typography, theme } from "antd";
-import { Outlet, useLocation } from "react-router-dom";
+import { PanelLeft } from "lucide-react";
+import { Outlet } from "react-router-dom";
 
-import { AppSidebarMenu } from "../components/AppSidebarMenu";
-import { ServiceStatusBanner } from "../components/ServiceStatusBanner";
-import { NAV_ITEMS } from "../config/navigation";
-import { ServiceStatusProvider } from "../hooks/useServiceStatus";
-import { useMediaQuery } from "../hooks/useMediaQuery";
-import { useTheme } from "../theme/ThemeProvider";
-import { getSidebarBg } from "../theme/config";
+import { AppSidebar } from "@/components/app-sidebar";
+import { ServiceStatusBanner } from "@/components/ServiceStatusBanner";
+import { UserAccountMenu } from "@/components/UserAccountMenu";
+import { ServiceStatusProvider } from "@/hooks/useServiceStatus";
+import { SidebarInset, SidebarProvider, useSidebar } from "@/components/ui/sidebar";
 
-const { Header, Sider, Content } = Layout;
-const { Title } = Typography;
-
-const HEADER_BG = "#000000";
-const HEADER_TEXT = "#ffffff";
-const MOBILE_BREAKPOINT = "(max-width: 991.98px)";
-
-export function AppLayout() {
-  const { token } = theme.useToken();
-  const { resolved } = useTheme();
-  const location = useLocation();
-  const mobile = useMediaQuery(MOBILE_BREAKPOINT);
-  const [menuOpen, setMenuOpen] = useState(false);
-
-  const menuTheme = resolved === "dark" ? "dark" : "light";
-  const sidebarBg = getSidebarBg(resolved);
-
-  const selectedKey = useMemo(() => {
-    const match = NAV_ITEMS.find((item) => location.pathname.startsWith(item.path));
-    return match ? [match.path] : [];
-  }, [location.pathname]);
-
-  const sidebar = (
-    <AppSidebarMenu menuTheme={menuTheme} resolved={resolved} selectedKey={selectedKey} mobile={mobile} onNavigate={mobile ? () => setMenuOpen(false) : undefined} />
-  );
-
-  const headerStyle = {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingInline: 24,
-    background: resolved === "dark" ? token.colorBgContainer : HEADER_BG,
-    color: resolved === "dark" ? token.colorText : HEADER_TEXT,
-    borderBottom: `1px solid ${resolved === "dark" ? token.colorBorderSecondary : "#1f1f1f"}`,
-  } as const;
-
-  const headerTextColor = resolved === "dark" ? token.colorText : HEADER_TEXT;
+function MobileSidebarTrigger() {
+  const { toggleSidebar } = useSidebar();
 
   return (
+    <button
+      type="button"
+      className="-ml-1 flex h-11 cursor-pointer items-center gap-2 rounded-md border-0 bg-transparent p-0 text-sm font-medium outline-none hover:opacity-80 focus-visible:ring-[3px] focus-visible:ring-ring/50"
+      aria-label="Меню"
+      onClick={toggleSidebar}
+    >
+      <PanelLeft className="size-5" />
+      Меню
+    </button>
+  );
+}
+
+export function AppLayout() {
+  return (
     <ServiceStatusProvider>
-      <Layout style={{ minHeight: "100vh", background: token.colorBgLayout }}>
-        <Header style={headerStyle}>
-          <Flex align="center" gap={12}>
-            <img src="/frg_light_on_dark.png" alt="" aria-hidden style={{ height: mobile ? 28 : 36, display: "block" }} />
-            <Title level={4} style={{ margin: 0, color: headerTextColor }}>
-              Fast Ray Gram
-            </Title>
-          </Flex>
-          {mobile ? <Button type="text" icon={<MenuOutlined />} aria-label="Меню" style={{ color: headerTextColor }} onClick={() => setMenuOpen(true)} /> : null}
-        </Header>
+      <SidebarProvider>
+        <AppSidebar />
+        <SidebarInset>
+          <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 lg:px-6">
+            <div className="md:hidden">
+              <MobileSidebarTrigger />
+            </div>
+            <div className="ml-auto">
+              <UserAccountMenu />
+            </div>
+          </header>
 
-        <ServiceStatusBanner />
-
-        <Layout style={{ flex: 1, background: token.colorBgLayout }}>
-          {mobile ? (
-            <Drawer title="Меню" placement="right" open={menuOpen} onClose={() => setMenuOpen(false)} width={240} styles={{ body: { padding: 0, height: "100%" } }}>
-              {sidebar}
-            </Drawer>
-          ) : (
-            <Sider className="app-sider" width={200} theme={menuTheme} style={{ background: sidebarBg, borderRight: `1px solid ${token.colorBorderSecondary}` }}>
-              {sidebar}
-            </Sider>
-          )}
-
-          <Layout style={{ background: token.colorBgLayout }}>
-            <Content style={{ padding: "24px 16px", boxSizing: "border-box" }}>
-              <div className="app-main-inner">
-                <Outlet />
-              </div>
-            </Content>
-          </Layout>
-        </Layout>
-      </Layout>
+          <div className="flex flex-1 flex-col px-4 py-6 lg:px-8">
+            <div className="app-main-inner flex w-full flex-col gap-6">
+              <ServiceStatusBanner />
+              <Outlet />
+            </div>
+          </div>
+        </SidebarInset>
+      </SidebarProvider>
     </ServiceStatusProvider>
   );
 }

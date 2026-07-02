@@ -1,6 +1,23 @@
-import { Button, Form, Popconfirm, Space } from "antd";
+import { Loader2 } from "lucide-react";
 import type { ReactNode } from "react";
-import type { Rule } from "antd/es/form";
+
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+
+type ValidationRule = {
+  required?: boolean;
+  message?: string;
+};
 
 type LookupActionFormProps = {
   label: string;
@@ -10,32 +27,54 @@ type LookupActionFormProps = {
   onGet: () => void;
   onDelete?: () => void;
   deleteConfirmTitle?: string;
-  rules?: Rule[];
+  rules?: ValidationRule[];
   result?: ReactNode;
 };
 
-export function LookupActionForm({ label, name, input, loading, onGet, onDelete, deleteConfirmTitle, rules, result }: LookupActionFormProps) {
+export function LookupActionForm({
+  label,
+  name,
+  input,
+  loading,
+  onGet,
+  onDelete,
+  deleteConfirmTitle,
+  rules: _rules,
+  result,
+}: LookupActionFormProps) {
   return (
-    <>
-      <Form.Item label={label} style={{ marginBottom: 0 }}>
-        <Space.Compact block>
-          <Form.Item name={name} noStyle rules={rules}>
-            {input}
-          </Form.Item>
-          <Button loading={loading} onClick={onGet}>
-            Получить
-          </Button>
-          {onDelete ? (
-            <Popconfirm title={deleteConfirmTitle ?? "Удалить?"} okText="Да" cancelText="Нет" okButtonProps={{ danger: true }} onConfirm={onDelete}>
-              <Button danger loading={loading}>
+    <div className="flex w-full flex-col gap-2">
+      <Label htmlFor={name}>{label}</Label>
+      <div className="flex w-full flex-wrap gap-0 sm:flex-nowrap">
+        <div className="min-w-0 flex-1 [&_[data-slot=input]]:rounded-r-none [&_input]:rounded-r-none">{input}</div>
+        <Button type="button" variant="outline" className="rounded-l-none shrink-0" disabled={loading} onClick={onGet}>
+          {loading ? <Loader2 className="animate-spin" /> : null}
+          Получить
+        </Button>
+        {onDelete ? (
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button type="button" variant="destructive" className="rounded-l-none shrink-0 sm:ml-0" disabled={loading}>
+                {loading ? <Loader2 className="animate-spin" /> : null}
                 Удалить
               </Button>
-            </Popconfirm>
-          ) : null}
-        </Space.Compact>
-      </Form.Item>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>{deleteConfirmTitle ?? "Удалить?"}</AlertDialogTitle>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Нет</AlertDialogCancel>
+                <AlertDialogAction variant="destructive" onClick={onDelete}>
+                  Да
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        ) : null}
+      </div>
       {result}
-    </>
+    </div>
   );
 }
 
@@ -45,21 +84,34 @@ type CompactFormActionProps = {
   input: ReactNode;
   loading: boolean;
   submitLabel: string;
-  rules?: Rule[];
+  rules?: ValidationRule[];
   danger?: boolean;
 };
 
-export function CompactFormAction({ label, name, input, loading, submitLabel, rules, danger = false }: CompactFormActionProps) {
+export function CompactFormAction({
+  label,
+  name,
+  input,
+  loading,
+  submitLabel,
+  rules: _rules,
+  danger = false,
+}: CompactFormActionProps) {
   return (
-    <Form.Item label={label} style={{ marginBottom: 0 }}>
-      <Space.Compact block>
-        <Form.Item name={name} noStyle rules={rules}>
-          {input}
-        </Form.Item>
-        <Button danger={danger} htmlType="submit" loading={loading}>
+    <div className="flex w-full flex-col gap-2">
+      <Label htmlFor={name}>{label}</Label>
+      <div className="flex w-full">
+        <div className="min-w-0 flex-1 [&_[data-slot=input]]:rounded-r-none [&_input]:rounded-r-none">{input}</div>
+        <Button
+          type="submit"
+          variant={danger ? "destructive" : "default"}
+          className="rounded-l-none shrink-0"
+          disabled={loading}
+        >
+          {loading ? <Loader2 className="animate-spin" /> : null}
           {submitLabel}
         </Button>
-      </Space.Compact>
-    </Form.Item>
+      </div>
+    </div>
   );
 }
