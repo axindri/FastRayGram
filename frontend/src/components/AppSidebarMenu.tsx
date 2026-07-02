@@ -12,7 +12,7 @@ import { isAdminRole } from "../types";
 
 const { Text } = Typography;
 
-export const APP_VERSION = "v2.8.0";
+export const APP_VERSION = "v2.8.1";
 
 type AppSidebarMenuProps = {
   menuTheme: "light" | "dark";

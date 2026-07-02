@@ -24,7 +24,7 @@ const { Title, Text } = Typography;
 const RENEW_HINT = "Новый счёт можно выставить, когда до конца подписки останется меньше 24 часов (включая уже истёкшую).";
 
 function AvailableSectionsCard({ role }: { role: UserRole }) {
-  const sections = useMemo(() => filterNavItems(role, { excludePaths: ["/profile"] }), [role]);
+  const sections = useMemo(() => filterNavItems(role, { excludePaths: ["/profile", "/appearance"] }), [role]);
 
   if (!sections.length) {
     return null;
