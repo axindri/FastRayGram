@@ -1,36 +1,53 @@
-# Volumes directory
-/volumes
-
-# Environment files
-.env
-*.env
-!example_env
-
 # Python
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
 .Python
-env/
+
+# Virtual environments
+.venv/
 venv/
+env/
 ENV/
-.venv
 
-# Node
-node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+# uv
+.uv-cache/
 
-# IDE
-.vscode/
+# Environment files
+.env
+.env.*
+!.env.example
+
+# FastAPI / local runtime
+*.log
+logs/
+
+# Testing and coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+
+# Type checkers and linters
+.mypy_cache/
+.ruff_cache/
+.pyright/
+
+# Build artifacts
+build/
+dist/
+frontend/node_modules/
+frontend/dist/
+src/static/dist/
+*.egg-info/
+
+# IDE and OS files
 .idea/
-*.swp
-*.swo
-*~
-
-# OS
+.vscode/
 .DS_Store
-Thumbs.db
 
+database/
+frontend/node_modules/
+todo.md

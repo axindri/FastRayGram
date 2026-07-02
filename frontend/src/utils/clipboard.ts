@@ -1,40 +1,22 @@
-/**
- * Copy text to clipboard with fallback for mobile Safari
- * Works even after async operations when user gesture context is lost
- */
-export async function copyToClipboard(text: string): Promise<boolean> {
-  try {
-    // Try modern Clipboard API first
-    if (navigator.clipboard && window.isSecureContext) {
-      await navigator.clipboard.writeText(text);
-      return true;
-    }
-  } catch (err) {
-    // Clipboard API failed, try fallback
+export async function copyToClipboard(text: string): Promise<void> {
+  if (navigator.clipboard?.writeText) {
+    await navigator.clipboard.writeText(text);
+    return;
   }
 
-  // Fallback method using execCommand (works on mobile Safari even after async)
+  const textarea = document.createElement("textarea");
+  textarea.value = text;
+  textarea.style.position = "fixed";
+  textarea.style.left = "-9999px";
+  document.body.appendChild(textarea);
+  textarea.focus();
+  textarea.select();
+
   try {
-    const textArea = document.createElement('textarea');
-    textArea.value = text;
-    textArea.style.position = 'fixed';
-    textArea.style.left = '-999999px';
-    textArea.style.top = '-999999px';
-    textArea.style.opacity = '0';
-    textArea.setAttribute('readonly', '');
-    document.body.appendChild(textArea);
-    
-    // Select and copy
-    textArea.select();
-    textArea.setSelectionRange(0, text.length);
-    
-    const successful = document.execCommand('copy');
-    document.body.removeChild(textArea);
-    
-    return successful;
-  } catch (err) {
-    console.error('Failed to copy text:', err);
-    return false;
+    if (!document.execCommand("copy")) {
+      throw new Error("copy failed");
+    }
+  } finally {
+    document.body.removeChild(textarea);
   }
 }
-

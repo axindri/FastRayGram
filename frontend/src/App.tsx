@@ -1,183 +1,75 @@
-import { Routes, Route } from 'react-router-dom';
-import { Toaster } from 'react-hot-toast';
-import { Snowfall } from 'react-snowfall';
-import '@/styles/App.css';
-import { AppLayout, ProtectedRoute } from '@/components';
-import { Home, NotFound, Configs, Account, Login, Register, ChangePassword, UpdateProfile } from '@/pages';
-import { useTheme } from '@/hooks/useTheme';
-import { useTelegram } from '@/hooks/useTelegram';
-import { useEffect } from 'react';
-import { useAppStore } from '@/store/useAppStore';
-import { tokenStorage } from '@/services/api/tokenStorage';
-import { isTokenExpiringSoon } from '@/utils/jwt';
-import { apiClient } from '@/services';
-import { KEEPALIVE_INTERVAL_SEC, ACCESS_TOKEN_REFRESH_THRESHOLD_SEC } from '@/config/settings';
-import { Admin, Requests, RequestDetail, Users, UserDetail, Configs as AdminConfigs, ConfigDetail as AdminConfigDetail, News, NewsDetail, AppSettings, AppSettingsDetail } from '@/pages/Admin';
+import { Spin } from "antd";
+import { LoadingOutlined } from "@ant-design/icons";
+import { Navigate, Route, Routes } from "react-router-dom";
 
-const isWinterSeason = () => {
-  const now = new Date();
-  const month = now.getMonth() + 1;
-  return month === 12 || month === 1 || month === 2;
-};
+import { useAuth } from "./auth";
+import { RequireAdmin } from "./components/RequireAdmin";
+import { AppLayout } from "./layouts/AppLayout";
+import { ForbiddenPage } from "./pages/ForbiddenPage";
+import { LoginPage } from "./pages/LoginPage";
+import { MonitoringPage } from "./pages/MonitoringPage";
+import { PaymentFailPage } from "./pages/PaymentFailPage";
+import { PaymentSuccessPage } from "./pages/PaymentSuccessPage";
+import { PaymentsPage } from "./pages/PaymentsPage";
+import { ProfilePage } from "./pages/ProfilePage";
+import { RegisterPage } from "./pages/RegisterPage";
+import { RegistrationPage } from "./pages/RegistrationPage";
+import { UsersPage } from "./pages/UsersPage";
 
-function App() {
-  const { checkAuth, isInitialized } = useAppStore();
+function ProtectedLayout() {
+  const { user, loading } = useAuth();
 
-  useEffect(() => {
-    if (!isInitialized) {
-      console.log('[App] Initializing authentication first');
-      checkAuth();
-    }
-  }, []);
+  if (loading) {
+    return (
+      <div style={{ display: "grid", placeItems: "center", minHeight: "100vh" }}>
+        <Spin size="large" />
+      </div>
+    );
+  }
 
-  useEffect(() => {
-    if (!isInitialized) {
-      console.log('[App] Skip keepalive, store is not initialized');
-      return;
-    }
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
 
-    const keepAlive = async () => {
-      console.log('[App] keepalive check');
-      const access = tokenStorage.getAccessToken();
-      if (!access) {
-        console.log('[App] keepalive check: no access token');
-        return;
-      }
-      if (!isTokenExpiringSoon(access, ACCESS_TOKEN_REFRESH_THRESHOLD_SEC)) {
-        console.log('[App] keepalive check: token not expiring soon, everything is OK!');
-        return;
-      }
-      try {
-        console.log('[App] keepalive refresh triggered');
-        await apiClient.refreshToken();
-      } catch (error) {
-        console.warn('[App] keepalive refresh failed', error);
-      }
-    };
+  return <AppLayout />;
+}
 
-    const intervalId = window.setInterval(keepAlive, KEEPALIVE_INTERVAL_SEC * 1000);
-    console.log(`[App] keepalive interval id:${intervalId} started ${KEEPALIVE_INTERVAL_SEC} seconds`);
-
-    return () => {
-      window.clearInterval(intervalId);
-      console.log(`[App] keepalive interval id:${intervalId} cleared`);
-    };
-  }, [isInitialized]);
-
-  useTheme();
-  useTelegram();
-
+function LoadingScreen() {
   return (
-    <>
-      {isWinterSeason() && <Snowfall snowflakeCount={100} speed={[0.5, 3]} wind={[-0.5, 2]} radius={[0.5, 3]} />}
-      <Toaster
-        position="top-right"
-        toastOptions={{
-          className: '',
-          style: {
-            background: 'var(--color-bg-secondary)',
-            color: 'var(--color-text-primary)',
-            border: '1px solid var(--color-border)',
-            borderRadius: 'var(--radius-md)',
-            padding: '12px 16px',
-            fontSize: '14px',
-            fontFamily: 'var(--color-font-family)',
-          },
-          success: {
-            iconTheme: {
-              primary: 'var(--color-success)',
-              secondary: 'var(--color-bg-secondary)',
-            },
-          },
-          error: {
-            iconTheme: {
-              primary: 'var(--color-error)',
-              secondary: 'var(--color-bg-secondary)',
-            },
-          },
-          loading: {
-            iconTheme: {
-              primary: 'var(--color-accent)',
-              secondary: 'var(--color-bg-secondary)',
-            },
-          },
-        }}
-      />
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/change-password" element={<ChangePassword />} />
-        <Route
-          path="/update-profile"
-          element={
-            <ProtectedRoute>
-              <UpdateProfile />
-            </ProtectedRoute>
-          }
-        />
-        <Route path="/" element={<AppLayout />}>
-          <Route
-            index
-            element={
-              <ProtectedRoute>
-                <Home />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="configs"
-            element={
-              <ProtectedRoute>
-                <Configs />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="account"
-            element={
-              <ProtectedRoute>
-                <Account />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="admin"
-            element={
-              <ProtectedRoute requiredRole="admin">
-                <Admin />
-              </ProtectedRoute>
-            }
-          >
-            <Route path="requests" element={<Requests />} />
-            <Route path="requests/:uuid" element={<RequestDetail />} />
-            <Route path="users" element={<Users />} />
-            <Route path="users/:uuid" element={<UserDetail />} />
-            <Route path="configs" element={<AdminConfigs />} />
-            <Route path="configs/:uuid" element={<AdminConfigDetail />} />
-            <Route path="news" element={<News />} />
-            <Route path="news/:uuid" element={<NewsDetail />} />
-            <Route
-              path="app/settings"
-              element={
-                <ProtectedRoute requiredRole="superuser">
-                  <AppSettings />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="app/settings/:type"
-              element={
-                <ProtectedRoute requiredRole="superuser">
-                  <AppSettingsDetail />
-                </ProtectedRoute>
-              }
-            />
-          </Route>
-          <Route path="*" element={<NotFound />} />
-        </Route>
-      </Routes>
-    </>
+    <div style={{ display: "grid", placeItems: "center", minHeight: "100vh" }}>
+      <Spin indicator={<LoadingOutlined spin />} size="large" />
+    </div>
   );
 }
 
-export default App;
+export default function App() {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return <LoadingScreen />;
+  }
+
+  return (
+    <Routes>
+      <Route path="/login" element={user ? <Navigate to="/profile" replace /> : <LoginPage />} />
+      <Route path="/register" element={user ? <Navigate to="/profile" replace /> : <RegisterPage />} />
+
+      <Route element={<ProtectedLayout />}>
+        <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/payment/success" element={<PaymentSuccessPage />} />
+        <Route path="/payment/fail" element={<PaymentFailPage />} />
+        <Route path="/forbidden" element={<ForbiddenPage />} />
+        <Route path="/" element={<Navigate to="/profile" replace />} />
+
+        <Route element={<RequireAdmin />}>
+          <Route path="/monitoring" element={<MonitoringPage />} />
+          <Route path="/payments" element={<PaymentsPage />} />
+          <Route path="/users" element={<UsersPage />} />
+          <Route path="/registration" element={<RegistrationPage />} />
+        </Route>
+      </Route>
+
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  );
+}

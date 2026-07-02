@@ -1,157 +1,113 @@
-<div align="center">
-  <img src="./frontend/public/frg_light.png" alt="Fast Ray Gram Logo" width="120">
-  
-  # Fast Ray Gram
-</div>
+<p align="center">
+  <img src="frontend/public/frg_light.png" alt="Fast Ray Gram" width="160" />
+</p>
 
-[![GitHub stars](https://img.shields.io/github/stars/axindri/FastRayGram?style=flat-square)](https://github.com/axindri/FastRayGram/stargazers)
-[![GitHub forks](https://img.shields.io/github/forks/axindri/FastRayGram?style=flat-square)](https://github.com/axindri/FastRayGram/network)
-[![GitHub watchers](https://img.shields.io/github/watchers/axindri/FastRayGram?style=flat-square)](https://github.com/axindri/FastRayGram/watchers)
-[![GitHub repo size](https://img.shields.io/github/repo-size/axindri/FastRayGram?style=flat-square)](https://github.com/axindri/FastRayGram)
-[![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/axindri/FastRayGram?style=flat-square)](https://github.com/axindri/FastRayGram)
-[![GitHub language count](https://img.shields.io/github/languages/count/axindri/FastRayGram?style=flat-square)](https://github.com/axindri/FastRayGram)
-[![GitHub top language](https://img.shields.io/github/languages/top/axindri/FastRayGram?style=flat-square)](https://github.com/axindri/FastRayGram)
-[![License](https://img.shields.io/github/license/axindri/FastRayGram?style=flat-square)](https://github.com/axindri/FastRayGram/blob/main/LICENSE)
-[![GitHub last commit](https://img.shields.io/github/last-commit/axindri/FastRayGram?style=flat-square)](https://github.com/axindri/FastRayGram/commits/main)
-[![GitHub issues](https://img.shields.io/github/issues/axindri/FastRayGram?style=flat-square)](https://github.com/axindri/FastRayGram/issues)
-[![GitHub pull requests](https://img.shields.io/github/issues-pr/axindri/FastRayGram?style=flat-square)](https://github.com/axindri/FastRayGram/pulls)
+<h1 align="center">Fast Ray Gram</h1>
+
+<p align="center">
+  Личный кабинет и админка для VPN-подписки на базе <strong>3X-UI</strong> с оплатой через <strong>TimeWeb</strong>.
+</p>
+
+<p align="center">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-GPL--3.0-blue.svg" alt="License: GPL-3.0" /></a>
+  <img src="https://img.shields.io/badge/python-3.13+-blue.svg" alt="Python" />
+  <img src="https://img.shields.io/badge/frontend-React_19-61dafb.svg" alt="React" />
+</p>
 
 ---
 
-![Fast Ray Gram Demo](./img/frg_promo.gif)
+## О проекте
 
+**Fast Ray Gram** — self-hosted веб-приложение для небольших VPN-сервисов:
 
-## Languages / Языки
+- **Личный кабинет** — подписка, ссылка для VPN-клиента, оплата продления, вход по ссылке без пароля.
+- **Регистрация по коду** — админ выдаёт ссылку, пользователь сам создаёт аккаунт.
+- **Админка** — пользователи, XUI-клиенты, счета, коды регистрации, мониторинг сервисов.
+- **Платежи** — выставление счетов в TimeWeb, фоновая проверка оплат, продление подписки в XUI.
 
-- [🇬🇧 English](#english) | [🇷🇺 Русский](#русский)
+Стек: **FastAPI** · **SQLite** · **React** · **Ant Design** · **Docker**.
 
----
+## Скриншоты
 
-## English
+Интерфейс в тёмной теме. Все изображения лежат в [`docs/screenshots/`](docs/screenshots/).
 
-### About
+| Профиль | Пользователи |
+|:---:|:---:|
+| [![Профиль пользователя](docs/screenshots/profile.png)](docs/screenshots/profile.png) | [![Управление пользователями](docs/screenshots/users.png)](docs/screenshots/users.png) |
+| Личный кабинет: подписка, ссылка для входа, счета | Админка: создание пользователей и XUI-клиентов |
 
-**Free and Accessible**
+| Регистрация | Платежи |
+|:---:|:---:|
+| [![Регистрация по коду](docs/screenshots/register.png)](docs/screenshots/register.png) | [![Платежи и счета](docs/screenshots/payments.png)](docs/screenshots/payments.png) |
+| Самостоятельная регистрация по ссылке от админа | Проверка оплат, список инвойсов, отмена счетов |
 
-🆓 This application is completely **free** and does not aim to make money. Our goal is to make secure internet access more accessible to everyone.
+## Возможности
 
-**Open Source**
+- JWT-авторизация и вход по ссылке `?authToken=…`
+- Управление клиентами 3X-UI (создание, продление, лимит IP, трафик)
+- Инвойсы TimeWeb: `pending` → `processing` → `paid`
+- Многоразовые коды регистрации со сроком действия
+- Тёмная тема, адаптивный интерфейс
 
-🔓 The application code is **open source** and available for public review. We do not use users' personal information for personal purposes. All responsibility for hosting and operation of the application remains with the hosting provider.
+## Запуск на сервере
 
-**Modern Encryption**
+### Пререквизиты
 
-🔐 The service provides various configurations using modern traffic encryption protocols. Within the established period, you can use the connection and renew it upon request and administrator approval.
+На сервере (VPS / bare metal):
 
-**Our Mission**
+1. **Docker** и **Docker Compose** v2
+2. Рабочая панель **3X-UI** (API URL, sub URL, API key)
+3. Аккаунт **TimeWeb** с API-токеном и `payer_id` (для приёма платежей)
+4. Открытый порт **80/443** (или проброс на `APP_PORT`)
 
-❤️ In today's world, staying connected with each other is not always easy. We want to make it a little more accessible, bringing people closer together through secure and reliable internet access.
+Опционально: reverse proxy (Caddy / Nginx) и TLS-сертификат перед контейнером.
 
-### User Documentation
+### Деплой
 
-- [User Guide](./docs/eng/userguide.md) - Project deployment and server configuration
+```bash
+git clone <repository-url>
+cd fast-ray-gram
+cp .env.example .env
+```
 
-### Technical Documentation
+Заполните `.env` — обязательно смените секреты и укажите XUI / TimeWeb.
 
-- [System Architecture](./docs/eng/technical/architecture.md) - Overview of system architecture and components
-- [API Documentation](./docs/eng/technical/api.md) - Description of all API endpoints and methods
-- [Authentication and Authorization](./docs/eng/technical/authentication.md) - Authentication system, JWT tokens, sessions
-- [Role Model and Access Rights](./docs/eng/technical/roles.md) - User roles and permission distribution
-- [Service Interaction](./docs/eng/technical/services.md) - How services interact with each other
-- [Data Models](./docs/eng/technical/data-models.md) - Data structure and database models
+```bash
+docker compose up -d --build
+```
 
-### 🚀 Quick Start
+Приложение: `http://<ваш-сервер>:8000` (порт задаётся `APP_PORT`).
 
-Get started quickly with these steps:
+Вместе с приложением поднимается **invoice-worker** — периодически проверяет оплаченные счета (`CHECK_INTERVAL_SEC`, по умолчанию 30 с).
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/axindri/FastRayGram.git
-   cd FastRayGram
-   ```
+### Минимальный чеклист после деплоя
 
-2. Copy the environment file:
-   ```bash
-   cp .env.example .env
-   ```
+- [ ] `APP__JWT_SECRET` и `APP__SUPERUSER_TOKEN` — уникальные значения
+- [ ] XUI доступен с сервера приложения
+- [ ] TimeWeb токен валиден, `return_url` / `fail_url` ведут на ваш домен
+- [ ] Каталог `database/` на volume (данные SQLite сохраняются между перезапусками)
+- [ ] Бэкап `database/data.db` по расписанию
 
-3. Fill in the required parameters in the `.env` file (see [Required Variables to Fill](./docs/eng/userguide.md#required-variables-to-fill) in the User Guide).
+### Переменные окружения
 
-4. Start all services:
-   ```bash
-   make up
-   ```
+| Переменная | Описание |
+|---|---|
+| `APP__JWT_SECRET` | Секрет подписи JWT |
+| `APP__SUPERUSER_TOKEN` | Токен суперпользователя и воркера инвойсов |
+| `APP__MONITORING_SERVICE_URL` | URL внешнего мониторинга (Uptime Kuma и т.п.) |
+| `XUI__URL` / `XUI__SUB_URL` / `XUI__API_KEY` | Панель 3X-UI |
+| `TIMEWEB__TOKEN` / `TIMEWEB__PAYER_ID` | Платежи TimeWeb |
+| `APP_PORT` | Порт на хосте (по умолчанию `8000`) |
+| `CHECK_INTERVAL_SEC` | Интервал проверки оплат |
 
-### Setup and Deployment
+Полный список — в [`.env.example`](.env.example).
 
-⚙️ For detailed setup and deployment instructions, see the [User Guide](./docs/eng/userguide.md).
+## Документация
 
-### For Developers
+- [Участие в разработке и локальный запуск](CONTRIBUTING.md)
 
-👨‍💻 Technical documentation is available in the [Technical Documentation](./docs/eng/technical/) section.
+## Лицензия
 
----
+Проект распространяется под лицензией **[GNU General Public License v3.0](LICENSE)**.
 
-## Русский
-
-### О проекте
-
-**Бесплатно и доступно**
-
-🆓 Это приложение полностью **бесплатное**. Наша цель — не заработок, а сделать безопасный доступ в интернет доступным для каждого.
-
-**Открытый код**
-
-🔓 Код приложения — **открытый**, его может просмотреть любой. Мы не используем личные данные пользователей в своих целях. Весь хостинг и инфраструктура обеспечиваются нашими провайдерами, и ответственность за их работу лежит на них.
-
-**Современное шифрование**
-
-🔐 Сервис использует современные протоколы для шифрования вашего трафика. Доступ предоставляется на определённый срок, который можно продлить по запросу с одобрения администратора.
-
-**Наша миссия**
-
-❤️ В современном мире быть на связи бывает непросто. Наша миссия — помогать людям общаться, предоставляя безопасный и надёжный доступ в интернет.
-
-### Пользовательская документация
-
-- [Руководство пользователя](./docs/ru/userguide.md) - Развертывание проекта и настройка на сервере
-
-### Техническая документация
-
-- [Архитектура системы](./docs/ru/technical/architecture.md) - Обзор архитектуры и компонентов системы
-- [API Документация](./docs/ru/technical/api.md) - Описание всех API endpoints и методов
-- [Аутентификация и авторизация](./docs/ru/technical/authentication.md) - Система аутентификации, JWT токены, сессии
-- [Ролевая модель и права доступа](./docs/ru/technical/roles.md) - Роли пользователей и распределение прав
-- [Взаимодействие сервисов](./docs/ru/technical/services.md) - Как сервисы взаимодействуют между собой
-- [Модели данных](./docs/ru/technical/data-models.md) - Структура данных и модели базы данных
-
-### 🚀 Быстрый старт
-
-Быстро начать работу можно следующими шагами:
-
-1. Клонируйте репозиторий:
-   ```bash
-   git clone https://github.com/axindri/FastRayGram.git
-   cd FastRayGram
-   ```
-
-2. Скопируйте файл окружения:
-   ```bash
-   cp .env.example .env
-   ```
-
-3. Заполните обязательные параметры в файле `.env` (см. [Обязательные переменные для заполнения](./docs/ru/userguide.md#обязательные-переменные-для-заполнения) в Руководстве пользователя).
-
-4. Запустите все сервисы:
-   ```bash
-   make up
-   ```
-
-### Настройка и запуск
-
-⚙️ Для детальной настройки и запуска см. [Руководство пользователя](./docs/ru/userguide.md).
-
-### Для разработчиков
-
-👨‍💻 Техническая документация доступна в разделе [Техническая документация](./docs/ru/technical/).
-
+Вы можете свободно использовать, изменять и распространять код при условии сохранения той же лицензии для производных работ.

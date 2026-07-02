@@ -1,0 +1,66 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.dev
+    container_name: fast-ray-gram
+    ports:
+      - "${APP_PORT:-8000}:8000"
+    env_file:
+      - .env
+    environment:
+      APP__HOST: 0.0.0.0
+      APP__PORT: 8000
+      DB__URL: sqlite+aiosqlite:////app/database/data.db
+    volumes:
+      - ./database:/app/database
+      - ./main.py:/app/main.py
+      - ./src/api:/app/src/api
+      - ./src/core:/app/src/core
+      - ./src/models:/app/src/models
+      - ./src/schemas:/app/src/schemas
+      - ./src/services:/app/src/services
+    restart: unless-stopped
+
+  invoice-worker:
+    image: curlimages/curl:8.12.1
+    container_name: fast-ray-gram-invoice-worker
+    env_file:
+      - .env
+    environment:
+      APP_URL: http://app:8000
+      CHECK_INTERVAL_SEC: ${CHECK_INTERVAL_SEC:-30}
+    volumes:
+      - ./docker/invoice-worker.sh:/invoice-worker.sh:ro
+    entrypoint: ["/bin/sh", "/invoice-worker.sh"]
+    depends_on:
+      - app
+    restart: unless-stopped
+
+  sqlite-web:
+    image: coleifer/sqlite-web
+    container_name: fast-ray-gram-sqlite-web
+    ports:
+      - "${SQLITE_WEB_PORT:-8081}:8080"
+    env_file:
+      - .env
+    environment:
+      SQLITE_WEB_PASSWORD: ${SQLITE_WEB_PASSWORD:-}
+    volumes:
+      - ./database:/data
+    entrypoint: /bin/sh
+    command:
+      - -c
+      - |
+        until [ -f /data/data.db ]; do
+          echo "waiting for /data/data.db..."
+          sleep 2
+        done
+        if [ -n "$$SQLITE_WEB_PASSWORD" ]; then
+          exec sqlite_web -H 0.0.0.0 -p 8080 -P /data/data.db
+        else
+          exec sqlite_web -H 0.0.0.0 -p 8080 /data/data.db
+        fi
+    depends_on:
+      - app
+    restart: unless-stopped
