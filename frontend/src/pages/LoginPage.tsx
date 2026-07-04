@@ -48,7 +48,6 @@ export function LoginPage() {
         <img src="/frg_light.png" alt="" aria-hidden className="h-12" />
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Fast Ray Gram</h1>
-          <p className="text-sm text-muted-foreground">Вход по токену</p>
         </div>
       </div>
 
@@ -61,14 +60,7 @@ export function LoginPage() {
           <form className="flex flex-col gap-4" onSubmit={onSubmit}>
             <div className="flex flex-col gap-2">
               <Label htmlFor="token">Токен</Label>
-              <Input
-                id="token"
-                type="password"
-                autoComplete="current-password"
-                value={token}
-                onChange={(event) => setToken(event.target.value)}
-                aria-invalid={Boolean(fieldError)}
-              />
+              <Input id="token" type="password" autoComplete="current-password" value={token} onChange={(event) => setToken(event.target.value)} aria-invalid={Boolean(fieldError)} />
               {fieldError ? <p className="text-sm text-destructive">{fieldError}</p> : null}
             </div>
 

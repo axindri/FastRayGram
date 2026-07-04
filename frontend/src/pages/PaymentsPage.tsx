@@ -10,7 +10,6 @@ import { cancelInvoice, checkInvoices, fetchInvoices, type InvoiceListFilters } 
 import { InvoiceCard } from "@/components/InvoiceCard";
 import { ListEmptyState } from "@/components/ListEmptyState";
 import { PaginatedList } from "@/components/PaginatedList";
-import { SectionCard } from "@/components/SectionCard";
 import { getApiErrorMessage } from "@/utils/apiError";
 import { emptyPaginated } from "@/utils/pagination";
 import { PAYMENT_SEARCH_FIELD_LABELS, USERNAME_MAX_LENGTH, type PaymentSearchField } from "@/constants";
@@ -89,70 +88,63 @@ export function PaymentsAllPage() {
   };
 
   return (
-    <SectionCard
-      title="Все счета"
-      extra={
-        <Button type="button" variant="outline" size="sm" disabled={allLoading} onClick={() => void loadAllInvoices(allInvoices.page)}>
-          {allLoading ? <Loader2 className="animate-spin" /> : <RefreshCw />}
-          Обновить
-        </Button>
-      }
-    >
-      <div className="flex w-full flex-col gap-4">
-        <div className="flex w-full flex-col sm:flex-row">
-          <Select value={searchField} onValueChange={(value) => setSearchField(value as PaymentSearchField)}>
-            <SelectTrigger className="w-full sm:w-[168px] sm:rounded-r-none">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {Object.entries(PAYMENT_SEARCH_FIELD_LABELS).map(([value, label]) => (
-                <SelectItem key={value} value={value}>
-                  {label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <div className="flex min-w-0 flex-1">
-            <Input
-              value={searchValue}
-              placeholder={`Поиск: ${PAYMENT_SEARCH_FIELD_LABELS[searchField]}`}
-              maxLength={searchField === "username" ? USERNAME_MAX_LENGTH : undefined}
-              className="rounded-r-none sm:rounded-none"
-              onChange={(event) => {
-                const next = event.target.value;
-                setSearchValue(next);
-                if (!next) {
-                  onInvoiceSearch("");
-                }
-              }}
-              onKeyDown={(event) => {
-                if (event.key === "Enter") {
-                  onInvoiceSearch(searchValue);
-                }
-              }}
-            />
-            <Button type="button" variant="outline" className="rounded-l-none shrink-0" onClick={() => onInvoiceSearch(searchValue)}>
-              <Search />
-            </Button>
-          </div>
+    <div className="flex w-full flex-col gap-4">
+      <div className="flex w-full flex-col gap-2 sm:flex-row sm:gap-0">
+        <Select value={searchField} onValueChange={(value) => setSearchField(value as PaymentSearchField)}>
+          <SelectTrigger className="w-full sm:w-[168px] sm:rounded-r-none">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {Object.entries(PAYMENT_SEARCH_FIELD_LABELS).map(([value, label]) => (
+              <SelectItem key={value} value={value}>
+                {label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <div className="flex min-w-0 flex-1">
+          <Input
+            value={searchValue}
+            placeholder={`Поиск`}
+            maxLength={searchField === "username" ? USERNAME_MAX_LENGTH : undefined}
+            className="rounded-r-none sm:rounded-none"
+            onChange={(event) => {
+              const next = event.target.value;
+              setSearchValue(next);
+              if (!next) {
+                onInvoiceSearch("");
+              }
+            }}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") {
+                onInvoiceSearch(searchValue);
+              }
+            }}
+          />
+          <Button type="button" variant="outline" className="rounded-none shrink-0" disabled={allLoading} onClick={() => void loadAllInvoices(allInvoices.page)}>
+            {allLoading ? <Loader2 className="animate-spin" /> : <RefreshCw />}
+          </Button>
+          <Button type="button" variant="outline" className="rounded-l-none shrink-0" onClick={() => onInvoiceSearch(searchValue)}>
+            <Search />
+          </Button>
         </div>
-
-        <PaginatedList
-          page={allInvoices.page}
-          pages={allInvoices.pages}
-          total={allInvoices.total}
-          loading={allLoading}
-          empty={!allInvoices.items.length}
-          emptyDescription="Счетов нет"
-          emptyTitle="Счетов нет"
-          onPageChange={(page) => void loadAllInvoices(page)}
-        >
-          {allInvoices.items.map((item) => (
-            <InvoiceCard key={item.id} item={item} access="admin" onCancel={onCancelInvoice} cancelLoadingId={cancelLoadingId} />
-          ))}
-        </PaginatedList>
       </div>
-    </SectionCard>
+
+      <PaginatedList
+        page={allInvoices.page}
+        pages={allInvoices.pages}
+        total={allInvoices.total}
+        loading={allLoading}
+        empty={!allInvoices.items.length}
+        emptyDescription="Счетов нет"
+        emptyTitle="Счетов нет"
+        onPageChange={(page) => void loadAllInvoices(page)}
+      >
+        {allInvoices.items.map((item) => (
+          <InvoiceCard key={item.id} item={item} access="admin" onCancel={onCancelInvoice} cancelLoadingId={cancelLoadingId} />
+        ))}
+      </PaginatedList>
+    </div>
   );
 }
 
@@ -173,25 +165,18 @@ export function PaymentsPaidPage() {
   };
 
   return (
-    <SectionCard
-      title="Оплаченные счета"
-      hint="Проверка статуса оплаты в TimeWeb и продление подписок"
-      extra={
-        <Button type="button" disabled={checkLoading} onClick={() => void onCheck()}>
-          {checkLoading ? <Loader2 className="animate-spin" /> : null}
-          Проверить
-        </Button>
-      }
-    >
-      <div className="flex w-full flex-col gap-4">
-        {checkedInvoices === null ? (
-          <ListEmptyState icon={FileSearch} title="Проверка не запускалась" description="Нажмите «Проверить», чтобы найти оплаченные счета в TimeWeb" />
-        ) : checkedInvoices.length === 0 ? (
-          <ListEmptyState icon={Receipt} title="Новых оплат нет" description="После проверки здесь появятся недавно оплаченные счета" />
-        ) : (
-          checkedInvoices.map((item) => <InvoiceCard key={item.id} item={item} />)
-        )}
-      </div>
-    </SectionCard>
+    <div className="flex w-full flex-col gap-4">
+      {checkedInvoices === null ? (
+        <ListEmptyState icon={FileSearch} title="Проверка не запускалась" description="Нажмите «Проверить», чтобы найти оплаченные счета в TimeWeb" />
+      ) : checkedInvoices.length === 0 ? (
+        <ListEmptyState icon={Receipt} title="Новых оплат нет" description="После проверки здесь появятся недавно оплаченные счета" />
+      ) : (
+        checkedInvoices.map((item) => <InvoiceCard key={item.id} item={item} />)
+      )}
+      <Button type="button" disabled={checkLoading} onClick={() => void onCheck()}>
+        {checkLoading ? <Loader2 className="animate-spin" /> : null}
+        Проверить
+      </Button>
+    </div>
   );
 }

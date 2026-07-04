@@ -1,12 +1,4 @@
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
-import { cn } from "@/lib/utils";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 type PaginationFooterProps = {
   page: number;
@@ -16,9 +8,8 @@ type PaginationFooterProps = {
   onPageChange: (page: number) => void;
 };
 
-function paginationControlClassName(disabled: boolean) {
-  return cn(disabled && "pointer-events-none opacity-50");
-}
+const navButtonClassName =
+  "flex size-9 shrink-0 items-center justify-center rounded-md border bg-card text-sm shadow-xs transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40";
 
 export function PaginationFooter({ page, pages, total, loading, onPageChange }: PaginationFooterProps) {
   if (total <= 0 || pages <= 1) {
@@ -29,42 +20,18 @@ export function PaginationFooter({ page, pages, total, loading, onPageChange }: 
   const nextDisabled = page >= pages || loading;
 
   return (
-    <Pagination className="mx-0 w-full shrink-0 justify-center">
-      <PaginationContent className="shrink-0">
-        <PaginationItem>
-          <PaginationPrevious
-            href="#"
-            className={paginationControlClassName(prevDisabled)}
-            aria-disabled={prevDisabled}
-            tabIndex={prevDisabled ? -1 : undefined}
-            onClick={(event) => {
-              event.preventDefault();
-              if (!prevDisabled) {
-                onPageChange(page - 1);
-              }
-            }}
-          />
-        </PaginationItem>
-        <PaginationItem>
-          <PaginationLink href="#" isActive className="pointer-events-none" onClick={(event) => event.preventDefault()}>
-            {page}
-          </PaginationLink>
-        </PaginationItem>
-        <PaginationItem>
-          <PaginationNext
-            href="#"
-            className={paginationControlClassName(nextDisabled)}
-            aria-disabled={nextDisabled}
-            tabIndex={nextDisabled ? -1 : undefined}
-            onClick={(event) => {
-              event.preventDefault();
-              if (!nextDisabled) {
-                onPageChange(page + 1);
-              }
-            }}
-          />
-        </PaginationItem>
-      </PaginationContent>
-    </Pagination>
+    <nav aria-label="Пагинация" className="flex w-full flex-wrap items-center justify-center gap-3 pt-2">
+      <button type="button" aria-label="Предыдущая страница" disabled={prevDisabled} className={navButtonClassName} onClick={() => onPageChange(page - 1)}>
+        <ChevronLeft className="size-4" aria-hidden />
+      </button>
+      <span aria-live="polite" className="text-center text-sm tabular-nums text-muted-foreground">
+        Страница <span className="text-foreground">{page}</span> из <span className="text-foreground">{pages}</span>
+        {" · "}
+        <span className="text-foreground">{total}</span> всего
+      </span>
+      <button type="button" aria-label="Следующая страница" disabled={nextDisabled} className={navButtonClassName} onClick={() => onPageChange(page + 1)}>
+        <ChevronRight className="size-4" aria-hidden />
+      </button>
+    </nav>
   );
 }

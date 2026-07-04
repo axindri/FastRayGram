@@ -4,7 +4,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
@@ -151,10 +151,6 @@ export function RegisterPage() {
       </div>
 
       <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle>Новый пользователь</CardTitle>
-          <CardDescription>Заполните данные для входа в сервис</CardDescription>
-        </CardHeader>
         <CardContent>
           {validating ? (
             <div className="grid min-h-[120px] place-items-center">
@@ -168,8 +164,6 @@ export function RegisterPage() {
             </Alert>
           ) : (
             <form className="flex flex-col gap-4" onSubmit={onSubmit}>
-              <p className="text-sm text-muted-foreground">Заполните данные для создания аккаунта</p>
-
               <div className="flex flex-col gap-2">
                 <Label htmlFor="username">Username</Label>
                 <Input
@@ -188,7 +182,7 @@ export function RegisterPage() {
               <div className="flex flex-col gap-2">
                 <Label htmlFor="mark" className="inline-flex items-center gap-1">
                   Контакт для связи
-                  <HintTooltip title="Укажите Telegram или e-mail, по которому с вами можно связаться. Номер телефона указывать не нужно." />
+                  <HintTooltip title="Укажите Telegram или e-mail, по которому с вами можно связаться." />
                 </Label>
                 <Input
                   id="mark"
@@ -203,12 +197,16 @@ export function RegisterPage() {
                 {fieldErrors.mark ? <p className="text-sm text-destructive">{fieldErrors.mark}</p> : null}
               </div>
 
-              <p className="text-sm text-muted-foreground">
-                {`После регистрации подписка будет активна ${registrationExpiryDays} дн.`}
-              </p>
-              <p className="text-sm text-muted-foreground">
-                После входа ссылку для повторного входа можно скопировать в профиле.
-              </p>
+              <Alert variant="default">
+                <AlertCircle />
+                <AlertTitle>После регистрации</AlertTitle>
+                <AlertDescription>Подписка будет активна {registrationExpiryDays} дн.</AlertDescription>
+              </Alert>
+              <Alert variant="default">
+                <AlertCircle />
+                <AlertTitle>После входа</AlertTitle>
+                <AlertDescription>Ссылку для повторного входа можно скопировать в профиле.</AlertDescription>
+              </Alert>
 
               {submitError ? (
                 <Alert variant="destructive">

@@ -42,7 +42,13 @@ export function PaginatedList({
       >
         {children}
       </AsyncListState>
-      <PaginationFooter page={page} pages={pages} total={total} loading={loading} onPageChange={onPageChange} />
+      <PaginationFooter
+        page={page}
+        pages={pages}
+        total={total}
+        loading={loading}
+        onPageChange={onPageChange}
+      />
     </div>
   );
 }
