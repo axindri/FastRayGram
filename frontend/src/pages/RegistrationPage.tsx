@@ -7,7 +7,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 import { buildRegistrationLink, createRegistrationCode, deleteRegistrationCode, extendRegistrationCode, fetchRegistrationCodes } from "@/api";
-import { AdminPageColumn, AdminPageLayout } from "@/components/AdminPageLayout";
 import { CopyableInput } from "@/components/CopyableInput";
 import { PaginatedList } from "@/components/PaginatedList";
 import { RegistrationCodeCard } from "@/components/RegistrationCodeCard";
@@ -103,9 +102,7 @@ export function RegistrationPage() {
   };
 
   return (
-    <AdminPageLayout title="Регистрация" description="Коды приглашения для новых пользователей">
-      <AdminPageColumn span={24}>
-        <div className="flex w-full flex-col gap-4">
+    <div className="flex w-full flex-col gap-4">
           <SectionCard title="Создать код" hint="Сгенерируйте ссылку и отправьте её новому пользователю">
             <form className="flex flex-col gap-4" onSubmit={onCreate}>
               <div className="flex flex-col gap-2">
@@ -138,8 +135,6 @@ export function RegistrationPage() {
               ))}
             </PaginatedList>
           </div>
-        </div>
-      </AdminPageColumn>
-    </AdminPageLayout>
+    </div>
   );
 }

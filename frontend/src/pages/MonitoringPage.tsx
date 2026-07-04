@@ -8,9 +8,9 @@ import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@/comp
 import { cn } from "@/lib/utils";
 
 import { fetchAdminLinks, fetchStatus } from "@/api";
-import { AdminPageColumn, AdminPageLayout } from "@/components/AdminPageLayout";
 import { SectionCard } from "@/components/SectionCard";
 import { getApiErrorMessage } from "@/utils/apiError";
+import { BADGE_STYLES } from "@/lib/badge-styles";
 import { ADMIN_LINKS_META, SERVICE_STATUS_LABELS } from "@/constants";
 import { getStatusServices, type AdminLinks, type StatusResponse } from "@/types";
 
@@ -21,7 +21,7 @@ function serviceStatusBadge(status: string) {
     return {
       label: SERVICE_STATUS_LABELS.ok,
       variant: "outline" as const,
-      className: "border-green-600/25 bg-green-600/10 text-green-700 dark:text-green-400",
+      className: BADGE_STYLES.success,
     };
   }
 
@@ -36,7 +36,7 @@ function serviceStatusBadge(status: string) {
   return {
     label: SERVICE_STATUS_LABELS[normalized] ?? status,
     variant: "outline" as const,
-    className: "border-amber-600/25 bg-amber-600/10 text-amber-800 dark:text-amber-400",
+    className: BADGE_STYLES.warning,
   };
 }
 
@@ -71,10 +71,8 @@ export function MonitoringPage() {
   }, [load]);
 
   return (
-    <AdminPageLayout title="Мониторинг" description="Статус сервисов и быстрые ссылки на панели">
-      <AdminPageColumn span={24}>
-        <div className="flex flex-col gap-4">
-          <SectionCard
+    <div className="flex flex-col gap-4">
+      <SectionCard
             title="Статус"
             extra={
               <Button type="button" variant="outline" size="sm" onClick={() => void load()} disabled={loading}>
@@ -107,9 +105,9 @@ export function MonitoringPage() {
                 <Loader2 className="size-8 animate-spin text-muted-foreground" />
               </div>
             ) : null}
-          </SectionCard>
+      </SectionCard>
 
-          <SectionCard title="Ссылки">
+      <SectionCard title="Ссылки">
             {links ? (
               <div className="flex flex-col gap-4">
                 {ADMIN_LINKS_META.map(({ key, title, hint }) => (
@@ -138,9 +136,7 @@ export function MonitoringPage() {
                 <Loader2 className="size-8 animate-spin text-muted-foreground" />
               </div>
             ) : null}
-          </SectionCard>
-        </div>
-      </AdminPageColumn>
-    </AdminPageLayout>
+      </SectionCard>
+    </div>
   );
 }

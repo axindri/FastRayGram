@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardAction, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { BADGE_STYLES } from "@/lib/badge-styles";
 import type { RegistrationCode } from "@/types";
 
 import { ConfirmIconAction } from "@/components/ConfirmIconAction";
@@ -47,11 +48,7 @@ export function RegistrationCodeCard({
           <div className="flex flex-wrap items-center gap-2">
             <Badge
               variant="outline"
-              className={cn(
-                status.active
-                  ? "border-green-600/20 bg-green-600/10 text-green-700 dark:text-green-400"
-                  : "border-destructive/20 bg-destructive/10 text-destructive",
-              )}
+              className={cn(status.active ? BADGE_STYLES.success : BADGE_STYLES.error)}
             >
               {status.label}
             </Badge>

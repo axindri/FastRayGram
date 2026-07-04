@@ -11,6 +11,7 @@ import type { AdminUser, UserRole } from "@/types";
 import { ActionIconTooltip } from "@/components/ActionIconTooltip";
 import { ConfirmIconAction } from "@/components/ConfirmIconAction";
 import { CopyableInput } from "@/components/CopyableInput";
+import { SubscriptionLink } from "@/components/SubscriptionLink";
 
 type RoleOption = {
   value: UserRole;
@@ -144,12 +145,7 @@ export function UserCard({
               Заметка: <span className="font-semibold text-foreground">{user.mark}</span>
             </p>
           ) : null}
-          {!editing && user.sub_url ? (
-            <a href={user.sub_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-primary hover:underline">
-              <Link className="size-3.5" />
-              <span>Ссылка подписки</span>
-            </a>
-          ) : null}
+          {!editing && user.sub_url ? <SubscriptionLink href={user.sub_url} /> : null}
         </div>
         {editing ? (
           <div className="mt-3 flex flex-col gap-2">

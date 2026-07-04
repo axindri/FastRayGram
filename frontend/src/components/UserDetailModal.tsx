@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { FileText, Link, Loader2 } from "lucide-react";
+import { FileText, Loader2 } from "lucide-react";
 
 import { fetchInvoices, fetchXuiClient } from "@/api";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,6 +12,7 @@ import { CardTitleWithIcon } from "@/components/CardTitleWithIcon";
 import { InvoiceCard } from "@/components/InvoiceCard";
 import { PaginatedList } from "@/components/PaginatedList";
 import { SubscriptionNotFound } from "@/components/SubscriptionNotFound";
+import { SubscriptionLink } from "@/components/SubscriptionLink";
 import { UserAvatar } from "@/components/UserAvatar";
 import { XuiClientCard } from "@/components/XuiClientCard";
 
@@ -110,12 +111,7 @@ export function UserDetailModal({ open, user, onClose }: UserDetailModalProps) {
                     Заметка: <span className="font-semibold text-foreground">{user.mark}</span>
                   </p>
                 ) : null}
-                {user.sub_url ? (
-                  <a href={user.sub_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-primary hover:underline">
-                    <Link className="size-3.5" />
-                    <span>Ссылка подписки</span>
-                  </a>
-                ) : null}
+                {user.sub_url ? <SubscriptionLink href={user.sub_url} /> : null}
               </CardContent>
             </Card>
 

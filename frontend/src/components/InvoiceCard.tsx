@@ -9,6 +9,7 @@ import { invoiceStatusBadge, isInvoiceActive, type AccessLevel, type AdminInvoic
 
 import { ConfirmIconAction } from "@/components/ConfirmIconAction";
 import { CopyableText } from "@/components/CopyableInput";
+import { SubscriptionLink } from "@/components/SubscriptionLink";
 
 function InvoiceStatusBadge({ status }: { status: string }) {
   const badge = invoiceStatusBadge(status);
@@ -81,11 +82,7 @@ export function InvoiceCard({
             <CopyableText value={String(adminItem.id)}>Идентификатор (ID): {adminItem.id}</CopyableText>
             <p>Пользователь: {adminItem.username || `ID ${adminItem.user_id}`}</p>
             {adminItem.mark ? <p>Заметка: {adminItem.mark}</p> : null}
-            {adminItem.sub_url ? (
-              <a href={adminItem.sub_url} target="_blank" rel="noreferrer" className="text-primary hover:underline">
-                Ссылка подписки
-              </a>
-            ) : null}
+            {adminItem.sub_url ? <SubscriptionLink href={adminItem.sub_url} /> : null}
           </>
         ) : null}
         <p>Создан: {formatDate(item.created_at)}</p>

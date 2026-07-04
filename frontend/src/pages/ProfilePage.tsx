@@ -29,9 +29,11 @@ import { getApiErrorMessage } from "@/utils/apiError";
 import { formatJwtExpiryRemaining, isJwtToken, jwtExpiryTagColor } from "@/utils/jwt";
 import { isInvoiceActive, type UserRole } from "@/types";
 
+import { BADGE_STYLES } from "@/lib/badge-styles";
+
 function expiryBadgeClassName(color: "success" | "error" | "default") {
   if (color === "success") {
-    return "border-green-600/20 bg-green-600/10 text-green-700 dark:text-green-400";
+    return BADGE_STYLES.success;
   }
 
   return undefined;

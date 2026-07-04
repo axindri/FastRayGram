@@ -1,5 +1,9 @@
 import { Loader2 } from "lucide-react";
+import { useEffect, useState, type FormEvent } from "react";
+import { toast } from "sonner";
 
+import { buildAuthLink, createUser, fetchConfig } from "@/api";
+import { useAuth } from "@/auth";
 import { CopyableInput } from "@/components/CopyableInput";
 import { SectionCard } from "@/components/SectionCard";
 import { Button } from "@/components/ui/button";
@@ -8,41 +12,87 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { FLOW_NONE, FLOW_OPTIONS, MARK_HINT, MARK_MAX_LENGTH, USERNAME_HINT, USERNAME_MAX_LENGTH } from "@/constants";
 import type { UserRole } from "@/types";
-import { useUsersContext } from "@/pages/users/useUsersContext";
+import { getApiErrorMessage } from "@/utils/apiError";
+import { getAssignableRoleOptions, validateCreateUser, type CreateUserFieldErrors, type CreateUserForm } from "@/utils/username";
 
 export function UsersCreatePage() {
-  const {
-    createLoading,
-    createdAuthLink,
-    createForm,
-    setCreateForm,
-    createFieldErrors,
-    onCreateUser,
-    defaultExpiryDays,
-    defaultLimitIps,
-    roleOptions,
-  } = useUsersContext();
+  const { user: currentUser } = useAuth();
+  const roleOptions = getAssignableRoleOptions(currentUser?.role);
+
+  const [defaultExpiryDays, setDefaultExpiryDays] = useState(30);
+  const [defaultLimitIps, setDefaultLimitIps] = useState(5);
+  const [loading, setLoading] = useState(false);
+  const [authLink, setAuthLink] = useState("");
+  const [form, setForm] = useState<CreateUserForm>({ username: "", role: "user", limit_ips: 5 });
+  const [fieldErrors, setFieldErrors] = useState<CreateUserFieldErrors>({});
+
+  useEffect(() => {
+    fetchConfig()
+      .then((config) => {
+        setDefaultExpiryDays(config.default_expiry_time_days);
+        setDefaultLimitIps(config.default_limit_ips);
+        setForm((prev) => ({
+          ...prev,
+          expiry_time_days: config.default_expiry_time_days,
+          limit_ips: config.default_limit_ips,
+        }));
+      })
+      .catch(() => undefined);
+  }, []);
+
+  const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const errors = validateCreateUser(form);
+    setFieldErrors(errors);
+
+    if (Object.keys(errors).length > 0) {
+      return;
+    }
+
+    setLoading(true);
+    setAuthLink("");
+
+    try {
+      const token = await createUser({
+        ...form,
+        username: form.username.trim(),
+        mark: form.mark || "",
+        flow: form.flow || "",
+        limit_ips: form.limit_ips ?? defaultLimitIps,
+        total_gb: form.total_gb ?? 0,
+        expiry_time_days: form.expiry_time_days ?? defaultExpiryDays,
+        enable: true,
+      });
+      setAuthLink(buildAuthLink(token));
+      toast.success("Пользователь создан");
+    } catch (error) {
+      toast.error(getApiErrorMessage(error, "Не удалось создать пользователя"));
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <SectionCard title="Создать пользователя" hint="Будет создан пользователь и его XUI-клиент">
-      <form className="flex flex-col gap-4" onSubmit={onCreateUser}>
+      <form className="flex flex-col gap-4" onSubmit={onSubmit}>
         <div className="flex flex-col gap-2">
           <Label htmlFor="create-username">Username</Label>
           <Input
             id="create-username"
             placeholder="Alex"
             maxLength={USERNAME_MAX_LENGTH}
-            value={createForm.username}
-            aria-invalid={Boolean(createFieldErrors.username)}
-            onChange={(event) => setCreateForm((prev) => ({ ...prev, username: event.target.value }))}
+            value={form.username}
+            aria-invalid={Boolean(fieldErrors.username)}
+            onChange={(event) => setForm((prev) => ({ ...prev, username: event.target.value }))}
           />
           <p className="text-xs text-muted-foreground">{USERNAME_HINT}</p>
-          {createFieldErrors.username ? <p className="text-sm text-destructive">{createFieldErrors.username}</p> : null}
+          {fieldErrors.username ? <p className="text-sm text-destructive">{fieldErrors.username}</p> : null}
         </div>
 
         <div className="flex flex-col gap-2">
           <Label htmlFor="create-role">Роль</Label>
-          <Select value={createForm.role} onValueChange={(value) => setCreateForm((prev) => ({ ...prev, role: value as UserRole }))}>
+          <Select value={form.role} onValueChange={(value) => setForm((prev) => ({ ...prev, role: value as UserRole }))}>
             <SelectTrigger id="create-role" className="w-full">
               <SelectValue />
             </SelectTrigger>
@@ -62,20 +112,20 @@ export function UsersCreatePage() {
             id="create-mark"
             placeholder="Заметка или комментарий"
             maxLength={MARK_MAX_LENGTH}
-            value={createForm.mark ?? ""}
-            aria-invalid={Boolean(createFieldErrors.mark)}
-            onChange={(event) => setCreateForm((prev) => ({ ...prev, mark: event.target.value }))}
+            value={form.mark ?? ""}
+            aria-invalid={Boolean(fieldErrors.mark)}
+            onChange={(event) => setForm((prev) => ({ ...prev, mark: event.target.value }))}
           />
           <p className="text-xs text-muted-foreground">{MARK_HINT}</p>
-          {createFieldErrors.mark ? <p className="text-sm text-destructive">{createFieldErrors.mark}</p> : null}
+          {fieldErrors.mark ? <p className="text-sm text-destructive">{fieldErrors.mark}</p> : null}
         </div>
 
         <div className="flex flex-col gap-2">
           <Label htmlFor="create-flow">Flow</Label>
           <Select
-            value={createForm.flow || FLOW_NONE}
+            value={form.flow || FLOW_NONE}
             onValueChange={(value) =>
-              setCreateForm((prev) => ({
+              setForm((prev) => ({
                 ...prev,
                 flow: value === FLOW_NONE ? "" : value,
               }))
@@ -101,9 +151,9 @@ export function UsersCreatePage() {
               id="create-limit-ips"
               type="number"
               placeholder={String(defaultLimitIps)}
-              value={createForm.limit_ips ?? ""}
+              value={form.limit_ips ?? ""}
               onChange={(event) =>
-                setCreateForm((prev) => ({
+                setForm((prev) => ({
                   ...prev,
                   limit_ips: event.target.value === "" ? undefined : Number(event.target.value),
                 }))
@@ -116,9 +166,9 @@ export function UsersCreatePage() {
               id="create-total-gb"
               type="number"
               placeholder="0"
-              value={createForm.total_gb ?? ""}
+              value={form.total_gb ?? ""}
               onChange={(event) =>
-                setCreateForm((prev) => ({
+                setForm((prev) => ({
                   ...prev,
                   total_gb: event.target.value === "" ? undefined : Number(event.target.value),
                 }))
@@ -131,9 +181,9 @@ export function UsersCreatePage() {
               id="create-expiry"
               type="number"
               placeholder={String(defaultExpiryDays)}
-              value={createForm.expiry_time_days ?? ""}
+              value={form.expiry_time_days ?? ""}
               onChange={(event) =>
-                setCreateForm((prev) => ({
+                setForm((prev) => ({
                   ...prev,
                   expiry_time_days: event.target.value === "" ? undefined : Number(event.target.value),
                 }))
@@ -142,13 +192,13 @@ export function UsersCreatePage() {
           </div>
         </div>
 
-        <Button type="submit" disabled={createLoading}>
-          {createLoading ? <Loader2 className="animate-spin" /> : null}
+        <Button type="submit" disabled={loading}>
+          {loading ? <Loader2 className="animate-spin" /> : null}
           Создать
         </Button>
       </form>
 
-      {createdAuthLink ? <CopyableInput label="Ссылка для входа" value={createdAuthLink} /> : null}
+      {authLink ? <CopyableInput label="Ссылка для входа" value={authLink} /> : null}
     </SectionCard>
   );
 }

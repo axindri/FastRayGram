@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+import { BADGE_STYLES } from "@/lib/badge-styles";
 import { formatLimitIps, formatTraffic } from "@/utils/format";
 import { dateExpiryTagColor, formatDateExpiryRemaining } from "@/utils/jwt";
 import type { AccessLevel, XuiClient } from "@/types";
@@ -62,7 +63,7 @@ function subscriptionStatus(client: XuiClient, access: AccessLevel) {
 
 function statusBadgeClassName(color: "success" | "error" | "default") {
   if (color === "success") {
-    return "border-green-600/20 bg-green-600/10 text-green-700 dark:text-green-400";
+    return BADGE_STYLES.success;
   }
 
   if (color === "error") {
