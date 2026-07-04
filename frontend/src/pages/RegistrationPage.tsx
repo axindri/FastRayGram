@@ -1,4 +1,4 @@
-import { Loader2, RefreshCw } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { toast } from "sonner";
 
@@ -6,13 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-import {
-  buildRegistrationLink,
-  createRegistrationCode,
-  deleteRegistrationCode,
-  extendRegistrationCode,
-  fetchRegistrationCodes,
-} from "@/api";
+import { buildRegistrationLink, createRegistrationCode, deleteRegistrationCode, extendRegistrationCode, fetchRegistrationCodes } from "@/api";
 import { AdminPageColumn, AdminPageLayout } from "@/components/AdminPageLayout";
 import { CopyableInput } from "@/components/CopyableInput";
 import { PaginatedList } from "@/components/PaginatedList";
@@ -116,15 +110,7 @@ export function RegistrationPage() {
             <form className="flex flex-col gap-4" onSubmit={onCreate}>
               <div className="flex flex-col gap-2">
                 <Label htmlFor="valid-days">Срок действия кода, дней</Label>
-                <Input
-                  id="valid-days"
-                  type="number"
-                  min={1}
-                  max={365}
-                  value={validDays}
-                  aria-invalid={Boolean(validDaysError)}
-                  onChange={(event) => setValidDays(Number(event.target.value))}
-                />
+                <Input id="valid-days" type="number" min={1} max={365} value={validDays} aria-invalid={Boolean(validDaysError)} onChange={(event) => setValidDays(Number(event.target.value))} />
                 {validDaysError ? <p className="text-sm text-destructive">{validDaysError}</p> : null}
               </div>
 
@@ -137,15 +123,7 @@ export function RegistrationPage() {
             {createdLink ? <CopyableInput label="Ссылка для регистрации" value={createdLink} /> : null}
           </SectionCard>
 
-          <SectionCard
-            title="Коды регистрации"
-            extra={
-              <Button type="button" variant="outline" size="sm" disabled={codesLoading} onClick={() => void loadCodes(codes.page)}>
-                {codesLoading ? <Loader2 className="animate-spin" /> : <RefreshCw />}
-                Обновить
-              </Button>
-            }
-          >
+          <div>
             <PaginatedList
               page={codes.page}
               pages={codes.pages}
@@ -156,17 +134,10 @@ export function RegistrationPage() {
               onPageChange={(page) => void loadCodes(page)}
             >
               {codes.items.map((item) => (
-                <RegistrationCodeCard
-                  key={item.id}
-                  item={item}
-                  onExtend={onExtend}
-                  onDelete={onDelete}
-                  extendLoading={actionId === item.id}
-                  deleteLoading={actionId === item.id}
-                />
+                <RegistrationCodeCard key={item.id} item={item} onExtend={onExtend} onDelete={onDelete} extendLoading={actionId === item.id} deleteLoading={actionId === item.id} />
               ))}
             </PaginatedList>
-          </SectionCard>
+          </div>
         </div>
       </AdminPageColumn>
     </AdminPageLayout>

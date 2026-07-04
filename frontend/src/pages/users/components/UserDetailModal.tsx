@@ -3,7 +3,7 @@ import { FileText, Link, Loader2 } from "lucide-react";
 
 import { fetchInvoices, fetchXuiClient } from "@/api";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader } from "@/components/ui/dialog";
 import { getApiErrorMessage } from "@/utils/apiError";
 import { emptyPaginated } from "@/utils/pagination";
 import { INVOICES_PAGE_LIMIT, ROLE_LABELS } from "@/constants";
@@ -90,12 +90,7 @@ export function UserDetailModal({ open, user, onClose }: UserDetailModalProps) {
       }}
     >
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            {user ? <UserAvatar username={user.username} /> : null}
-            <span>{user?.username ?? "Пользователь"}</span>
-          </DialogTitle>
-        </DialogHeader>
+        <DialogHeader />
 
         {user ? (
           <div className="flex w-full flex-col gap-4">

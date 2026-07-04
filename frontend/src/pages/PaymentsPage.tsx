@@ -2,18 +2,17 @@ import { FileSearch, Loader2, Receipt, RefreshCw, Search } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-
 import { cancelInvoice, checkInvoices, fetchInvoices, type InvoiceListFilters } from "@/api";
 import { InvoiceCard } from "@/components/InvoiceCard";
 import { ListEmptyState } from "@/components/ListEmptyState";
 import { PaginatedList } from "@/components/PaginatedList";
-import { getApiErrorMessage } from "@/utils/apiError";
-import { emptyPaginated } from "@/utils/pagination";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { PAYMENT_SEARCH_FIELD_LABELS, USERNAME_MAX_LENGTH, type PaymentSearchField } from "@/constants";
 import type { AdminInvoice, Invoice, Paginated } from "@/types";
+import { getApiErrorMessage } from "@/utils/apiError";
+import { emptyPaginated } from "@/utils/pagination";
 
 export function PaymentsAllPage() {
   const [allInvoices, setAllInvoices] = useState<Paginated<AdminInvoice>>(() => emptyPaginated(3));
@@ -105,7 +104,7 @@ export function PaymentsAllPage() {
         <div className="flex min-w-0 flex-1">
           <Input
             value={searchValue}
-            placeholder={`Поиск`}
+            placeholder="Поиск"
             maxLength={searchField === "username" ? USERNAME_MAX_LENGTH : undefined}
             className="rounded-r-none sm:rounded-none"
             onChange={(event) => {
@@ -121,10 +120,10 @@ export function PaymentsAllPage() {
               }
             }}
           />
-          <Button type="button" variant="outline" className="rounded-none shrink-0" disabled={allLoading} onClick={() => void loadAllInvoices(allInvoices.page)}>
+          <Button type="button" variant="outline" className="shrink-0 rounded-none" disabled={allLoading} onClick={() => void loadAllInvoices(allInvoices.page)}>
             {allLoading ? <Loader2 className="animate-spin" /> : <RefreshCw />}
           </Button>
-          <Button type="button" variant="outline" className="rounded-l-none shrink-0" onClick={() => onInvoiceSearch(searchValue)}>
+          <Button type="button" variant="outline" className="shrink-0 rounded-l-none" onClick={() => onInvoiceSearch(searchValue)}>
             <Search />
           </Button>
         </div>

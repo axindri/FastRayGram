@@ -1,33 +1,14 @@
-import { Loader2, RefreshCw, Search } from "lucide-react";
-import { useOutletContext } from "react-router-dom";
+import { Loader2 } from "lucide-react";
 
+import { CopyableInput } from "@/components/CopyableInput";
+import { SectionCard } from "@/components/SectionCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-
-import { CopyableInput } from "@/components/CopyableInput";
-import { LookupActionForm } from "@/components/LookupActionForm";
-import { PaginatedList } from "@/components/PaginatedList";
-import { SectionCard } from "@/components/SectionCard";
-import { SubscriptionNotFound } from "@/components/SubscriptionNotFound";
-import { UserCard } from "@/components/UserCard";
-import { XuiClientCard } from "@/components/XuiClientCard";
-import {
-  FLOW_NONE,
-  FLOW_OPTIONS,
-  MARK_HINT,
-  MARK_MAX_LENGTH,
-  USERNAME_HINT,
-  USERNAME_MAX_LENGTH,
-} from "@/constants";
+import { FLOW_NONE, FLOW_OPTIONS, MARK_HINT, MARK_MAX_LENGTH, USERNAME_HINT, USERNAME_MAX_LENGTH } from "@/constants";
 import type { UserRole } from "@/types";
-
-import type { UsersAdminContext } from "@/pages/users/useUsersAdmin";
-
-function useUsersContext() {
-  return useOutletContext<UsersAdminContext>();
-}
+import { useUsersContext } from "@/pages/users/useUsersContext";
 
 export function UsersCreatePage() {
   const {
@@ -169,153 +150,5 @@ export function UsersCreatePage() {
 
       {createdAuthLink ? <CopyableInput label="Ссылка для входа" value={createdAuthLink} /> : null}
     </SectionCard>
-  );
-}
-
-export function UsersAllPage() {
-  const {
-    allUsers,
-    allUsersLoading,
-    loadAllUsers,
-    usersSearchInput,
-    setUsersSearchInput,
-    onUsersSearch,
-    roleOptions,
-    actionUserId,
-    setDetailUser,
-    onDeleteUser,
-    onRefreshUserLink,
-    onUpdateUserRole,
-  } = useUsersContext();
-
-  return (
-    <div className="flex flex-col gap-4">
-      <SectionCard
-        title="Все пользователи"
-        extra={
-          <Button type="button" variant="outline" size="sm" disabled={allUsersLoading} onClick={() => void loadAllUsers(allUsers.page)}>
-            {allUsersLoading ? <Loader2 className="animate-spin" /> : <RefreshCw />}
-            Обновить
-          </Button>
-        }
-      >
-        <div className="flex w-full flex-col gap-4">
-          <div className="flex w-full">
-            <Input
-              value={usersSearchInput}
-              placeholder="Поиск по имени пользователя"
-              maxLength={USERNAME_MAX_LENGTH}
-              className="rounded-r-none"
-              onChange={(event) => {
-                const next = event.target.value;
-                setUsersSearchInput(next);
-                if (!next) {
-                  onUsersSearch("");
-                }
-              }}
-              onKeyDown={(event) => {
-                if (event.key === "Enter") {
-                  onUsersSearch(usersSearchInput);
-                }
-              }}
-            />
-            <Button type="button" variant="outline" className="rounded-l-none shrink-0" onClick={() => onUsersSearch(usersSearchInput)}>
-              <Search />
-            </Button>
-          </div>
-
-          <PaginatedList
-            page={allUsers.page}
-            pages={allUsers.pages}
-            total={allUsers.total}
-            loading={allUsersLoading}
-            empty={!allUsers.items.length}
-            emptyDescription="Пользователей нет"
-            onPageChange={(page) => void loadAllUsers(page)}
-          >
-            {allUsers.items.map((item) => (
-              <UserCard
-                key={item.id}
-                user={item}
-                roleOptions={roleOptions}
-                actionUserId={actionUserId}
-                onView={setDetailUser}
-                onDelete={onDeleteUser}
-                onRefreshLink={onRefreshUserLink}
-                onUpdateRole={onUpdateUserRole}
-              />
-            ))}
-          </PaginatedList>
-        </div>
-      </SectionCard>
-    </div>
-  );
-}
-
-export function UsersXuiPage() {
-  const {
-    xuiEmail,
-    setXuiEmail,
-    xuiEmailError,
-    xuiGetLoading,
-    xuiClient,
-    xuiSearchAttempted,
-    defaultExpiryDays,
-    xuiActionLoading,
-    onFetchXuiClient,
-    onUpdateXuiClient,
-    onResetXuiTraffic,
-    onDeleteXuiClient,
-  } = useUsersContext();
-
-  return (
-    <div className="flex flex-col gap-4">
-      <SectionCard title="XUI клиент" hint="Поиск клиента по username и управление подпиской">
-        <LookupActionForm
-          label="Username"
-          name="email"
-          input={
-            <Input
-              id="email"
-              placeholder="Alex"
-              value={xuiEmail}
-              aria-invalid={Boolean(xuiEmailError)}
-              onChange={(event) => setXuiEmail(event.target.value)}
-              onKeyDown={(event) => {
-                if (event.key === "Enter") {
-                  event.preventDefault();
-                  void onFetchXuiClient();
-                }
-              }}
-            />
-          }
-          loading={xuiGetLoading}
-          onGet={() => void onFetchXuiClient()}
-          rules={[{ required: true, message: "Введите имя пользователя" }]}
-          result={
-            <>
-              {xuiEmailError ? <p className="text-sm text-destructive">{xuiEmailError}</p> : null}
-              {xuiClient ? (
-                <div className="mt-4">
-                  <XuiClientCard
-                    client={xuiClient}
-                    access="user"
-                    defaultExpiryDays={defaultExpiryDays}
-                    actionLoading={xuiActionLoading}
-                    onUpdate={onUpdateXuiClient}
-                    onResetTraffic={onResetXuiTraffic}
-                    onDelete={onDeleteXuiClient}
-                  />
-                </div>
-              ) : xuiSearchAttempted && !xuiGetLoading ? (
-                <div className="mt-4">
-                  <SubscriptionNotFound embedded />
-                </div>
-              ) : null}
-            </>
-          }
-        />
-      </SectionCard>
-    </div>
   );
 }

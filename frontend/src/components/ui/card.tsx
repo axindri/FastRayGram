@@ -32,7 +32,7 @@ function CardTitle({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="card-title"
-      className={cn("flex min-h-8 items-center leading-none font-semibold", className)}
+      className={cn("flex min-h-8 min-w-0 items-center break-all leading-none font-semibold", className)}
       {...props}
     />
   )
