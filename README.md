@@ -31,8 +31,7 @@
 
 | Профиль | Пользователи |
 |:---:|:---:|
-| [![Профиль пользователя]](docs/screenshots/profile.png) | [![Меню администратора]](docs/screenshots/menu.png) |
-
+| ![Меню администратора](docs/screenshots/menu.png) | ![Профиль пользователя](docs/screenshots/profile.png) | 
 
 ## Запуск на сервере
 
