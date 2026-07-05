@@ -1,15 +1,30 @@
 import { useEffect, useState } from "react";
-import { Eye, Link, Loader2, Pencil, Trash2 } from "lucide-react";
+import { Ellipsis, Eye, Link, Loader2, Pencil, StickyNote, Trash2 } from "lucide-react";
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardAction, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ROLE_LABELS } from "@/constants";
+import { MARK_MAX_LENGTH, ROLE_LABELS } from "@/constants";
 import type { AdminUser, UserRole } from "@/types";
 
-import { ActionIconTooltip } from "@/components/ActionIconTooltip";
-import { ConfirmIconAction } from "@/components/ConfirmIconAction";
 import { CopyableInput } from "@/components/CopyableInput";
 import { SubscriptionLink } from "@/components/SubscriptionLink";
 
@@ -17,6 +32,9 @@ type RoleOption = {
   value: UserRole;
   label: string;
 };
+
+type EditMode = "none" | "role" | "mark";
+type PendingConfirm = "refresh" | "delete" | null;
 
 type UserCardProps = {
   user: AdminUser;
@@ -26,6 +44,7 @@ type UserCardProps = {
   onDelete?: (id: number) => void;
   onRefreshLink?: (id: number) => Promise<string>;
   onUpdateRole?: (id: number, role: "user" | "admin") => Promise<{ user: AdminUser; authLink: string }>;
+  onUpdateMark?: (id: number, mark: string) => Promise<void>;
 };
 
 export function UserCard({
@@ -36,11 +55,14 @@ export function UserCard({
   onDelete,
   onRefreshLink,
   onUpdateRole,
+  onUpdateMark,
 }: UserCardProps) {
-  const [editing, setEditing] = useState(false);
+  const [editMode, setEditMode] = useState<EditMode>("none");
   const [selectedRole, setSelectedRole] = useState<"user" | "admin">(user.role === "admin" ? "admin" : "user");
+  const [markValue, setMarkValue] = useState(user.mark);
   const [authLink, setAuthLink] = useState("");
-  const [roleSaving, setRoleSaving] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [pendingConfirm, setPendingConfirm] = useState<PendingConfirm>(null);
 
   const isActionLoading = actionUserId === user.id;
   const canManage = user.role !== "superuser";
@@ -49,13 +71,17 @@ export function UserCard({
     Boolean(onUpdateRole) &&
     roleOptions.length > 0 &&
     !(user.role === "admin" && !roleOptions.some((option) => option.value === "admin"));
-  const showActions = Boolean(onView || onDelete || onRefreshLink || canEditRole);
+  const canEditMark = canManage && Boolean(onUpdateMark);
+  const editing = editMode !== "none";
+  const showActions = Boolean(onView || onDelete || onRefreshLink || canEditRole || canEditMark);
 
   useEffect(() => {
-    setEditing(false);
+    setEditMode("none");
     setAuthLink("");
+    setPendingConfirm(null);
     setSelectedRole(user.role === "admin" ? "admin" : "user");
-  }, [user.id, user.role]);
+    setMarkValue(user.mark);
+  }, [user.id, user.role, user.mark]);
 
   const handleRefreshLink = async () => {
     if (!onRefreshLink) {
@@ -71,15 +97,40 @@ export function UserCard({
       return;
     }
 
-    setRoleSaving(true);
+    setSaving(true);
 
     try {
       const result = await onUpdateRole(user.id, selectedRole);
       setAuthLink(result.authLink);
-      setEditing(false);
+      setEditMode("none");
     } finally {
-      setRoleSaving(false);
+      setSaving(false);
     }
+  };
+
+  const handleSaveMark = async () => {
+    if (!onUpdateMark) {
+      return;
+    }
+
+    if (markValue.length > MARK_MAX_LENGTH) {
+      return;
+    }
+
+    setSaving(true);
+
+    try {
+      await onUpdateMark(user.id, markValue.trim());
+      setEditMode("none");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const cancelEdit = () => {
+    setEditMode("none");
+    setSelectedRole(user.role === "admin" ? "admin" : "user");
+    setMarkValue(user.mark);
   };
 
   return (
@@ -88,45 +139,99 @@ export function UserCard({
         <CardTitle>{user.username}</CardTitle>
         {showActions ? (
           <CardAction>
-            <div className="flex flex-wrap gap-1">
-              {onView ? (
-                <ActionIconTooltip label="Просмотр">
-                  <Button type="button" variant="outline" size="icon-sm" aria-label="Просмотр" onClick={() => onView(user)}>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon-sm"
+                  aria-label="Действия"
+                  disabled={editing || isActionLoading}
+                >
+                  {isActionLoading ? <Loader2 className="animate-spin" /> : <Ellipsis />}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                {onView ? (
+                  <DropdownMenuItem onClick={() => onView(user)}>
                     <Eye />
-                  </Button>
-                </ActionIconTooltip>
-              ) : null}
-              {canEditRole && !editing ? (
-                <ActionIconTooltip label="Изменить роль">
-                  <Button type="button" variant="outline" size="icon-sm" aria-label="Изменить роль" onClick={() => setEditing(true)}>
+                    Просмотр
+                  </DropdownMenuItem>
+                ) : null}
+                {canEditRole && !editing ? (
+                  <DropdownMenuItem onClick={() => setEditMode("role")}>
                     <Pencil />
-                  </Button>
-                </ActionIconTooltip>
-              ) : null}
-              {onRefreshLink && canManage ? (
-                <ConfirmIconAction
-                  label="Новая ссылка для входа"
-                  title="Получить новую ссылку для входа?"
-                  ariaLabel="Обновить ссылку"
-                  icon={<Link />}
-                  loading={isActionLoading}
-                  disabled={isActionLoading}
-                  onConfirm={() => void handleRefreshLink()}
-                />
-              ) : null}
-              {onDelete && canManage ? (
-                <ConfirmIconAction
-                  label="Удалить"
-                  title="Удалить пользователя?"
-                  ariaLabel="Удалить"
-                  icon={<Trash2 />}
-                  loading={isActionLoading}
-                  disabled={isActionLoading}
-                  destructive
-                  onConfirm={() => onDelete(user.id)}
-                />
-              ) : null}
-            </div>
+                    Изменить роль
+                  </DropdownMenuItem>
+                ) : null}
+                {canEditMark && !editing ? (
+                  <DropdownMenuItem onClick={() => setEditMode("mark")}>
+                    <StickyNote />
+                    Изменить заметку
+                  </DropdownMenuItem>
+                ) : null}
+                {onRefreshLink && canManage ? (
+                  <DropdownMenuItem
+                    onSelect={(event) => {
+                      event.preventDefault();
+                      setPendingConfirm("refresh");
+                    }}
+                  >
+                    <Link />
+                    Новая ссылка для входа
+                  </DropdownMenuItem>
+                ) : null}
+                {onDelete && canManage ? (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      variant="destructive"
+                      onSelect={(event) => {
+                        event.preventDefault();
+                        setPendingConfirm("delete");
+                      }}
+                    >
+                      <Trash2 />
+                      Удалить
+                    </DropdownMenuItem>
+                  </>
+                ) : null}
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            <AlertDialog open={pendingConfirm === "refresh"} onOpenChange={(open) => !open && setPendingConfirm(null)}>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Получить новую ссылку для входа?</AlertDialogTitle>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Нет</AlertDialogCancel>
+                  <AlertDialogAction onClick={() => void handleRefreshLink().finally(() => setPendingConfirm(null))}>
+                    Да
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+
+            <AlertDialog open={pendingConfirm === "delete"} onOpenChange={(open) => !open && setPendingConfirm(null)}>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Удалить пользователя?</AlertDialogTitle>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Нет</AlertDialogCancel>
+                  <AlertDialogAction
+                    variant="destructive"
+                    onClick={() => {
+                      onDelete?.(user.id);
+                      setPendingConfirm(null);
+                    }}
+                  >
+                    Да
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </CardAction>
         ) : null}
       </CardHeader>
@@ -135,25 +240,25 @@ export function UserCard({
           <p>
             ID: <span className="font-semibold text-foreground">{user.id}</span>
           </p>
-          {!editing ? (
+          {editMode !== "role" ? (
             <p>
               Роль: <span className="font-semibold text-foreground">{ROLE_LABELS[user.role]}</span>
             </p>
           ) : null}
-          {!editing ? (
+          {editMode === "none" ? (
             <p>
               Код регистрации:{" "}
               <span className="font-semibold text-foreground">{user.registration_code ?? "—"}</span>
             </p>
           ) : null}
-          {!editing && user.mark ? (
+          {editMode !== "mark" ? (
             <p>
-              Заметка: <span className="font-semibold text-foreground">{user.mark}</span>
+              Заметка: <span className="font-semibold text-foreground">{user.mark || "—"}</span>
             </p>
           ) : null}
-          {!editing && user.sub_url ? <SubscriptionLink href={user.sub_url} /> : null}
+          {editMode === "none" && user.sub_url ? <SubscriptionLink href={user.sub_url} /> : null}
         </div>
-        {editing ? (
+        {editMode === "role" ? (
           <div className="mt-3 flex flex-col gap-2">
             <Label>Новая роль</Label>
             <Select value={selectedRole} onValueChange={(value) => setSelectedRole(value as "user" | "admin")}>
@@ -170,21 +275,29 @@ export function UserCard({
             </Select>
           </div>
         ) : null}
+        {editMode === "mark" ? (
+          <div className="mt-3 flex flex-col gap-2">
+            <Label htmlFor={`mark-${user.id}`}>Заметка</Label>
+            <Input
+              id={`mark-${user.id}`}
+              value={markValue}
+              maxLength={MARK_MAX_LENGTH}
+              onChange={(event) => setMarkValue(event.target.value)}
+            />
+          </div>
+        ) : null}
       </CardContent>
-      {editing ? (
+      {editMode === "role" || editMode === "mark" ? (
         <CardFooter className="gap-2">
-          <Button type="button" disabled={roleSaving || isActionLoading} onClick={() => void handleSaveRole()}>
-            {roleSaving || isActionLoading ? <Loader2 className="animate-spin" /> : null}
-            Сохранить
-          </Button>
           <Button
             type="button"
-            variant="outline"
-            onClick={() => {
-              setEditing(false);
-              setSelectedRole(user.role === "admin" ? "admin" : "user");
-            }}
+            disabled={saving || isActionLoading}
+            onClick={() => void (editMode === "role" ? handleSaveRole() : handleSaveMark())}
           >
+            {saving || isActionLoading ? <Loader2 className="animate-spin" /> : null}
+            Сохранить
+          </Button>
+          <Button type="button" variant="outline" onClick={cancelEdit}>
             Отмена
           </Button>
         </CardFooter>

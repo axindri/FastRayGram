@@ -12,7 +12,14 @@ from src.models.registration import (
     RegistrationCodeResponse,
 )
 from src.models.tw import AdminInvoiceResponse, InvoiceResponse
-from src.models.users import AdminUserResponse, CreateUserRequest, UpdateUserRoleRequest, UpdateUserRoleResponse, UserStatsResponse
+from src.models.users import (
+    AdminUserResponse,
+    CreateUserRequest,
+    UpdateUserMarkRequest,
+    UpdateUserRoleRequest,
+    UpdateUserRoleResponse,
+    UserStatsResponse,
+)
 from src.models.xui import UpdateClientRequest
 from src.schemas.users import User
 from src.services.db import get_db
@@ -47,10 +54,14 @@ async def list_users(
     page: int = Query(default=1, ge=1),
     limit: int = Query(default=20, ge=1, le=100),
     search: str | None = Query(default=None, max_length=USERNAME_MAX_LENGTH),
+    user_id: int | None = Query(default=None, ge=1),
+    role: Role | None = None,
     db: AsyncSession = Depends(get_db),
     user_service: UserService = Depends(get_user_service),
 ) -> PaginatedResponse[AdminUserResponse]:
-    items, total, page = await user_service.list_users(db, page=page, limit=limit, search=search)
+    items, total, page = await user_service.list_users(
+        db, page=page, limit=limit, search=search, user_id=user_id, role=role
+    )
     return build_paginated_response(items, total, page, limit)
 
 
@@ -86,6 +97,16 @@ async def update_user_role(
     current_user: User = Depends(get_current_user),
 ) -> UpdateUserRoleResponse:
     return await user_service.update_role(db, id, payload.role, current_user.role)
+
+
+@router.post("/users/{id}/mark")
+async def update_user_mark(
+    id: int,
+    payload: UpdateUserMarkRequest,
+    db: AsyncSession = Depends(get_db),
+    user_service: UserService = Depends(get_user_service),
+) -> AdminUserResponse:
+    return await user_service.update_mark(db, id, payload.mark)
 
 
 @router.get("/users/get/{id}")

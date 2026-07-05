@@ -47,6 +47,10 @@ class UpdateUserRoleRequest(BaseModel):
     role: Role
 
 
+class UpdateUserMarkRequest(BaseModel):
+    mark: OptionalMark = ""
+
+
 class UpdateUserRoleResponse(BaseModel):
     user: AdminUserResponse
     token: str

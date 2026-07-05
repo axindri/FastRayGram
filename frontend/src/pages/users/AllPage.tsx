@@ -1,18 +1,21 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
-import { buildAuthLink, deleteUser, fetchUserStats, fetchUsers, refreshUserToken, updateUserRole } from "@/api";
+import { buildAuthLink, deleteUser, fetchUserStats, fetchUsers, refreshUserToken, updateUserMark, updateUserRole, type UserListFilters } from "@/api";
 import { useAuth } from "@/auth";
 import { PaginatedList } from "@/components/PaginatedList";
 import { SearchInputGroup } from "@/components/SearchInputGroup";
 import { UserCard } from "@/components/UserCard";
 import { UserDetailModal } from "@/components/UserDetailModal";
 import { UserStatsSummary } from "@/components/UserStatsSummary";
-import { USERNAME_MAX_LENGTH } from "@/constants";
-import type { AdminUser, Paginated, UserStats } from "@/types";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ROLE_LABELS, USERNAME_MAX_LENGTH, USER_SEARCH_FIELD_LABELS, type UserSearchField } from "@/constants";
+import type { AdminUser, Paginated, UserRole, UserStats } from "@/types";
 import { getApiErrorMessage } from "@/utils/apiError";
 import { emptyPaginated } from "@/utils/pagination";
 import { getAssignableRoleOptions } from "@/utils/username";
+
+const ROLE_SEARCH_OPTIONS: UserRole[] = ["user", "admin", "superuser"];
 
 export function UsersAllPage() {
   const { user: currentUser } = useAuth();
@@ -22,10 +25,12 @@ export function UsersAllPage() {
   const [stats, setStats] = useState<UserStats | null>(null);
   const [loading, setLoading] = useState(false);
   const [statsLoading, setStatsLoading] = useState(false);
-  const [search, setSearch] = useState("");
-  const [searchInput, setSearchInput] = useState("");
-  const searchRef = useRef(search);
-  searchRef.current = search;
+  const [searchField, setSearchField] = useState<UserSearchField>("username");
+  const [searchValue, setSearchValue] = useState("");
+  const [roleSearch, setRoleSearch] = useState<UserRole>("user");
+  const [userFilters, setUserFilters] = useState<UserListFilters>({});
+  const userFiltersRef = useRef(userFilters);
+  userFiltersRef.current = userFilters;
 
   const [actionUserId, setActionUserId] = useState<number | null>(null);
   const [detailUser, setDetailUser] = useState<AdminUser | null>(null);
@@ -43,11 +48,12 @@ export function UsersAllPage() {
   }, []);
 
   const loadUsers = useCallback(
-    async (page: number, query?: string) => {
+    async (page: number, filters?: UserListFilters) => {
+      const query = filters ?? userFiltersRef.current;
       setLoading(true);
 
       try {
-        setUsers(await fetchUsers(page, users.limit, query ?? searchRef.current));
+        setUsers(await fetchUsers(page, users.limit, Object.keys(query).length ? query : undefined));
       } catch (error) {
         toast.error(getApiErrorMessage(error, "Не удалось загрузить пользователей"));
       } finally {
@@ -63,17 +69,46 @@ export function UsersAllPage() {
   }, [loadUsers, loadStats]);
 
   const refreshPage = useCallback(
-    async (page: number, query?: string) => {
-      await Promise.all([loadUsers(page, query), loadStats()]);
+    async (page: number, filters?: UserListFilters) => {
+      await Promise.all([loadUsers(page, filters), loadStats()]);
     },
     [loadUsers, loadStats],
   );
 
   const onSearch = (value: string) => {
-    const query = value.trim();
-    setSearch(query);
-    setSearchInput(value);
-    void loadUsers(1, query);
+    if (searchField === "role") {
+      const filters: UserListFilters = { role: roleSearch };
+      setSearchValue("");
+      setUserFilters(filters);
+      void loadUsers(1, filters);
+      return;
+    }
+
+    const trimmed = value.trim();
+    setSearchValue(value);
+
+    if (!trimmed) {
+      setUserFilters({});
+      void loadUsers(1, {});
+      return;
+    }
+
+    if (searchField === "username") {
+      const filters: UserListFilters = { search: trimmed };
+      setUserFilters(filters);
+      void loadUsers(1, filters);
+      return;
+    }
+
+    const parsed = Number(trimmed);
+    if (!Number.isInteger(parsed) || parsed <= 0) {
+      toast.warning("Введите целое число больше 0");
+      return;
+    }
+
+    const filters: UserListFilters = { user_id: parsed };
+    setUserFilters(filters);
+    void loadUsers(1, filters);
   };
 
   const onDeleteUser = async (id: number) => {
@@ -124,24 +159,81 @@ export function UsersAllPage() {
     }
   };
 
+  const onUpdateUserMark = async (id: number, mark: string) => {
+    setActionUserId(id);
+
+    try {
+      await updateUserMark(id, mark);
+      toast.success("Заметка обновлена");
+      await loadUsers(users.page);
+    } catch (error) {
+      toast.error(getApiErrorMessage(error, "Не удалось обновить заметку"));
+      throw error;
+    } finally {
+      setActionUserId(null);
+    }
+  };
+
   return (
     <div className="flex w-full flex-col gap-4">
       <UserStatsSummary stats={stats} loading={statsLoading} />
 
       <SearchInputGroup
-        value={searchInput}
-        placeholder="Поиск по имени пользователя"
-        maxLength={USERNAME_MAX_LENGTH}
+        value={searchValue}
+        placeholder="Поиск"
+        maxLength={searchField === "username" ? USERNAME_MAX_LENGTH : undefined}
         loading={loading}
+        leading={
+          <Select
+            value={searchField}
+            onValueChange={(value) => {
+              const field = value as UserSearchField;
+              setSearchField(field);
+              setSearchValue("");
+              if (field !== "role") {
+                setUserFilters({});
+                void loadUsers(1, {});
+              }
+            }}
+          >
+            <SelectTrigger className="w-full sm:w-[168px] sm:rounded-r-none">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {Object.entries(USER_SEARCH_FIELD_LABELS).map(([value, label]) => (
+                <SelectItem key={value} value={value}>
+                  {label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        }
         onChange={(next) => {
-          setSearchInput(next);
-          if (!next) {
+          setSearchValue(next);
+          if (!next && searchField !== "role") {
             onSearch("");
           }
         }}
-        onSearch={() => onSearch(searchInput)}
+        onSearch={() => (searchField === "role" ? onSearch("") : onSearch(searchValue))}
         onRefresh={() => void refreshPage(users.page)}
       />
+
+      {searchField === "role" ? (
+        <div className="flex flex-wrap items-center gap-2">
+          <Select value={roleSearch} onValueChange={(value) => setRoleSearch(value as UserRole)}>
+            <SelectTrigger className="w-full sm:w-[220px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {ROLE_SEARCH_OPTIONS.map((role) => (
+                <SelectItem key={role} value={role}>
+                  {ROLE_LABELS[role]}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      ) : null}
 
       <PaginatedList
         page={users.page}
@@ -163,6 +255,7 @@ export function UsersAllPage() {
             onDelete={onDeleteUser}
             onRefreshLink={onRefreshUserLink}
             onUpdateRole={onUpdateUserRole}
+            onUpdateMark={onUpdateUserMark}
           />
         ))}
       </PaginatedList>

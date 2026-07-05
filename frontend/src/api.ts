@@ -153,6 +153,12 @@ export type InvoiceListFilters = {
   username?: string;
 };
 
+export type UserListFilters = {
+  search?: string;
+  user_id?: number;
+  role?: "user" | "admin" | "superuser";
+};
+
 export async function fetchInvoices(page = 1, limit = 3, filters?: InvoiceListFilters): Promise<Paginated<AdminInvoice>> {
   const params = new URLSearchParams({
     page: String(page),
@@ -182,14 +188,22 @@ export async function fetchUserStats(): Promise<UserStats> {
   return request<UserStats>(`${API_PREFIX}/admin/users/stats`);
 }
 
-export async function fetchUsers(page = 1, limit = 4, search?: string): Promise<Paginated<AdminUser>> {
+export async function fetchUsers(page = 1, limit = 4, filters?: UserListFilters): Promise<Paginated<AdminUser>> {
   const params = new URLSearchParams({
     page: String(page),
     limit: String(limit),
   });
 
-  if (search?.trim()) {
-    params.set("search", search.trim());
+  if (filters?.search?.trim()) {
+    params.set("search", filters.search.trim());
+  }
+
+  if (filters?.user_id) {
+    params.set("user_id", String(filters.user_id));
+  }
+
+  if (filters?.role) {
+    params.set("role", filters.role);
   }
 
   return request<Paginated<AdminUser>>(`${API_PREFIX}/admin/users?${params.toString()}`);
@@ -270,6 +284,13 @@ export async function updateUserRole(id: number, role: "user" | "admin"): Promis
   return request<UpdateUserRoleResponse>(`${API_PREFIX}/admin/users/${id}/role`, {
     method: "POST",
     body: JSON.stringify({ role }),
+  });
+}
+
+export async function updateUserMark(id: number, mark: string): Promise<AdminUser> {
+  return request<AdminUser>(`${API_PREFIX}/admin/users/${id}/mark`, {
+    method: "POST",
+    body: JSON.stringify({ mark }),
   });
 }
 

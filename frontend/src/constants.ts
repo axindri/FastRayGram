@@ -3,7 +3,7 @@ import { Monitor, Moon, Sun, type LucideIcon } from "lucide-react";
 export type NavSection = "main" | "admin" | "settings";
 
 // App
-export const APP_VERSION = "v3.3.1";
+export const APP_VERSION = "v3.3.2";
 export const TOKEN_KEY = "authToken";
 export const API_PREFIX = "/api";
 export const THEME_STORAGE_KEY = "theme";
@@ -98,6 +98,15 @@ export const PAYMENT_SEARCH_FIELD_LABELS: Record<PaymentSearchField, string> = {
   invoiceId: "Номер платежа",
   id: "ID платежа",
   username: "Имя пользователя",
+};
+
+// Users search
+export type UserSearchField = "username" | "id" | "role";
+
+export const USER_SEARCH_FIELD_LABELS: Record<UserSearchField, string> = {
+  username: "Имя пользователя",
+  id: "ID пользователя",
+  role: "Роль",
 };
 
 // UI copy

@@ -1,11 +1,27 @@
 import { useEffect, useState } from "react";
-import { Info, Loader2, Pencil, RotateCcw, Trash2, Wifi } from "lucide-react";
+import { Ellipsis, Info, Loader2, Pencil, RotateCcw, Trash2, Wifi } from "lucide-react";
 
 import { formatDate, formatExpiryRemaining } from "@/utils/datetime";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardAction, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -16,9 +32,7 @@ import { dateExpiryTagColor, formatDateExpiryRemaining } from "@/utils/jwt";
 import type { AccessLevel, XuiClient } from "@/types";
 
 import { CopyableInput } from "@/components/CopyableInput";
-import { ActionIconTooltip } from "@/components/ActionIconTooltip";
 import { CardTitleWithIcon } from "@/components/CardTitleWithIcon";
-import { ConfirmIconAction } from "@/components/ConfirmIconAction";
 import { HintTooltip } from "@/components/HintTooltip";
 import { LIMIT_IP_HINT } from "@/constants";
 
@@ -26,6 +40,8 @@ type XuiUpdatePayload = {
   expiry_time_days: number;
   enable: boolean;
 };
+
+type PendingConfirm = "reset" | "delete" | null;
 
 type XuiClientCardProps = {
   client: XuiClient;
@@ -118,6 +134,7 @@ export function XuiClientCard({
   const [expiryDays, setExpiryDays] = useState(defaultExpiryDays);
   const [enabled, setEnabled] = useState(client.enable);
   const [saving, setSaving] = useState(false);
+  const [pendingConfirm, setPendingConfirm] = useState<PendingConfirm>(null);
 
   const isAdmin = access === "admin";
   const expiryRemaining = formatExpiryRemaining(client.expiry_datetime);
@@ -128,6 +145,7 @@ export function XuiClientCard({
     setEditing(false);
     setEnabled(client.enable);
     setExpiryDays(defaultExpiryDays);
+    setPendingConfirm(null);
   }, [client.email, client.enable, defaultExpiryDays]);
 
   const handleSave = async () => {
@@ -165,36 +183,90 @@ export function XuiClientCard({
             </Badge>
             {showActions ? (
               <>
-                {onUpdate && !editing ? (
-                  <ActionIconTooltip label="Срок и статус подписки">
-                    <Button type="button" variant="outline" size="icon-sm" aria-label="Редактировать" onClick={() => setEditing(true)}>
-                      <Pencil />
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon-sm"
+                      aria-label="Действия"
+                      disabled={editing || actionLoading}
+                    >
+                      {actionLoading ? <Loader2 className="animate-spin" /> : <Ellipsis />}
                     </Button>
-                  </ActionIconTooltip>
-                ) : null}
-                {onResetTraffic ? (
-                  <ConfirmIconAction
-                    label="Сбросить трафик"
-                    title="Сбросить трафик?"
-                    ariaLabel="Сбросить трафик"
-                    icon={<RotateCcw />}
-                    loading={actionLoading}
-                    disabled={actionLoading}
-                    onConfirm={() => void onResetTraffic(client.email)}
-                  />
-                ) : null}
-                {onDelete ? (
-                  <ConfirmIconAction
-                    label="Удалить"
-                    title="Удалить XUI-клиента?"
-                    ariaLabel="Удалить"
-                    icon={<Trash2 />}
-                    loading={actionLoading}
-                    disabled={actionLoading}
-                    destructive
-                    onConfirm={() => void onDelete(client.email)}
-                  />
-                ) : null}
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56">
+                    {onUpdate && !editing ? (
+                      <DropdownMenuItem onClick={() => setEditing(true)}>
+                        <Pencil />
+                        Срок и статус подписки
+                      </DropdownMenuItem>
+                    ) : null}
+                    {onResetTraffic ? (
+                      <DropdownMenuItem
+                        onSelect={(event) => {
+                          event.preventDefault();
+                          setPendingConfirm("reset");
+                        }}
+                      >
+                        <RotateCcw />
+                        Сбросить трафик
+                      </DropdownMenuItem>
+                    ) : null}
+                    {onDelete ? (
+                      <>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                          variant="destructive"
+                          onSelect={(event) => {
+                            event.preventDefault();
+                            setPendingConfirm("delete");
+                          }}
+                        >
+                          <Trash2 />
+                          Удалить
+                        </DropdownMenuItem>
+                      </>
+                    ) : null}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
+                <AlertDialog open={pendingConfirm === "reset"} onOpenChange={(open) => !open && setPendingConfirm(null)}>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Сбросить трафик?</AlertDialogTitle>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Нет</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => {
+                          void onResetTraffic?.(client.email).finally(() => setPendingConfirm(null));
+                        }}
+                      >
+                        Да
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+
+                <AlertDialog open={pendingConfirm === "delete"} onOpenChange={(open) => !open && setPendingConfirm(null)}>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Удалить XUI-клиента?</AlertDialogTitle>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Нет</AlertDialogCancel>
+                      <AlertDialogAction
+                        variant="destructive"
+                        onClick={() => {
+                          void onDelete?.(client.email).finally(() => setPendingConfirm(null));
+                        }}
+                      >
+                        Да
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </>
             ) : null}
           </div>

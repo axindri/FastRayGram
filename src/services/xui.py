@@ -106,11 +106,18 @@ class XuiService:
 
         payload: dict[str, str | int | bool] = {
             "email": email,
-            "expiryTime": int((datetime.now() + timedelta(days=client.expiry_time_days)).timestamp()) * 1000,
-            "enable": client.enable,
         }
+        if client.expiry_time_days is not None:
+            payload["expiryTime"] = int((datetime.now() + timedelta(days=client.expiry_time_days)).timestamp()) * 1000
+        if client.enable is not None:
+            payload["enable"] = client.enable
         if client.limit_ips is not None:
             payload["limitIp"] = client.limit_ips
+        if client.comment is not None:
+            payload["comment"] = client.comment
+
+        if len(payload) == 1:
+            raise HTTPException(status_code=400, detail="Nothing to update")
 
         response = await AsyncClient(timeout=self.timeout).post(
             f"{self.url}/panel/api/clients/update/{email}",

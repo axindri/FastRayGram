@@ -96,11 +96,21 @@ class UserService:
         )
 
     async def list_users(
-        self, db: AsyncSession, page: int = 1, limit: int = 20, search: str | None = None
+        self,
+        db: AsyncSession,
+        page: int = 1,
+        limit: int = 20,
+        search: str | None = None,
+        user_id: int | None = None,
+        role: Role | None = None,
     ) -> tuple[list[AdminUserResponse], int, int]:
         filters = []
         if search:
             filters.append(User.username.ilike(f"%{search.strip()}%"))
+        if user_id is not None:
+            filters.append(User.id == user_id)
+        if role is not None:
+            filters.append(User.role == role)
 
         total_query = select(func.count()).select_from(User)
         if filters:
@@ -226,6 +236,22 @@ class UserService:
         token = await self._encode_user_token(user)
         admin_user = await self.get_admin_user(db, user.id)
         return UpdateUserRoleResponse(user=admin_user, token=token)
+
+    async def update_mark(self, db: AsyncSession, id: int, mark: str) -> AdminUserResponse:
+        user = await self.get_by_id(db, id)
+        if user is None:
+            raise HTTPException(status_code=404, detail="User not found")
+        if user.role == Role.SUPERUSER:
+            raise HTTPException(status_code=400, detail="Superuser mark cannot be changed")
+
+        user.mark = mark
+        xui_client = await self.xui_service.get_client_by_email(user.username)
+        if xui_client is not None:
+            await self.xui_service.update_client_by_email(user.username, UpdateClientRequest(comment=mark))
+
+        await db.flush()
+        await db.commit()
+        return await self.get_admin_user(db, user.id)
 
     async def get_xui_user_profile_by_id(self, db: AsyncSession, id: int) -> ClientResponse:
         user = await self.get_by_id(db, id)

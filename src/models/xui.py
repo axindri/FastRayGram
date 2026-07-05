@@ -30,6 +30,7 @@ class ClientResponse(BaseModel):
 
 
 class UpdateClientRequest(BaseModel):
-    expiry_time_days: int = Field(default=0)
-    enable: bool = Field(default=True)
+    expiry_time_days: int | None = None
+    enable: bool | None = None
     limit_ips: int | None = None
+    comment: str | None = None
