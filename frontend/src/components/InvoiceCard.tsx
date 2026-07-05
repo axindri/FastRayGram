@@ -1,6 +1,6 @@
 import { Ban } from "lucide-react";
 
-import { formatDate } from "@/api";
+import { formatDate } from "@/utils/datetime";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardAction, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";

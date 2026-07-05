@@ -1,3 +1,5 @@
+import { parseUtcDate } from "@/utils/datetime";
+
 function pluralRu(value: number, one: string, few: string, many: string): string {
   const abs = Math.abs(value);
   const mod10 = abs % 10;
@@ -46,8 +48,8 @@ export function formatJwtExpiryRemaining(token: string): string | null {
 }
 
 export function formatDateExpiryRemaining(value: string): string | null {
-  const expiry = new Date(value);
-  if (Number.isNaN(expiry.getTime())) {
+  const expiry = parseUtcDate(value);
+  if (!expiry) {
     return null;
   }
 
@@ -82,8 +84,8 @@ export function jwtExpiryTagColor(token: string): "success" | "error" | "default
 }
 
 export function dateExpiryTagColor(value: string): "success" | "error" | "default" {
-  const expiry = new Date(value);
-  if (Number.isNaN(expiry.getTime())) {
+  const expiry = parseUtcDate(value);
+  if (!expiry) {
     return "default";
   }
 

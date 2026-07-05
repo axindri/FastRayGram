@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Info, Loader2, Pencil, RotateCcw, Trash2, Wifi } from "lucide-react";
 
-import { formatDate, formatExpiryRemaining } from "@/api";
+import { formatDate, formatExpiryRemaining } from "@/utils/datetime";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";

@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Loader2, Trash2 } from "lucide-react";
 
-import { buildRegistrationLink, formatDate } from "@/api";
+import { buildRegistrationLink } from "@/api";
+import { formatDate, isUtcDatePast } from "@/utils/datetime";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardAction, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,7 +23,7 @@ type RegistrationCodeCardProps = {
 };
 
 function codeStatus(item: RegistrationCode): { label: string; active: boolean } {
-  if (new Date(item.expires_at).getTime() <= Date.now()) {
+  if (isUtcDatePast(item.expires_at)) {
     return { label: "Истёк", active: false };
   }
 

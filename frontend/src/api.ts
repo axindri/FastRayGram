@@ -19,6 +19,7 @@ import {
   RENEWAL_WINDOW_MS,
   TOKEN_KEY,
 } from "@/constants";
+import { parseUtcDate } from "@/utils/datetime";
 
 export class ApiError extends Error {
   readonly status: number;
@@ -81,61 +82,9 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   return data as T;
 }
 
-export function formatDate(value?: string): string {
-  return value ? new Date(value).toLocaleString("ru-RU") : "—";
-}
-
-function pluralRu(value: number, one: string, few: string, many: string): string {
-  const abs = Math.abs(value);
-  const mod10 = abs % 10;
-  const mod100 = abs % 100;
-
-  if (mod10 === 1 && mod100 !== 11) {
-    return one;
-  }
-
-  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) {
-    return few;
-  }
-
-  return many;
-}
-
-export function formatExpiryRemaining(value?: string): string | null {
-  if (!value) {
-    return null;
-  }
-
-  const expiry = new Date(value);
-  if (Number.isNaN(expiry.getTime())) {
-    return null;
-  }
-
-  const diffMs = expiry.getTime() - Date.now();
-  if (diffMs <= 0) {
-    return "(истекло)";
-  }
-
-  const dayMs = 24 * 60 * 60 * 1000;
-  const hourMs = 60 * 60 * 1000;
-
-  if (diffMs >= dayMs) {
-    const days = Math.floor(diffMs / dayMs);
-    return `(осталось ${days} ${pluralRu(days, "день", "дня", "дней")})`;
-  }
-
-  const hours = Math.max(1, Math.ceil(diffMs / hourMs));
-  return `(осталось ${hours} ${pluralRu(hours, "час", "часа", "часов")})`;
-}
-
-
 export function canRenewSubscription(expiryDatetime?: string): boolean {
-  if (!expiryDatetime) {
-    return false;
-  }
-
-  const expiry = new Date(expiryDatetime);
-  if (Number.isNaN(expiry.getTime())) {
+  const expiry = parseUtcDate(expiryDatetime);
+  if (!expiry) {
     return false;
   }
 
