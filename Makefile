@@ -16,7 +16,7 @@ help:
 	@echo "Fast Ray Gram"
 	@echo ""
 	@echo "  make pull            git pull"
-	@echo "  make build           пересборка образов (+ frontend build в prod)"
+	@echo "  make build           пересборка Docker-образов (frontend собирается внутри образа)"
 	@echo "  make update          pull + build"
 	@echo "  make start           запуск в фоне (prod: docker-compose.yml)"
 	@echo "  make stop            остановка и удаление контейнеров"
@@ -33,9 +33,6 @@ pull:
 
 build:
 	$(COMPOSE) $(COMPOSE_ARGS) build --pull
-ifneq ($(MODE),dev)
-	cd frontend && npm ci && npm run build
-endif
 
 update: pull build
 
