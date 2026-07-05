@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { ChevronRight, Heart } from "lucide-react";
+import { ChevronLeft, ChevronRight, Heart } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
 import { GitHubIcon } from "@/components/icons/GitHubIcon";
@@ -32,6 +32,27 @@ function closeMobileSidebar(isMobile: boolean, setOpenMobile: (open: boolean) =>
   if (isMobile) {
     setOpenMobile(false);
   }
+}
+
+function MobileSidebarClose() {
+  const { isMobile, setOpenMobile } = useSidebar();
+
+  if (!isMobile) {
+    return null;
+  }
+
+  return (
+    <Button
+      type="button"
+      variant="ghost"
+      size="icon-sm"
+      className="shrink-0"
+      aria-label="Закрыть меню"
+      onClick={() => setOpenMobile(false)}
+    >
+      <ChevronLeft className="size-5" />
+    </Button>
+  );
 }
 
 function NavLeafLink({ path, label, Icon, isActive }: { path: string; label: string; Icon: NavItem["Icon"]; isActive: boolean }) {
@@ -92,6 +113,7 @@ function NavGroupWithChildren({ item, pathname }: { item: NavItem; pathname: str
 export function AppSidebar() {
   const { user } = useAuth();
   const location = useLocation();
+  const { isMobile, setOpenMobile } = useSidebar();
   const [boostyUrl, setBoostyUrl] = useState("");
   const [githubUrl, setGithubUrl] = useState("");
 
@@ -111,19 +133,22 @@ export function AppSidebar() {
   return (
     <Sidebar className="border-r border-border bg-background">
       <SidebarHeader className="border-b border-border p-2">
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild>
-              <Link to="/profile">
-                <img src="/frg_light_on_dark.png" alt="" aria-hidden className="size-8 rounded-md" />
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">Fast Ray Gram</span>
-                  <span className="truncate text-xs text-muted-foreground">Панель управления</span>
-                </div>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
+        <div className="flex items-center gap-1">
+          <SidebarMenu className="min-w-0 flex-1">
+            <SidebarMenuItem>
+              <SidebarMenuButton size="lg" asChild>
+                <Link to="/profile" onClick={() => closeMobileSidebar(isMobile, setOpenMobile)}>
+                  <img src="/frg_light_on_dark.png" alt="" aria-hidden className="size-8 rounded-md" />
+                  <div className="grid flex-1 text-left text-sm leading-tight">
+                    <span className="truncate font-semibold">Fast Ray Gram</span>
+                    <span className="truncate text-xs text-muted-foreground">Панель управления</span>
+                  </div>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+          <MobileSidebarClose />
+        </div>
       </SidebarHeader>
       <SidebarContent>
         {groups.map((group) => (

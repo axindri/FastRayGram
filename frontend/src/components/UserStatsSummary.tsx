@@ -24,7 +24,7 @@ export function UserStatsSummary({ stats, loading = false }: UserStatsSummaryPro
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Статистика пользователей</CardTitle>
+        <CardTitle>Статистика</CardTitle>
       </CardHeader>
       <CardContent className="grid">
         <StatItem label="Всего на сервере" value={stats?.total ?? null} loading={loading} />
