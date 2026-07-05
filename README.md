@@ -27,19 +27,11 @@
 
 Стек: **FastAPI** · **PostgreSQL** · **React** · **Docker**.
 
-## Скриншоты
-
-Интерфейс в тёмной теме. Все изображения лежат в [`docs/screenshots/`](docs/screenshots/).
+## Превью
 
 | Профиль | Пользователи |
 |:---:|:---:|
-| [![Профиль пользователя](docs/screenshots/profile.png)](docs/screenshots/profile.png) | [![Управление пользователями](docs/screenshots/users.png)](docs/screenshots/users.png) |
-| Личный кабинет: подписка, ссылка для входа, счета | Админка: создание пользователей и XUI-клиентов |
-
-| Регистрация | Платежи |
-|:---:|:---:|
-| [![Регистрация по коду](docs/screenshots/register.png)](docs/screenshots/register.png) | [![Платежи и счета](docs/screenshots/payments.png)](docs/screenshots/payments.png) |
-| Самостоятельная регистрация по ссылке от админа | Проверка оплат, список инвойсов, отмена счетов |
+| [![Профиль пользователя]](docs/screenshots/profile.png) | [![Меню администратора]](docs/screenshots/menu.png) |
 
 
 ## Запуск на сервере
