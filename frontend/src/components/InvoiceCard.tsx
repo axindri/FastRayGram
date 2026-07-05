@@ -8,7 +8,6 @@ import { cn } from "@/lib/utils";
 import { invoiceStatusBadge, isInvoiceActive, type AccessLevel, type AdminInvoice, type Invoice } from "@/types";
 
 import { ConfirmIconAction } from "@/components/ConfirmIconAction";
-import { SubscriptionLink } from "@/components/SubscriptionLink";
 
 function InvoiceStatusBadge({ status }: { status: string }) {
   const badge = invoiceStatusBadge(status);
@@ -33,14 +32,7 @@ function isAdminInvoice(item: Invoice | AdminInvoice): item is AdminInvoice {
   return "username" in item && typeof (item as AdminInvoice).username === "string";
 }
 
-export function InvoiceCard({
-  item,
-  access = "admin",
-  paymentBlocked = false,
-  canRenew = false,
-  onCancel,
-  cancelLoadingId = null,
-}: InvoiceCardProps) {
+export function InvoiceCard({ item, access = "admin", paymentBlocked = false, canRenew = false, onCancel, cancelLoadingId = null }: InvoiceCardProps) {
   const status = String(item.status || "").toLowerCase();
   const isPending = status === "pending";
   const isAdmin = access === "admin";
@@ -50,9 +42,7 @@ export function InvoiceCard({
   const canCancel = isAdmin && isInvoiceActive(status) && Boolean(onCancel);
   const cancelLoading = cancelLoadingId === item.id;
 
-  const title = isAdmin
-    ? `#${item.invoice_id}${adminItem ? ` · ${adminItem.amount} ₽` : ""}`
-    : `#${item.invoice_id} · ${item.amount} ₽`;
+  const title = isAdmin ? `#${item.invoice_id}${adminItem ? ` · ${adminItem.amount} ₽` : ""}` : `#${item.invoice_id} · ${item.amount} ₽`;
 
   return (
     <Card>
@@ -83,15 +73,13 @@ export function InvoiceCard({
                 Идентификатор (ID): <span className="font-semibold text-foreground">{adminItem.id}</span>
               </p>
               <p>
-                Пользователь:{" "}
-                <span className="font-semibold text-foreground">{adminItem.username || `ID ${adminItem.user_id}`}</span>
+                Пользователь: <span className="font-semibold text-foreground">{adminItem.username || `ID ${adminItem.user_id}`}</span>
               </p>
               {adminItem.mark ? (
                 <p>
                   Заметка: <span className="font-semibold text-foreground">{adminItem.mark}</span>
                 </p>
               ) : null}
-              {adminItem.sub_url ? <SubscriptionLink href={adminItem.sub_url} /> : null}
             </>
           ) : null}
           <p>
