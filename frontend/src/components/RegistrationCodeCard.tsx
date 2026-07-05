@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Loader2, Trash2 } from "lucide-react";
+import { Ban, Loader2 } from "lucide-react";
 
 import { buildRegistrationLink } from "@/api";
 import { formatDate, isUtcDatePast } from "@/utils/datetime";
@@ -17,29 +17,46 @@ import { CopyableInput } from "@/components/CopyableInput";
 type RegistrationCodeCardProps = {
   item: RegistrationCode;
   onExtend: (id: number, extendDays: number) => void;
-  onDelete: (id: number) => void;
+  onDisable: (id: number) => void;
   extendLoading?: boolean;
-  deleteLoading?: boolean;
+  disableLoading?: boolean;
 };
 
 function codeStatus(item: RegistrationCode): { label: string; active: boolean } {
+  if (!item.enable) {
+    return { label: "Отключён", active: false };
+  }
+
   if (isUtcDatePast(item.expires_at)) {
     return { label: "Истёк", active: false };
+  }
+
+  if (item.max_registrations > 0 && item.registrations_count >= item.max_registrations) {
+    return { label: "Исчерпан", active: false };
   }
 
   return { label: "Активен", active: true };
 }
 
+function formatRegistrationLimit(item: RegistrationCode): string {
+  if (item.max_registrations === 0) {
+    return `${item.registrations_count} / без лимита`;
+  }
+
+  return `${item.registrations_count} / ${item.max_registrations}`;
+}
+
 export function RegistrationCodeCard({
   item,
   onExtend,
-  onDelete,
+  onDisable,
   extendLoading = false,
-  deleteLoading = false,
+  disableLoading = false,
 }: RegistrationCodeCardProps) {
   const [extendDays, setExtendDays] = useState(7);
   const status = codeStatus(item);
   const registrationLink = buildRegistrationLink(item.code);
+  const isDisabled = !item.enable;
 
   return (
     <Card>
@@ -53,21 +70,24 @@ export function RegistrationCodeCard({
             >
               {status.label}
             </Badge>
-            <ConfirmIconAction
-              label="Удалить"
-              title="Удалить код регистрации?"
-              ariaLabel="Удалить код"
-              icon={<Trash2 />}
-              loading={deleteLoading}
-              disabled={deleteLoading}
-              destructive
-              onConfirm={() => onDelete(item.id)}
-            />
+            {!isDisabled ? (
+              <ConfirmIconAction
+                label="Отключить"
+                title="Отключить код регистрации?"
+                ariaLabel="Отключить код"
+                icon={<Ban />}
+                loading={disableLoading}
+                disabled={disableLoading}
+                destructive
+                onConfirm={() => onDisable(item.id)}
+              />
+            ) : null}
           </div>
         </CardAction>
       </CardHeader>
       <CardContent className="text-sm text-muted-foreground">
         <p>Действует до: {formatDate(item.expires_at)}</p>
+        <p>Регистраций: {formatRegistrationLimit(item)}</p>
         <p>Создан: {formatDate(item.created_at)}</p>
       </CardContent>
       <CardFooter className="flex-col items-stretch gap-4">
@@ -81,7 +101,12 @@ export function RegistrationCodeCard({
             className="w-16"
           />
           <span className="text-sm text-muted-foreground">дней</span>
-          <Button type="button" variant="outline" disabled={extendLoading} onClick={() => onExtend(item.id, extendDays)}>
+          <Button
+            type="button"
+            variant="outline"
+            disabled={extendLoading || isDisabled}
+            onClick={() => onExtend(item.id, extendDays)}
+          >
             {extendLoading ? <Loader2 className="animate-spin" /> : null}
             Продлить
           </Button>

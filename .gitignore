@@ -48,6 +48,8 @@ src/static/dist/
 .vscode/
 .DS_Store
 
-database/
-frontend/node_modules/
+# Database (PostgreSQL cluster in ./database/postgres/)
+database/postgres/
+
+
 todo.md

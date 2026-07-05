@@ -10,6 +10,9 @@ export const THEME_STORAGE_KEY = "theme";
 
 // Timing & limits
 export const STATUS_POLL_MS = 60_000;
+export const RATE_LIMIT_RETRY_MS = 60_000;
+export const TOO_MANY_REQUESTS_PATH = "/too-many-requests";
+export const RATE_LIMIT_RETURN_KEY = "rateLimitReturnPath";
 export const RENEWAL_WINDOW_MS = 24 * 60 * 60 * 1000;
 export const INVOICES_PAGE_LIMIT = 3;
 

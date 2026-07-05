@@ -31,6 +31,7 @@ class AdminUserResponse(BaseModel):
     role: Role = Field(default=Role.USER)
     mark: str = Field(default="")
     sub_url: str = Field(default="")
+    registration_code: str | None = None
 
     class Config:
         from_attributes = True

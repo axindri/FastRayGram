@@ -32,9 +32,14 @@ export class ApiError extends Error {
 }
 
 let unauthorizedHandler: (() => void) | null = null;
+let rateLimitHandler: (() => void) | null = null;
 
 export function setUnauthorizedHandler(handler: (() => void) | null) {
   unauthorizedHandler = handler;
+}
+
+export function setRateLimitHandler(handler: (() => void) | null) {
+  rateLimitHandler = handler;
 }
 
 export function clearAuthToken() {
@@ -58,6 +63,11 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 
   const text = await response.text();
   let data: unknown = null;
+
+  if (response.status === 429) {
+    rateLimitHandler?.();
+    throw new ApiError("Слишком много запросов", 429);
+  }
 
   if (text) {
     try {
@@ -215,15 +225,17 @@ export async function fetchRegistrationCodes(page = 1, limit = 4): Promise<Pagin
   return request<Paginated<RegistrationCode>>(`${API_PREFIX}/admin/registration-codes?page=${page}&limit=${limit}`);
 }
 
-export async function createRegistrationCode(validDays = 7): Promise<RegistrationCode> {
+export async function createRegistrationCode(validDays = 7, maxRegistrations = 1): Promise<RegistrationCode> {
   return request<RegistrationCode>(`${API_PREFIX}/admin/registration-codes`, {
     method: "POST",
-    body: JSON.stringify({ valid_days: validDays }),
+    body: JSON.stringify({ valid_days: validDays, max_registrations: maxRegistrations }),
   });
 }
 
-export async function deleteRegistrationCode(id: number): Promise<void> {
-  await request<null>(`${API_PREFIX}/admin/registration-codes/${id}`, { method: "DELETE" });
+export async function disableRegistrationCode(id: number): Promise<RegistrationCode> {
+  return request<RegistrationCode>(`${API_PREFIX}/admin/registration-codes/${id}/disable`, {
+    method: "POST",
+  });
 }
 
 export async function extendRegistrationCode(id: number, extendDays: number): Promise<RegistrationCode> {

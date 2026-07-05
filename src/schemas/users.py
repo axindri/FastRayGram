@@ -1,4 +1,4 @@
-from sqlalchemy import Integer, String
+from sqlalchemy import ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from src.core.enums import Role
@@ -14,3 +14,6 @@ class User(Base):
     token_position: Mapped[int] = mapped_column(Integer, default=0)
     sub_url: Mapped[str] = mapped_column(String, default="")
     mark: Mapped[str] = mapped_column(String, default="")
+    registration_code_id: Mapped[int | None] = mapped_column(
+        Integer, ForeignKey("registration_codes.id", ondelete="SET NULL"), nullable=True
+    )

@@ -1,6 +1,7 @@
 from functools import lru_cache
+from urllib.parse import quote_plus
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, computed_field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -23,6 +24,7 @@ class AppSettings(BaseModel):
     max_invoice_amount: int = Field(default=1000)
     default_expiry_time_days: int = Field(default=30)
     registration_expiry_time_days: int = Field(default=3)
+    default_registration_code_max_uses: int = Field(default=1)
     default_limit_ips: int = Field(default=5)
     monitoring_service_url: str = Field(default="http://localhost:8000/status/")
     boosty_url: str = Field(default="http://localhost")
@@ -30,7 +32,18 @@ class AppSettings(BaseModel):
 
 
 class DatabaseSettings(BaseModel):
-    url: str = Field(default="sqlite+aiosqlite:///./database/data.db")
+    host: str = Field(default="localhost")
+    port: int = Field(default=5432)
+    user: str = Field(default="fastraygram")
+    password: str = Field(default="change-me")
+    db: str = Field(default="fastraygram")
+
+    @computed_field
+    @property
+    def url(self) -> str:
+        user = quote_plus(self.user)
+        password = quote_plus(self.password)
+        return f"postgresql+asyncpg://{user}:{password}@{self.host}:{self.port}/{self.db}"
 
 
 class XuiPanelSettings(BaseModel):

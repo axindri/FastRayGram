@@ -4,29 +4,88 @@ x-logging: &default-logging
     max-size: "500m"
     max-file: "1"
 
+x-postgres-tuning: &postgres-tuning
+  - postgres
+  - -c
+  - shared_buffers=128MB
+  - -c
+  - effective_cache_size=256MB
+  - -c
+  - max_connections=30
+  - -c
+  - work_mem=4MB
+  - -c
+  - maintenance_work_mem=64MB
+  - -c
+  - max_worker_processes=2
+  - -c
+  - max_parallel_workers=1
+
+x-postgres: &postgres
+  image: postgres:17-alpine
+  container_name: frg-postgres
+  ports:
+    - "${DB__PORT:-5432}:5432"
+  env_file:
+    - .env
+  environment:
+    POSTGRES_USER: ${DB__USER:-fastraygram}
+    POSTGRES_PASSWORD: ${DB__PASSWORD:-change-me}
+    POSTGRES_DB: ${DB__DB:-fastraygram}
+  volumes:
+    - ./database/postgres:/var/lib/postgresql/data
+  command: *postgres-tuning
+  healthcheck:
+    test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\""]
+    interval: 5s
+    timeout: 5s
+    retries: 12
+    start_period: 60s
+  mem_limit: 512m
+  memswap_limit: 512m
+  restart: unless-stopped
+  logging: *default-logging
+
 services:
+  postgres:
+    <<: *postgres
+
   app:
     build:
       context: .
       dockerfile: docker/Dockerfile
-    container_name: fast-ray-gram
+    container_name: frg-app
     ports:
       - "${APP_PORT:-8000}:8000"
-      - "${APP_HTTPS_PORT:-443}:443"
     env_file:
       - .env
     environment:
       APP__HOST: 0.0.0.0
       APP__PORT: 8000
-      DB__URL: sqlite+aiosqlite:////app/database/data.db
-    volumes:
-      - ./database:/app/database
+      DB__HOST: postgres
+      DB__PORT: 5432
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    logging: *default-logging
+
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.frontend
+    container_name: frg-frontend
+    ports:
+      - "${FRONTEND_PORT:-80}:80"
+    depends_on:
+      app:
+        condition: service_started
     restart: unless-stopped
     logging: *default-logging
 
   invoice-worker:
     image: curlimages/curl:8.12.1
-    container_name: fast-ray-gram-invoice-worker
+    container_name: frg-worker
     env_file:
       - .env
     environment:
@@ -36,6 +95,7 @@ services:
       - ./docker/invoice-worker.sh:/invoice-worker.sh:ro
     entrypoint: ["/bin/sh", "/invoice-worker.sh"]
     depends_on:
-      - app
+      app:
+        condition: service_started
     restart: unless-stopped
     logging: *default-logging

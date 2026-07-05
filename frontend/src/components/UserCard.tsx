@@ -140,6 +140,12 @@ export function UserCard({
               Роль: <span className="font-semibold text-foreground">{ROLE_LABELS[user.role]}</span>
             </p>
           ) : null}
+          {!editing ? (
+            <p>
+              Код регистрации:{" "}
+              <span className="font-semibold text-foreground">{user.registration_code ?? "—"}</span>
+            </p>
+          ) : null}
           {!editing && user.mark ? (
             <p>
               Заметка: <span className="font-semibold text-foreground">{user.mark}</span>

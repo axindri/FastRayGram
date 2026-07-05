@@ -123,6 +123,7 @@ export type AdminUser = {
   role: UserRole;
   mark: string;
   sub_url: string;
+  registration_code: string | null;
 };
 
 export type UpdateUserRoleResponse = {
@@ -172,6 +173,9 @@ export type RegistrationCode = {
   id: number;
   code: string;
   expires_at: string;
+  max_registrations: number;
+  registrations_count: number;
+  enable: boolean;
   created_by_id: number | null;
   created_at: string;
   updated_at: string;

@@ -86,10 +86,7 @@ async def get_user(
     db: AsyncSession = Depends(get_db),
     user_service: UserService = Depends(get_user_service),
 ) -> AdminUserResponse:
-    user = await user_service.get_by_id(db, id)
-    if user is None:
-        raise HTTPException(status_code=404, detail="User not found")
-    return AdminUserResponse.model_validate(user)
+    return await user_service.get_admin_user(db, id)
 
 
 @router.delete("/users/delete/{id}")
@@ -174,13 +171,13 @@ async def create_registration_code(
     return await registration_service.create_code(db, current_user, payload)
 
 
-@router.delete("/registration-codes/{id}")
-async def delete_registration_code(
+@router.post("/registration-codes/{id}/disable")
+async def disable_registration_code(
     id: int,
     db: AsyncSession = Depends(get_db),
     registration_service: RegistrationService = Depends(get_registration_service),
-) -> None:
-    return await registration_service.delete_code(db, id)
+) -> RegistrationCodeResponse:
+    return await registration_service.disable_code(db, id)
 
 
 @router.post("/registration-codes/{id}/extend")

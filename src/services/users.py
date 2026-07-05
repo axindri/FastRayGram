@@ -13,6 +13,7 @@ from src.models.tw import InvoiceResponse
 from src.models.users import AdminUserResponse, CreateUserRequest, UpdateUserRoleResponse, UserProfileResponse
 from src.models.xui import ClientResponse, CreateClientRequest
 from src.schemas.invoices import Invoice
+from src.schemas.registration_codes import RegistrationCode
 from src.schemas.users import User
 from src.services.jwt import JwtService, get_jwt_service
 from src.services.xui import XuiService, get_xui_service
@@ -25,7 +26,7 @@ class UserService:
     jwt_service: JwtService
     xui_service: XuiService
 
-    async def create(self, db: AsyncSession, user: CreateUserRequest) -> str:
+    async def create(self, db: AsyncSession, user: CreateUserRequest, *, registration_code_id: int | None = None) -> str:
         token_position = 0
         await self.xui_service.add_client_to_inbounds(
             CreateClientRequest(
@@ -48,6 +49,7 @@ class UserService:
             mark=user.mark,
             sub_url=xui_client.sub_url,
             token_position=token_position,
+            registration_code_id=registration_code_id,
         )
         db.add(db_user)
         await db.flush()
@@ -70,6 +72,29 @@ class UserService:
         result = await db.execute(select(User).where(User.username == username))
         return result.scalar_one_or_none()
 
+    async def _registration_codes_by_ids(self, db: AsyncSession, code_ids: list[int]) -> dict[int, str]:
+        if not code_ids:
+            return {}
+
+        result = await db.execute(
+            select(RegistrationCode.id, RegistrationCode.code).where(RegistrationCode.id.in_(code_ids))
+        )
+        return {code_id: code for code_id, code in result.all()}
+
+    def _to_admin_user_response(self, user: User, registration_codes: dict[int, str]) -> AdminUserResponse:
+        registration_code = None
+        if user.registration_code_id is not None:
+            registration_code = registration_codes.get(user.registration_code_id)
+
+        return AdminUserResponse(
+            id=user.id,
+            username=user.username,
+            role=user.role,
+            mark=user.mark,
+            sub_url=user.sub_url,
+            registration_code=registration_code,
+        )
+
     async def list_users(
         self, db: AsyncSession, page: int = 1, limit: int = 20, search: str | None = None
     ) -> tuple[list[AdminUserResponse], int, int]:
@@ -89,8 +114,24 @@ class UserService:
         if filters:
             users_query = users_query.where(*filters)
         result = await db.execute(users_query)
-        items = [AdminUserResponse.model_validate(user) for user in result.scalars().all()]
+        users = list(result.scalars().all())
+        registration_codes = await self._registration_codes_by_ids(
+            db,
+            [user.registration_code_id for user in users if user.registration_code_id is not None],
+        )
+        items = [self._to_admin_user_response(user, registration_codes) for user in users]
         return items, total, page
+
+    async def get_admin_user(self, db: AsyncSession, id: int) -> AdminUserResponse:
+        user = await self.get_by_id(db, id)
+        if user is None:
+            raise HTTPException(status_code=404, detail="User not found")
+
+        registration_codes = await self._registration_codes_by_ids(
+            db,
+            [user.registration_code_id] if user.registration_code_id is not None else [],
+        )
+        return self._to_admin_user_response(user, registration_codes)
 
     async def get_user_profile_by_id(self, db: AsyncSession, id: int) -> UserProfileResponse:
         user = await self.get_by_id(db, id)
@@ -174,7 +215,8 @@ class UserService:
         await db.flush()
         await db.commit()
         token = await self._encode_user_token(user)
-        return UpdateUserRoleResponse(user=AdminUserResponse.model_validate(user), token=token)
+        admin_user = await self.get_admin_user(db, user.id)
+        return UpdateUserRoleResponse(user=admin_user, token=token)
 
     async def get_xui_user_profile_by_id(self, db: AsyncSession, id: int) -> ClientResponse:
         user = await self.get_by_id(db, id)

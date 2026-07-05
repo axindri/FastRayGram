@@ -1,9 +1,9 @@
 from collections.abc import AsyncGenerator
 
 from fastapi import HTTPException
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase
-from sqlalchemy.pool import NullPool
 
 from src.core.settings import settings
 
@@ -14,8 +14,11 @@ class Base(DeclarativeBase):
 
 engine = create_async_engine(
     settings.database.url,
-    echo=False,
-    poolclass=NullPool,
+    echo=settings.app.debug,
+    pool_size=3,
+    max_overflow=2,
+    pool_pre_ping=True,
+    connect_args={"ssl": False},
 )
 
 SessionLocal = async_sessionmaker(
@@ -31,10 +34,14 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
     async with SessionLocal() as session:
         try:
             yield session
-        except Exception as e:
+        except IntegrityError as error:
             await session.rollback()
-            if "UNIQUE constraint failed" in str(e):
-                raise HTTPException(status_code=400, detail="Unique constraint violation")
-            raise e
+            sqlstate = getattr(getattr(error, "orig", None), "sqlstate", None)
+            if sqlstate == "23505":
+                raise HTTPException(status_code=400, detail="Unique constraint violation") from error
+            raise
+        except Exception:
+            await session.rollback()
+            raise
         finally:
             await session.close()

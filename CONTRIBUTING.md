@@ -31,9 +31,12 @@ docker compose -f docker-compose.dev.yml up --build
 
 | URL | Описание |
 |---|---|
-| http://localhost:8000 | API + собранный React |
-| http://localhost:8081 | SQLite Web (просмотр БД) |
-| http://localhost:8000/docs | Swagger |
+| http://localhost | Фронтенд (nginx) |
+| http://localhost/api | API через nginx (лимит 100 req/min с IP) |
+| http://localhost:8000/docs | Swagger (напрямую к API) |
+| localhost:5432 | PostgreSQL (`DB__PORT`) |
+
+Бэкенд (`app`) снаружи не публикуется — только через nginx. `invoice-worker` ходит в API напрямую, минуя лимит.
 
 Бэкенд в dev-режиме перезагружается при изменении файлов в `src/` и `main.py`.
 
@@ -55,17 +58,19 @@ Vite: http://localhost:5173 — проксирует запросы к API на 
 cd frontend && npm run build
 ```
 
-Артефакт попадает в `src/static/dist/` и отдаётся бэкендом.
+Артефакт попадает в `src/static/dist/` и отдаётся nginx-контейнером `frontend`.
 
 ## Бэкенд без Docker (опционально)
 
 ```bash
 cp .env.example .env
+# для запуска без Docker:
+# DB__HOST=localhost
 uv sync
 uv run uvicorn main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-База по умолчанию: `sqlite+aiosqlite:///./database/data.db` (создайте каталог `database/`).
+Нужен запущенный PostgreSQL (через `docker compose up postgres -d` или локальная установка).
 
 ## Структура репозитория
 
@@ -91,9 +96,8 @@ fast-ray-gram/
 
 - `APP__JWT_SECRET`, `APP__SUPERUSER_TOKEN` — обязательно сменить;
 - `XUI__URL`, `XUI__SUB_URL`, `XUI__API_KEY` — панель 3X-UI;
+- `DB__HOST`, `DB__PORT`, `DB__USER`, `DB__PASSWORD`, `DB__DB` — PostgreSQL;
 - `TIMEWEB__TOKEN`, `TIMEWEB__PAYER_ID` — платежи.
-
-## Как отправить изменения
 
 1. Создайте ветку от `main`.
 2. Внесите правки, проверьте сборку:

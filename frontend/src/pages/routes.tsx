@@ -1,5 +1,7 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 
+import { TOO_MANY_REQUESTS_PATH } from "@/constants";
+
 import { useAuth } from "@/auth";
 import { LoadingScreen } from "@/components/LoadingScreen";
 import { RequireAdmin } from "@/components/RequireAdmin";
@@ -16,6 +18,7 @@ import { ProfilePage } from "@/pages/ProfilePage";
 import { RegisterPage } from "@/pages/RegisterPage";
 import { RegistrationPage } from "@/pages/RegistrationPage";
 import { SettingsAppearancePage } from "@/pages/SettingsAppearancePage";
+import { TooManyRequestsPage } from "@/pages/TooManyRequestsPage";
 import { UsersAllPage } from "@/pages/users/AllPage";
 import { UsersCreatePage } from "@/pages/users/CreatePage";
 import { UsersXuiPage } from "@/pages/users/XuiPage";
@@ -43,6 +46,7 @@ export function AppRoutes() {
 
   return (
     <Routes>
+      <Route path={TOO_MANY_REQUESTS_PATH} element={<TooManyRequestsPage />} />
       <Route path="/login" element={user ? <Navigate to="/profile" replace /> : <LoginPage />} />
       <Route path="/register" element={user ? <Navigate to="/profile" replace /> : <RegisterPage />} />
 

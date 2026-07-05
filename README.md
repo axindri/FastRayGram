@@ -25,7 +25,7 @@
 - **Админка** — пользователи, XUI-клиенты, счета, коды регистрации, мониторинг сервисов.
 - **Платежи** — выставление счетов в TimeWeb, фоновая проверка оплат, продление подписки в XUI.
 
-Стек: **FastAPI** · **SQLite** · **React** · **Ant Design** · **Docker**.
+Стек: **FastAPI** · **PostgreSQL** · **React** · **Docker**.
 
 ## Скриншоты
 
@@ -69,9 +69,13 @@ cp .env.example .env
 docker compose up -d --build
 ```
 
-Приложение: `http://<ваш-сервер>:8000` (порт задаётся `APP_PORT`).
+Приложение: `http://<ваш-сервер>/` (фронтенд, порт `FRONTEND_PORT`, по умолчанию `80`). API напрямую: `http://<ваш-сервер>:8000` (порт `APP_PORT`).
 
-Вместе с приложением поднимается **invoice-worker** — периодически проверяет оплаченные счета (`CHECK_INTERVAL_SEC`, по умолчанию 30 с).
+Стек контейнеров: **nginx** (фронтенд + прокси `/api`) → **FastAPI** → **PostgreSQL**. Nginx ограничивает API до **100 запросов в минуту** с одного IP (`429` при превышении).
+
+Вместе с приложением поднимаются **PostgreSQL** и **invoice-worker** (проверка оплат, `CHECK_INTERVAL_SEC`, по умолчанию 30 с).
+
+PostgreSQL доступен снаружи на порту `DB__PORT` (по умолчанию `5432`). Конфигурация рассчитана на VPS с 1 GB RAM / 1 vCPU — см. `docker/postgres/postgresql.conf`.
 
 ### Переменные окружения
 
@@ -82,7 +86,9 @@ docker compose up -d --build
 | `APP__MONITORING_SERVICE_URL` | URL внешнего мониторинга (Uptime Kuma и т.п.) |
 | `XUI__URL` / `XUI__SUB_URL` / `XUI__API_KEY` | Панель 3X-UI |
 | `TIMEWEB__TOKEN` / `TIMEWEB__PAYER_ID` | Платежи TimeWeb |
-| `APP_PORT` | Порт на хосте (по умолчанию `8000`) |
+| `DB__HOST` / `DB__PORT` / `DB__USER` / `DB__PASSWORD` / `DB__DB` | Подключение к PostgreSQL (URL собирается автоматически) |
+| `APP_PORT` | Порт API на хосте (по умолчанию `8000`) |
+| `FRONTEND_PORT` | Порт nginx на хосте (по умолчанию `80`) |
 | `CHECK_INTERVAL_SEC` | Интервал проверки оплат |
 
 Полный список — в [`.env.example`](.env.example).

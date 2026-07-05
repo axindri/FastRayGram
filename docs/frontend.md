@@ -1,6 +1,6 @@
 # Frontend
 
-React + Vite + Ant Design SPA. API под `/api/*`, prod-сборка отдаётся бэкендом из `src/static/dist`.
+React + Vite + Ant Design SPA. API под `/api/*`, prod-сборка отдаётся nginx из `src/static/dist`.
 
 ## Структура `frontend/src/`
 

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-import { buildRegistrationLink, createRegistrationCode, deleteRegistrationCode, extendRegistrationCode, fetchRegistrationCodes } from "@/api";
+import { buildRegistrationLink, createRegistrationCode, disableRegistrationCode, extendRegistrationCode, fetchRegistrationCodes } from "@/api";
 import { CopyableInput } from "@/components/CopyableInput";
 import { PaginatedList } from "@/components/PaginatedList";
 import { RegistrationCodeCard } from "@/components/RegistrationCodeCard";
@@ -17,7 +17,9 @@ import type { Paginated, RegistrationCode } from "@/types";
 
 export function RegistrationPage() {
   const [validDays, setValidDays] = useState(7);
+  const [maxRegistrations, setMaxRegistrations] = useState(1);
   const [validDaysError, setValidDaysError] = useState("");
+  const [maxRegistrationsError, setMaxRegistrationsError] = useState("");
   const [createLoading, setCreateLoading] = useState(false);
   const [createdLink, setCreatedLink] = useState("");
 
@@ -57,12 +59,18 @@ export function RegistrationPage() {
       return;
     }
 
+    if (maxRegistrations < 0 || maxRegistrations > 10000) {
+      setMaxRegistrationsError("От 0 до 10000 (0 — без лимита)");
+      return;
+    }
+
     setValidDaysError("");
+    setMaxRegistrationsError("");
     setCreateLoading(true);
     setCreatedLink("");
 
     try {
-      const code = await createRegistrationCode(validDays);
+      const code = await createRegistrationCode(validDays, maxRegistrations);
       setCreatedLink(buildRegistrationLink(code.code));
       toast.success("Код регистрации создан");
       await loadCodes(1);
@@ -87,15 +95,15 @@ export function RegistrationPage() {
     }
   };
 
-  const onDelete = async (id: number) => {
+  const onDisable = async (id: number) => {
     setActionId(id);
 
     try {
-      await deleteRegistrationCode(id);
-      toast.success("Код удалён");
+      await disableRegistrationCode(id);
+      toast.success("Код отключён");
       await loadCodes(codes.page);
     } catch (error) {
-      toast.error(getApiErrorMessage(error, "Не удалось удалить код"));
+      toast.error(getApiErrorMessage(error, "Не удалось отключить код"));
     } finally {
       setActionId(null);
     }
@@ -109,6 +117,21 @@ export function RegistrationPage() {
                 <Label htmlFor="valid-days">Срок действия кода, дней</Label>
                 <Input id="valid-days" type="number" min={1} max={365} value={validDays} aria-invalid={Boolean(validDaysError)} onChange={(event) => setValidDays(Number(event.target.value))} />
                 {validDaysError ? <p className="text-sm text-destructive">{validDaysError}</p> : null}
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="max-registrations">Макс. регистраций по коду</Label>
+                <Input
+                  id="max-registrations"
+                  type="number"
+                  min={0}
+                  max={10000}
+                  value={maxRegistrations}
+                  aria-invalid={Boolean(maxRegistrationsError)}
+                  onChange={(event) => setMaxRegistrations(Number(event.target.value))}
+                />
+                <p className="text-sm text-muted-foreground">0 — без ограничения</p>
+                {maxRegistrationsError ? <p className="text-sm text-destructive">{maxRegistrationsError}</p> : null}
               </div>
 
               <Button type="submit" disabled={createLoading}>
@@ -131,7 +154,7 @@ export function RegistrationPage() {
               onPageChange={(page) => void loadCodes(page)}
             >
               {codes.items.map((item) => (
-                <RegistrationCodeCard key={item.id} item={item} onExtend={onExtend} onDelete={onDelete} extendLoading={actionId === item.id} deleteLoading={actionId === item.id} />
+                <RegistrationCodeCard key={item.id} item={item} onExtend={onExtend} onDisable={onDisable} extendLoading={actionId === item.id} disableLoading={actionId === item.id} />
               ))}
             </PaginatedList>
           </div>

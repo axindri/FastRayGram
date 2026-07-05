@@ -11,7 +11,7 @@ fi
 
 echo "Invoice worker started (interval=${CHECK_INTERVAL_SEC}s, app=${APP_URL})"
 
-until curl -sf "${APP_URL}/" >/dev/null; do
+until curl -sf "${APP_URL}/api/health" >/dev/null; do
   echo "waiting for app..."
   sleep 2
 done
