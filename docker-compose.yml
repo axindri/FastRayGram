@@ -56,7 +56,8 @@ services:
       dockerfile: docker/Dockerfile
     container_name: frg-app
     ports:
-      - "${APP_PORT:-8000}:8000"
+      # API only on localhost — external traffic must go through nginx (rate limit).
+      - "127.0.0.1:${APP_PORT:-8000}:8000"
     env_file:
       - .env
     environment:
