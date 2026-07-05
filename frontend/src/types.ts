@@ -117,6 +117,12 @@ export function isInvoiceActive(status: string) {
   return normalized === "pending" || normalized === "processing";
 }
 
+export type UserStats = {
+  total: number;
+  users: number;
+  admins: number;
+};
+
 export type AdminUser = {
   id: number;
   username: string;

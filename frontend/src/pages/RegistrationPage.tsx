@@ -151,6 +151,7 @@ export function RegistrationPage() {
               loading={codesLoading}
               empty={!codes.items.length}
               emptyDescription="Кодов пока нет"
+              entity="кодов"
               onPageChange={(page) => void loadCodes(page)}
             >
               {codes.items.map((item) => (

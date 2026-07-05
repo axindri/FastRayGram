@@ -11,6 +11,7 @@ import type {
   StatusResponse,
   UpdateUserRoleResponse,
   UserProfile,
+  UserStats,
   XuiClient,
 } from "@/types";
 
@@ -175,6 +176,10 @@ export async function fetchInvoices(page = 1, limit = 3, filters?: InvoiceListFi
   }
 
   return request<Paginated<AdminInvoice>>(`${API_PREFIX}/admin/invoices?${params.toString()}`);
+}
+
+export async function fetchUserStats(): Promise<UserStats> {
+  return request<UserStats>(`${API_PREFIX}/admin/users/stats`);
 }
 
 export async function fetchUsers(page = 1, limit = 4, search?: string): Promise<Paginated<AdminUser>> {

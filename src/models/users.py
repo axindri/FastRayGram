@@ -37,6 +37,12 @@ class AdminUserResponse(BaseModel):
         from_attributes = True
 
 
+class UserStatsResponse(BaseModel):
+    total: int
+    users: int
+    admins: int
+
+
 class UpdateUserRoleRequest(BaseModel):
     role: Role
 

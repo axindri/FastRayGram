@@ -8,7 +8,6 @@ import { cn } from "@/lib/utils";
 import { invoiceStatusBadge, isInvoiceActive, type AccessLevel, type AdminInvoice, type Invoice } from "@/types";
 
 import { ConfirmIconAction } from "@/components/ConfirmIconAction";
-import { CopyableText } from "@/components/CopyableInput";
 import { SubscriptionLink } from "@/components/SubscriptionLink";
 
 function InvoiceStatusBadge({ status }: { status: string }) {
@@ -76,17 +75,32 @@ export function InvoiceCard({
           </div>
         </CardAction>
       </CardHeader>
-      <CardContent className="flex flex-col gap-1 text-sm text-muted-foreground">
-        {adminItem ? (
-          <>
-            <CopyableText value={String(adminItem.id)}>Идентификатор (ID): {adminItem.id}</CopyableText>
-            <p>Пользователь: {adminItem.username || `ID ${adminItem.user_id}`}</p>
-            {adminItem.mark ? <p>Заметка: {adminItem.mark}</p> : null}
-            {adminItem.sub_url ? <SubscriptionLink href={adminItem.sub_url} /> : null}
-          </>
-        ) : null}
-        <p>Создан: {formatDate(item.created_at)}</p>
-        <p>Обновлен: {formatDate(item.updated_at)}</p>
+      <CardContent>
+        <div className="flex flex-col gap-2 text-sm text-muted-foreground">
+          {adminItem ? (
+            <>
+              <p>
+                Идентификатор (ID): <span className="font-semibold text-foreground">{adminItem.id}</span>
+              </p>
+              <p>
+                Пользователь:{" "}
+                <span className="font-semibold text-foreground">{adminItem.username || `ID ${adminItem.user_id}`}</span>
+              </p>
+              {adminItem.mark ? (
+                <p>
+                  Заметка: <span className="font-semibold text-foreground">{adminItem.mark}</span>
+                </p>
+              ) : null}
+              {adminItem.sub_url ? <SubscriptionLink href={adminItem.sub_url} /> : null}
+            </>
+          ) : null}
+          <p>
+            Создан: <span className="font-semibold text-foreground">{formatDate(item.created_at)}</span>
+          </p>
+          <p>
+            Обновлен: <span className="font-semibold text-foreground">{formatDate(item.updated_at)}</span>
+          </p>
+        </div>
       </CardContent>
       {showPayButton ? (
         <CardFooter>

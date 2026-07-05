@@ -11,6 +11,7 @@ type PaginatedListProps = {
   empty: boolean;
   emptyDescription: string;
   emptyTitle?: string;
+  entity: string;
   onPageChange: (page: number) => void;
   children: ReactNode;
   minHeight?: number;
@@ -25,6 +26,7 @@ export function PaginatedList({
   empty,
   emptyDescription,
   emptyTitle,
+  entity,
   onPageChange,
   children,
   minHeight = 80,
@@ -47,6 +49,7 @@ export function PaginatedList({
         pages={pages}
         total={total}
         loading={loading}
+        entity={entity}
         onPageChange={onPageChange}
       />
     </div>

@@ -1,14 +1,15 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
-import { buildAuthLink, deleteUser, fetchUsers, refreshUserToken, updateUserRole } from "@/api";
+import { buildAuthLink, deleteUser, fetchUserStats, fetchUsers, refreshUserToken, updateUserRole } from "@/api";
 import { useAuth } from "@/auth";
 import { PaginatedList } from "@/components/PaginatedList";
 import { SearchInputGroup } from "@/components/SearchInputGroup";
 import { UserCard } from "@/components/UserCard";
 import { UserDetailModal } from "@/components/UserDetailModal";
+import { UserStatsSummary } from "@/components/UserStatsSummary";
 import { USERNAME_MAX_LENGTH } from "@/constants";
-import type { AdminUser, Paginated } from "@/types";
+import type { AdminUser, Paginated, UserStats } from "@/types";
 import { getApiErrorMessage } from "@/utils/apiError";
 import { emptyPaginated } from "@/utils/pagination";
 import { getAssignableRoleOptions } from "@/utils/username";
@@ -18,7 +19,9 @@ export function UsersAllPage() {
   const roleOptions = getAssignableRoleOptions(currentUser?.role);
 
   const [users, setUsers] = useState<Paginated<AdminUser>>(emptyPaginated);
+  const [stats, setStats] = useState<UserStats | null>(null);
   const [loading, setLoading] = useState(false);
+  const [statsLoading, setStatsLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [searchInput, setSearchInput] = useState("");
   const searchRef = useRef(search);
@@ -26,6 +29,18 @@ export function UsersAllPage() {
 
   const [actionUserId, setActionUserId] = useState<number | null>(null);
   const [detailUser, setDetailUser] = useState<AdminUser | null>(null);
+
+  const loadStats = useCallback(async () => {
+    setStatsLoading(true);
+
+    try {
+      setStats(await fetchUserStats());
+    } catch (error) {
+      toast.error(getApiErrorMessage(error, "Не удалось загрузить статистику пользователей"));
+    } finally {
+      setStatsLoading(false);
+    }
+  }, []);
 
   const loadUsers = useCallback(
     async (page: number, query?: string) => {
@@ -44,7 +59,15 @@ export function UsersAllPage() {
 
   useEffect(() => {
     void loadUsers(1);
-  }, [loadUsers]);
+    void loadStats();
+  }, [loadUsers, loadStats]);
+
+  const refreshPage = useCallback(
+    async (page: number, query?: string) => {
+      await Promise.all([loadUsers(page, query), loadStats()]);
+    },
+    [loadUsers, loadStats],
+  );
 
   const onSearch = (value: string) => {
     const query = value.trim();
@@ -59,7 +82,7 @@ export function UsersAllPage() {
     try {
       await deleteUser(id);
       toast.success("Пользователь удалён");
-      await loadUsers(users.page);
+      await refreshPage(users.page);
     } catch (error) {
       toast.error(getApiErrorMessage(error, "Не удалось удалить пользователя"));
     } finally {
@@ -88,7 +111,7 @@ export function UsersAllPage() {
     try {
       const result = await updateUserRole(id, role);
       toast.success("Роль обновлена");
-      await loadUsers(users.page);
+      await refreshPage(users.page);
       return {
         user: result.user,
         authLink: buildAuthLink(result.token),
@@ -103,6 +126,8 @@ export function UsersAllPage() {
 
   return (
     <div className="flex w-full flex-col gap-4">
+      <UserStatsSummary stats={stats} loading={statsLoading} />
+
       <SearchInputGroup
         value={searchInput}
         placeholder="Поиск по имени пользователя"
@@ -115,7 +140,7 @@ export function UsersAllPage() {
           }
         }}
         onSearch={() => onSearch(searchInput)}
-        onRefresh={() => void loadUsers(users.page)}
+        onRefresh={() => void refreshPage(users.page)}
       />
 
       <PaginatedList
@@ -125,6 +150,7 @@ export function UsersAllPage() {
         loading={loading}
         empty={!users.items.length}
         emptyDescription="Пользователей нет"
+        entity="польз."
         onPageChange={(page) => void loadUsers(page)}
       >
         {users.items.map((item) => (

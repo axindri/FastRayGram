@@ -10,7 +10,7 @@ from src.core.enums import InvoiceStatus, Role
 from src.core.logger import get_logger
 from src.core.settings import settings
 from src.models.tw import InvoiceResponse
-from src.models.users import AdminUserResponse, CreateUserRequest, UpdateUserRoleResponse, UserProfileResponse
+from src.models.users import AdminUserResponse, CreateUserRequest, UpdateUserRoleResponse, UserProfileResponse, UserStatsResponse
 from src.models.xui import ClientResponse, CreateClientRequest
 from src.schemas.invoices import Invoice
 from src.schemas.registration_codes import RegistrationCode
@@ -132,6 +132,15 @@ class UserService:
             [user.registration_code_id] if user.registration_code_id is not None else [],
         )
         return self._to_admin_user_response(user, registration_codes)
+
+    async def get_user_stats(self, db: AsyncSession) -> UserStatsResponse:
+        result = await db.execute(select(User.role, func.count()).group_by(User.role))
+        counts = {role: count for role, count in result.all()}
+        return UserStatsResponse(
+            total=sum(counts.values()),
+            users=counts.get(Role.USER, 0),
+            admins=counts.get(Role.ADMIN, 0),
+        )
 
     async def get_user_profile_by_id(self, db: AsyncSession, id: int) -> UserProfileResponse:
         user = await self.get_by_id(db, id)

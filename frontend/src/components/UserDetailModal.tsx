@@ -143,6 +143,7 @@ export function UserDetailModal({ open, user, onClose }: UserDetailModalProps) {
                   loading={invoicesLoading}
                   empty={!invoices.items.length}
                   emptyDescription="Счетов нет"
+                  entity="счетов"
                   minHeight={64}
                   onPageChange={(page) => void loadInvoices(page, user.id)}
                 >

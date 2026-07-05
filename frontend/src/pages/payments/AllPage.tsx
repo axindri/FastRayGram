@@ -122,6 +122,7 @@ export function PaymentsAllPage() {
         empty={!allInvoices.items.length}
         emptyDescription="Счетов нет"
         emptyTitle="Счетов нет"
+        entity="счетов"
         onPageChange={(page) => void loadAllInvoices(page)}
       >
         {allInvoices.items.map((item) => (

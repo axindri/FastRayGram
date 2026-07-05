@@ -12,7 +12,7 @@ from src.models.registration import (
     RegistrationCodeResponse,
 )
 from src.models.tw import AdminInvoiceResponse, InvoiceResponse
-from src.models.users import AdminUserResponse, CreateUserRequest, UpdateUserRoleRequest, UpdateUserRoleResponse
+from src.models.users import AdminUserResponse, CreateUserRequest, UpdateUserRoleRequest, UpdateUserRoleResponse, UserStatsResponse
 from src.models.xui import UpdateClientRequest
 from src.schemas.users import User
 from src.services.db import get_db
@@ -32,6 +32,14 @@ async def admin_links() -> dict[str, str]:
         "servers_url": settings.timeweb.servers_url,
         "services_status_url": settings.app.monitoring_service_url,
     }
+
+
+@router.get("/users/stats")
+async def get_user_stats(
+    db: AsyncSession = Depends(get_db),
+    user_service: UserService = Depends(get_user_service),
+) -> UserStatsResponse:
+    return await user_service.get_user_stats(db)
 
 
 @router.get("/users")
