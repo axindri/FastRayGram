@@ -45,7 +45,8 @@ export function LoginPage() {
   return (
     <main className="flex min-h-screen flex-col items-center px-4 pb-8 pt-16">
       <div className="mb-8 flex flex-col items-center gap-3 text-center">
-        <img src="/frg_light.png" alt="" aria-hidden className="h-12" />
+        <img src="/frg_dark.png" alt="" aria-hidden className="h-12 dark:hidden" />
+        <img src="/frg_light_on_dark.png" alt="" aria-hidden className="hidden h-12 dark:block" />
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Fast Ray Gram</h1>
         </div>
