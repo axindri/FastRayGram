@@ -23,8 +23,6 @@ import { useServiceStatus } from "@/hooks/useServiceStatus";
 import { getApiErrorMessage } from "@/utils/apiError";
 import { isInvoiceActive, type UserRole } from "@/types";
 
-const DAY_PRESETS = [50, 70, 100] as const;
-
 type PaymentConfig = {
   dayPrice: number;
   minDays: number;
@@ -78,10 +76,6 @@ export function ProfilePage() {
   const minAmount = paymentConfig?.minAmount ?? 0;
   const maxAmount = paymentConfig?.maxAmount ?? 0;
   const amount = paymentConfig ? days * dayPrice : 0;
-  const dayPresets = useMemo(
-    () => (paymentConfig ? DAY_PRESETS.filter((preset) => preset >= minDays && preset <= maxDays) : []),
-    [paymentConfig, minDays, maxDays],
-  );
 
   const loadXuiClient = async () => {
     setXuiLoading(true);
@@ -260,15 +254,6 @@ export function ProfilePage() {
                       {days} × {dayPrice} ₽/день = {amount.toLocaleString("ru-RU")} ₽
                     </p>
                   </div>
-                  {dayPresets.length ? (
-                    <div className="flex flex-wrap gap-2">
-                      {dayPresets.map((preset) => (
-                        <Button key={preset} type="button" variant="outline" size="sm" disabled={paymentsDisabled} onClick={() => onDaysChange(preset)}>
-                          {preset} дней
-                        </Button>
-                      ))}
-                    </div>
-                  ) : null}
                   <div className="flex flex-col gap-2">
                     <input
                       type="range"
