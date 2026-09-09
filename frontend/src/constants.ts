@@ -3,7 +3,7 @@ import { Monitor, Moon, Sun, type LucideIcon } from "lucide-react";
 export type NavSection = "main" | "admin" | "settings";
 
 // App
-export const APP_VERSION = "v3.3.3";
+export const APP_VERSION = "v3.4.0";
 export const TOKEN_KEY = "authToken";
 export const API_PREFIX = "/api";
 export const THEME_STORAGE_KEY = "theme";
@@ -15,6 +15,11 @@ export const TOO_MANY_REQUESTS_PATH = "/too-many-requests";
 export const RATE_LIMIT_RETURN_KEY = "rateLimitReturnPath";
 export const RENEWAL_WINDOW_MS = 24 * 60 * 60 * 1000;
 export const INVOICES_PAGE_LIMIT = 3;
+
+// Payment calculator (frontend-only for now; backend will sync later)
+export const DAY_PRICE_RUB = 10;
+export const MIN_PAYMENT_DAYS = 50;
+export const MIN_PAYMENT_AMOUNT = DAY_PRICE_RUB * MIN_PAYMENT_DAYS;
 
 // Validation
 export const MARK_MAX_LENGTH = 64;

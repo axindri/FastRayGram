@@ -175,6 +175,14 @@ export type AppConfig = {
   github_url: string;
 };
 
+export type Finances = {
+  balance: number;
+  currency: string;
+  monthly_cost: number;
+  total_paid: number;
+  hours_left: number;
+};
+
 export type RegistrationCode = {
   id: number;
   code: string;

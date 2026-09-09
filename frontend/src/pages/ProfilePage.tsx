@@ -1,18 +1,14 @@
-import { Copy, FileText, Link as LinkIcon, Loader2, RefreshCw, TriangleAlert, Wallet } from "lucide-react";
+import { FileText, Loader2, RefreshCw, TriangleAlert, Wallet } from "lucide-react";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardAction, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { cn } from "@/lib/utils";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 
-import { buildAuthLink, canRenewSubscription, createInvoice, fetchConfig, fetchXuiMe, refreshMyToken } from "@/api";
-import { RENEW_HINT, TOKEN_KEY } from "@/constants";
+import { canRenewSubscription, createInvoice, fetchConfig, fetchXuiMe } from "@/api";
+import { DAY_PRICE_RUB, MIN_PAYMENT_AMOUNT, MIN_PAYMENT_DAYS, RENEW_HINT } from "@/constants";
 import { useAuth } from "@/auth";
 import { AsyncListState } from "@/components/AsyncListState";
 import { CardTitleWithIcon } from "@/components/CardTitleWithIcon";
@@ -23,21 +19,11 @@ import { SectionCard } from "@/components/SectionCard";
 import { SubscriptionNotFound } from "@/components/SubscriptionNotFound";
 import { XuiClientCard } from "@/components/XuiClientCard";
 import { filterNavItems, flattenNavLinks } from "@/config/navigation";
-import { useCopyToClipboard } from "@/hooks/useCopyToClipboard";
 import { useServiceStatus } from "@/hooks/useServiceStatus";
 import { getApiErrorMessage } from "@/utils/apiError";
-import { formatJwtExpiryRemaining, isJwtToken, jwtExpiryTagColor } from "@/utils/jwt";
 import { isInvoiceActive, type UserRole } from "@/types";
 
-import { BADGE_STYLES } from "@/lib/badge-styles";
-
-function expiryBadgeClassName(color: "success" | "error" | "default") {
-  if (color === "success") {
-    return BADGE_STYLES.success;
-  }
-
-  return undefined;
-}
+const DAY_PRESETS = [50, 70, 100] as const;
 
 function QuickLinks({ role }: { role: UserRole }) {
   const sections = useMemo(() => flattenNavLinks(filterNavItems(role, { excludePaths: ["/profile", "/settings"] })), [role]);
@@ -66,15 +52,11 @@ function QuickLinks({ role }: { role: UserRole }) {
 }
 
 export function ProfilePage() {
-  const { user, refreshUser, login } = useAuth();
-  const copy = useCopyToClipboard();
-  const [authToken, setAuthToken] = useState(() => localStorage.getItem(TOKEN_KEY) || "");
-  const [tokenRefreshLoading, setTokenRefreshLoading] = useState(false);
+  const { user, refreshUser } = useAuth();
 
-  const [minAmount, setMinAmount] = useState(100);
   const [maxAmount, setMaxAmount] = useState(1000);
-  const [amount, setAmount] = useState(100);
-  const [amountError, setAmountError] = useState("");
+  const [days, setDays] = useState(MIN_PAYMENT_DAYS);
+  const [daysError, setDaysError] = useState("");
   const { loading: statusLoading, paymentBlocked } = useServiceStatus();
   const [profileLoading, setProfileLoading] = useState(false);
   const [paymentLoading, setPaymentLoading] = useState(false);
@@ -82,9 +64,9 @@ export function ProfilePage() {
   const [xuiLoading, setXuiLoading] = useState(false);
   const [xuiLoaded, setXuiLoaded] = useState(false);
 
-  const authLink = useMemo(() => (authToken ? buildAuthLink(authToken) : ""), [authToken]);
-  const tokenExpiryLabel = useMemo(() => formatJwtExpiryRemaining(authToken), [authToken]);
-  const tokenExpiryColor = useMemo(() => jwtExpiryTagColor(authToken), [authToken]);
+  const maxDays = useMemo(() => Math.floor(maxAmount / DAY_PRICE_RUB), [maxAmount]);
+  const amount = days * DAY_PRICE_RUB;
+  const dayPresets = useMemo(() => DAY_PRESETS.filter((preset) => preset >= MIN_PAYMENT_DAYS && preset <= maxDays), [maxDays]);
 
   const loadXuiClient = async () => {
     setXuiLoading(true);
@@ -130,9 +112,9 @@ export function ProfilePage() {
         return;
       }
 
-      setMinAmount(config.min_invoice_amount);
-      setMaxAmount(config.max_invoice_amount);
-      setAmount(config.min_invoice_amount);
+      const nextMaxAmount = Math.max(config.max_invoice_amount, MIN_PAYMENT_AMOUNT);
+      setMaxAmount(nextMaxAmount);
+      setDays(MIN_PAYMENT_DAYS);
     });
 
     return () => {
@@ -148,20 +130,11 @@ export function ProfilePage() {
   const hasActiveInvoice = invoices.some((item) => isInvoiceActive(item.status));
   const paymentsDisabled = statusLoading || paymentBlocked;
   const canRenew = xuiClient ? canRenewSubscription(xuiClient.expiry_datetime) : false;
-  const showAuthTokenControls = user.role !== "superuser" && isJwtToken(authToken);
 
-  const onRefreshAuthToken = async () => {
-    setTokenRefreshLoading(true);
-
-    try {
-      const token = await refreshMyToken();
-      await login(token);
-      setAuthToken(token);
-      toast.success("Токен обновлён. Скопируйте новую ссылку для входа — старая больше не действует");
-    } catch (error) {
-      toast.error(getApiErrorMessage(error, "Не удалось обновить токен"));
-    } finally {
-      setTokenRefreshLoading(false);
+  const onDaysChange = (nextDays: number) => {
+    setDays(nextDays);
+    if (daysError) {
+      setDaysError("");
     }
   };
 
@@ -172,17 +145,17 @@ export function ProfilePage() {
       return;
     }
 
-    if (!amount) {
-      setAmountError("Введите сумму");
+    if (!Number.isInteger(days) || days < MIN_PAYMENT_DAYS || days > maxDays) {
+      setDaysError(`От ${MIN_PAYMENT_DAYS} до ${maxDays} дней`);
       return;
     }
 
-    if (amount < minAmount || amount > maxAmount) {
-      setAmountError(`От ${minAmount} до ${maxAmount} ₽`);
+    if (amount < MIN_PAYMENT_AMOUNT || amount > maxAmount) {
+      setDaysError(`Сумма от ${MIN_PAYMENT_AMOUNT} до ${maxAmount} ₽`);
       return;
     }
 
-    setAmountError("");
+    setDaysError("");
     setPaymentLoading(true);
 
     try {
@@ -201,48 +174,17 @@ export function ProfilePage() {
     <PageShell title="Профиль">
       {user.role !== "superuser" ? (
         <>
-          <div className="grid gap-6 lg:grid-cols-2 lg:items-stretch">
-            {authLink ? (
-              <Card className="flex h-full flex-col">
-                <CardHeader>
-                  <CardTitle>
-                    <CardTitleWithIcon icon={LinkIcon}>Ссылка для входа</CardTitleWithIcon>
-                  </CardTitle>
-                  <CardDescription>Сохраните ссылку для другого устройства. После обновления старая перестаёт работать.</CardDescription>
-                  {showAuthTokenControls && tokenExpiryLabel ? (
-                    <CardAction>
-                      <Badge variant={tokenExpiryColor === "error" ? "destructive" : "outline"} className={cn(expiryBadgeClassName(tokenExpiryColor))}>
-                        Активна {tokenExpiryLabel}
-                      </Badge>
-                    </CardAction>
-                  ) : null}
-                </CardHeader>
-                <CardFooter className="mt-auto gap-2">
-                  <Button type="button" variant="outline" onClick={() => copy(authLink)}>
-                    <Copy />
-                    Скопировать
-                  </Button>
-                  {showAuthTokenControls ? (
-                    <Button type="button" variant="outline" disabled={tokenRefreshLoading} onClick={() => void onRefreshAuthToken()}>
-                      {tokenRefreshLoading ? <Loader2 className="animate-spin" /> : <RefreshCw />}
-                      Обновить
-                    </Button>
-                  ) : null}
-                </CardFooter>
-              </Card>
-            ) : null}
-            {xuiLoading && !xuiClient ? (
-              <Card className="flex h-full min-h-48 flex-col">
-                <CardContent className="flex flex-1 items-center justify-center">
-                  <Loader2 className="size-8 animate-spin text-muted-foreground" />
-                </CardContent>
-              </Card>
-            ) : xuiClient ? (
-              <XuiClientCard client={xuiClient} access="user" className="h-full" />
-            ) : xuiLoaded ? (
-              <SubscriptionNotFound className="h-full min-h-48" />
-            ) : null}
-          </div>
+          {xuiLoading && !xuiClient ? (
+            <Card className="min-h-48">
+              <CardContent className="flex min-h-48 items-center justify-center">
+                <Loader2 className="size-8 animate-spin text-muted-foreground" />
+              </CardContent>
+            </Card>
+          ) : xuiClient ? (
+            <XuiClientCard client={xuiClient} access="user" />
+          ) : xuiLoaded ? (
+            <SubscriptionNotFound />
+          ) : null}
 
           {canRenew && !hasActiveInvoice ? (
             <Card>
@@ -253,28 +195,56 @@ export function ProfilePage() {
                 <CardDescription>Создайте счёт для оплаты подписки</CardDescription>
               </CardHeader>
               <CardContent>
-                <form id="profile-payment-form" className="flex flex-col gap-4" onSubmit={onCreatePayment}>
+                <form id="profile-payment-form" className="flex flex-col gap-5" onSubmit={onCreatePayment}>
+                  <div className="rounded-lg border bg-muted/40 p-4">
+                    <div className="flex flex-wrap items-end justify-between gap-3">
+                      <div>
+                        <p className="text-sm text-muted-foreground">К оплате</p>
+                        <p className="text-3xl font-semibold tracking-tight text-foreground tabular-nums">{amount.toLocaleString("ru-RU")} ₽</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm text-muted-foreground">Срок подписки</p>
+                        <p className="text-xl font-semibold text-foreground tabular-nums">{days} дн.</p>
+                      </div>
+                    </div>
+                    <p className="mt-3 text-sm text-muted-foreground">
+                      {days} × {DAY_PRICE_RUB} ₽/день = {amount.toLocaleString("ru-RU")} ₽<span className="text-muted-foreground/80"></span>
+                    </p>
+                  </div>
+                  {dayPresets.length ? (
+                    <div className="flex flex-wrap gap-2">
+                      {dayPresets.map((preset) => (
+                        <Button key={preset} type="button" variant="outline" size="sm" disabled={paymentsDisabled} onClick={() => onDaysChange(preset)}>
+                          {preset} дней
+                        </Button>
+                      ))}
+                    </div>
+                  ) : null}
                   <div className="flex flex-col gap-2">
-                    <Label htmlFor="profile-amount">Сумма, ₽</Label>
-                    <Input
-                      id="profile-amount"
-                      type="number"
-                      min={minAmount}
-                      max={maxAmount}
-                      value={amount}
+                    <input
+                      type="range"
+                      min={MIN_PAYMENT_DAYS}
+                      max={maxDays}
+                      step={1}
+                      value={Math.min(Math.max(days, MIN_PAYMENT_DAYS), maxDays)}
                       disabled={paymentsDisabled}
-                      aria-invalid={Boolean(amountError)}
-                      onChange={(event) => setAmount(Number(event.target.value))}
-                      className="w-32"
+                      onChange={(event) => onDaysChange(Number(event.target.value))}
+                      className="w-full accent-foreground"
+                      aria-label="Выбор количества дней"
+                      aria-invalid={Boolean(daysError)}
                     />
-                    {amountError ? <p className="text-sm text-destructive">{amountError}</p> : null}
+                    <div className="flex justify-between text-xs text-muted-foreground">
+                      <span>{MIN_PAYMENT_DAYS} дн.</span>
+                      <span>{maxDays} дн.</span>
+                    </div>
+                    {daysError ? <p className="text-sm text-destructive">{daysError}</p> : null}
                   </div>
                 </form>
               </CardContent>
               <CardFooter>
                 <Button type="submit" form="profile-payment-form" disabled={paymentsDisabled || paymentLoading}>
                   {paymentLoading ? <Loader2 className="animate-spin" /> : null}
-                  Создать и оплатить
+                  Оплатить {amount.toLocaleString("ru-RU")} ₽
                 </Button>
               </CardFooter>
             </Card>

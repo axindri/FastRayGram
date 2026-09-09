@@ -4,6 +4,7 @@ import type {
   AdminUser,
   AppConfig,
   CreateUserPayload,
+  Finances,
   Invoice,
   Paginated,
   RegisterValidation,
@@ -140,6 +141,10 @@ export async function confirmPaymentReturn(invoiceId: number, mdOrder?: string |
 
 export async function fetchStatus(): Promise<StatusResponse> {
   return request<StatusResponse>(`${API_PREFIX}/status`);
+}
+
+export async function fetchFinances(): Promise<Finances> {
+  return request<Finances>(`${API_PREFIX}/tw/finances`);
 }
 
 export async function fetchAdminLinks(): Promise<AdminLinks> {
