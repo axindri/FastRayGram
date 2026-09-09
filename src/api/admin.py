@@ -3,6 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.deps import get_current_user, require_roles
 from src.core.enums import Role
+from src.core.payments import invoice_renewal_days
 from src.core.settings import settings
 from src.models.common import PaginatedResponse, build_paginated_response
 from src.models.fields import USERNAME_MAX_LENGTH
@@ -162,9 +163,13 @@ async def check_invoices(
         user = await user_service.get_by_id(db, invoice.user_id)
         if user is None:
             continue
+        try:
+            renewal_days = invoice_renewal_days(invoice.amount)
+        except ValueError:
+            renewal_days = settings.app.default_expiry_time_days
         await xui_service.update_client_by_email(
             user.username,
-            UpdateClientRequest(expiry_time_days=settings.app.default_expiry_time_days, enable=True),
+            UpdateClientRequest(expiry_time_days=renewal_days, enable=True),
         )
         await xui_service.reset_client_traffic_by_email(user.username)
     return payed_invoices

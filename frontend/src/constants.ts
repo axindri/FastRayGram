@@ -16,11 +16,6 @@ export const RATE_LIMIT_RETURN_KEY = "rateLimitReturnPath";
 export const RENEWAL_WINDOW_MS = 24 * 60 * 60 * 1000;
 export const INVOICES_PAGE_LIMIT = 3;
 
-// Payment calculator (frontend-only for now; backend will sync later)
-export const DAY_PRICE_RUB = 10;
-export const MIN_PAYMENT_DAYS = 50;
-export const MIN_PAYMENT_AMOUNT = DAY_PRICE_RUB * MIN_PAYMENT_DAYS;
-
 // Validation
 export const MARK_MAX_LENGTH = 64;
 export const MARK_HINT = `До ${MARK_MAX_LENGTH} символов`;

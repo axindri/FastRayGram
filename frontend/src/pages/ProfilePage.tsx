@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 
 import { canRenewSubscription, createInvoice, fetchConfig, fetchXuiMe } from "@/api";
-import { DAY_PRICE_RUB, MIN_PAYMENT_AMOUNT, MIN_PAYMENT_DAYS, RENEW_HINT } from "@/constants";
+import { RENEW_HINT } from "@/constants";
 import { useAuth } from "@/auth";
 import { AsyncListState } from "@/components/AsyncListState";
 import { CardTitleWithIcon } from "@/components/CardTitleWithIcon";
@@ -24,6 +24,14 @@ import { getApiErrorMessage } from "@/utils/apiError";
 import { isInvoiceActive, type UserRole } from "@/types";
 
 const DAY_PRESETS = [50, 70, 100] as const;
+
+type PaymentConfig = {
+  dayPrice: number;
+  minDays: number;
+  maxDays: number;
+  minAmount: number;
+  maxAmount: number;
+};
 
 function QuickLinks({ role }: { role: UserRole }) {
   const sections = useMemo(() => flattenNavLinks(filterNavItems(role, { excludePaths: ["/profile", "/settings"] })), [role]);
@@ -54,8 +62,8 @@ function QuickLinks({ role }: { role: UserRole }) {
 export function ProfilePage() {
   const { user, refreshUser } = useAuth();
 
-  const [maxAmount, setMaxAmount] = useState(1000);
-  const [days, setDays] = useState(MIN_PAYMENT_DAYS);
+  const [paymentConfig, setPaymentConfig] = useState<PaymentConfig | null>(null);
+  const [days, setDays] = useState(0);
   const [daysError, setDaysError] = useState("");
   const { loading: statusLoading, paymentBlocked } = useServiceStatus();
   const [profileLoading, setProfileLoading] = useState(false);
@@ -64,9 +72,16 @@ export function ProfilePage() {
   const [xuiLoading, setXuiLoading] = useState(false);
   const [xuiLoaded, setXuiLoaded] = useState(false);
 
-  const maxDays = useMemo(() => Math.floor(maxAmount / DAY_PRICE_RUB), [maxAmount]);
-  const amount = days * DAY_PRICE_RUB;
-  const dayPresets = useMemo(() => DAY_PRESETS.filter((preset) => preset >= MIN_PAYMENT_DAYS && preset <= maxDays), [maxDays]);
+  const dayPrice = paymentConfig?.dayPrice ?? 0;
+  const minDays = paymentConfig?.minDays ?? 0;
+  const maxDays = paymentConfig?.maxDays ?? 0;
+  const minAmount = paymentConfig?.minAmount ?? 0;
+  const maxAmount = paymentConfig?.maxAmount ?? 0;
+  const amount = paymentConfig ? days * dayPrice : 0;
+  const dayPresets = useMemo(
+    () => (paymentConfig ? DAY_PRESETS.filter((preset) => preset >= minDays && preset <= maxDays) : []),
+    [paymentConfig, minDays, maxDays],
+  );
 
   const loadXuiClient = async () => {
     setXuiLoading(true);
@@ -107,15 +122,48 @@ export function ProfilePage() {
   useEffect(() => {
     let cancelled = false;
 
-    void fetchConfig().then((config) => {
-      if (cancelled) {
-        return;
-      }
+    void fetchConfig()
+      .then((config) => {
+        if (cancelled) {
+          return;
+        }
 
-      const nextMaxAmount = Math.max(config.max_invoice_amount, MIN_PAYMENT_AMOUNT);
-      setMaxAmount(nextMaxAmount);
-      setDays(MIN_PAYMENT_DAYS);
-    });
+        const nextDayPrice = config.invoice_day_price_rub;
+        const nextMinDays = config.min_payment_days;
+        const nextMaxDays = config.max_payment_days;
+        const nextMinAmount = config.min_invoice_amount;
+        const nextMaxAmount = config.max_invoice_amount;
+
+        if (
+          !Number.isFinite(nextDayPrice) ||
+          nextDayPrice <= 0 ||
+          !Number.isFinite(nextMinDays) ||
+          !Number.isFinite(nextMaxDays) ||
+          nextMinDays < 1 ||
+          nextMaxDays < nextMinDays ||
+          !Number.isFinite(nextMinAmount) ||
+          !Number.isFinite(nextMaxAmount) ||
+          nextMinAmount < 1 ||
+          nextMaxAmount < nextMinAmount
+        ) {
+          setPaymentConfig(null);
+          return;
+        }
+
+        setPaymentConfig({
+          dayPrice: nextDayPrice,
+          minDays: nextMinDays,
+          maxDays: nextMaxDays,
+          minAmount: nextMinAmount,
+          maxAmount: nextMaxAmount,
+        });
+        setDays(nextMinDays);
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setPaymentConfig(null);
+        }
+      });
 
     return () => {
       cancelled = true;
@@ -130,6 +178,7 @@ export function ProfilePage() {
   const hasActiveInvoice = invoices.some((item) => isInvoiceActive(item.status));
   const paymentsDisabled = statusLoading || paymentBlocked;
   const canRenew = xuiClient ? canRenewSubscription(xuiClient.expiry_datetime) : false;
+  const showPaymentBlock = Boolean(paymentConfig) && canRenew && !hasActiveInvoice;
 
   const onDaysChange = (nextDays: number) => {
     setDays(nextDays);
@@ -141,17 +190,17 @@ export function ProfilePage() {
   const onCreatePayment = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (paymentsDisabled || !canRenew) {
+    if (!paymentConfig || paymentsDisabled || !canRenew) {
       return;
     }
 
-    if (!Number.isInteger(days) || days < MIN_PAYMENT_DAYS || days > maxDays) {
-      setDaysError(`От ${MIN_PAYMENT_DAYS} до ${maxDays} дней`);
+    if (!Number.isInteger(days) || days < minDays || days > maxDays) {
+      setDaysError(`От ${minDays} до ${maxDays} дней`);
       return;
     }
 
-    if (amount < MIN_PAYMENT_AMOUNT || amount > maxAmount) {
-      setDaysError(`Сумма от ${MIN_PAYMENT_AMOUNT} до ${maxAmount} ₽`);
+    if (amount < minAmount || amount > maxAmount || amount % dayPrice !== 0) {
+      setDaysError(`Сумма от ${minAmount} до ${maxAmount} ₽`);
       return;
     }
 
@@ -186,7 +235,7 @@ export function ProfilePage() {
             <SubscriptionNotFound />
           ) : null}
 
-          {canRenew && !hasActiveInvoice ? (
+          {showPaymentBlock && paymentConfig ? (
             <Card>
               <CardHeader>
                 <CardTitle>
@@ -208,7 +257,7 @@ export function ProfilePage() {
                       </div>
                     </div>
                     <p className="mt-3 text-sm text-muted-foreground">
-                      {days} × {DAY_PRICE_RUB} ₽/день = {amount.toLocaleString("ru-RU")} ₽<span className="text-muted-foreground/80"></span>
+                      {days} × {dayPrice} ₽/день = {amount.toLocaleString("ru-RU")} ₽
                     </p>
                   </div>
                   {dayPresets.length ? (
@@ -223,10 +272,10 @@ export function ProfilePage() {
                   <div className="flex flex-col gap-2">
                     <input
                       type="range"
-                      min={MIN_PAYMENT_DAYS}
+                      min={minDays}
                       max={maxDays}
                       step={1}
-                      value={Math.min(Math.max(days, MIN_PAYMENT_DAYS), maxDays)}
+                      value={Math.min(Math.max(days, minDays), maxDays)}
                       disabled={paymentsDisabled}
                       onChange={(event) => onDaysChange(Number(event.target.value))}
                       className="w-full accent-foreground"
@@ -234,7 +283,7 @@ export function ProfilePage() {
                       aria-invalid={Boolean(daysError)}
                     />
                     <div className="flex justify-between text-xs text-muted-foreground">
-                      <span>{MIN_PAYMENT_DAYS} дн.</span>
+                      <span>{minDays} дн.</span>
                       <span>{maxDays} дн.</span>
                     </div>
                     {daysError ? <p className="text-sm text-destructive">{daysError}</p> : null}
