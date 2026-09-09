@@ -56,6 +56,9 @@ async def read_status(
 async def app_config() -> dict[str, str | int]:
     return {
         "version": settings.app.version,
+        "invoice_day_price_rub": settings.app.invoice_day_price_rub,
+        "min_payment_days": settings.app.min_payment_days,
+        "max_payment_days": settings.app.max_payment_days,
         "min_invoice_amount": settings.app.min_invoice_amount,
         "max_invoice_amount": settings.app.max_invoice_amount,
         "default_expiry_time_days": settings.app.default_expiry_time_days,

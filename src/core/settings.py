@@ -12,7 +12,7 @@ class CacheSettings(BaseModel):
 
 class AppSettings(BaseModel):
     name: str = Field(default="Fast Ray Gram API")
-    version: str = Field(default="1.7.0")
+    version: str = Field(default="1.8.0")
     host: str = Field(default="0.0.0.0")
     port: int = Field(default=8000)
     debug: bool = Field(default=False)
@@ -20,8 +20,9 @@ class AppSettings(BaseModel):
     jwt_secret: str = Field(default="jwt_secret")
     jwt_exp_days: int = Field(default=365)
     superuser_token: str = Field(default="superuser_token")
-    min_invoice_amount: int = Field(default=100)
-    max_invoice_amount: int = Field(default=1000)
+    invoice_day_price_rub: int = Field(default=10, ge=1)
+    min_payment_days: int = Field(default=50, ge=1)
+    max_payment_days: int = Field(default=100, ge=1)
     default_expiry_time_days: int = Field(default=30)
     registration_expiry_time_days: int = Field(default=3)
     default_registration_code_max_uses: int = Field(default=1)
@@ -29,6 +30,16 @@ class AppSettings(BaseModel):
     monitoring_service_url: str = Field(default="http://localhost:8000/status/")
     boosty_url: str = Field(default="http://localhost")
     github_url: str = Field(default="https://github.com/axindri/FastRayGram")
+
+    @computed_field
+    @property
+    def min_invoice_amount(self) -> int:
+        return self.invoice_day_price_rub * self.min_payment_days
+
+    @computed_field
+    @property
+    def max_invoice_amount(self) -> int:
+        return self.invoice_day_price_rub * self.max_payment_days
 
 
 class DatabaseSettings(BaseModel):

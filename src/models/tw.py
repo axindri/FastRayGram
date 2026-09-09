@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from src.core.settings import settings
 
@@ -17,13 +17,26 @@ class FinancesResponse(BaseModel):
 
 
 class NewInvoiceRequest(BaseModel):
-    amount: int = Field(
-        default=settings.app.min_invoice_amount,
-        ge=settings.app.min_invoice_amount,
-        le=settings.app.max_invoice_amount,
-    )
+    amount: int = Field(default=settings.app.min_invoice_amount)
     return_url: str
     fail_url: str
+
+    @field_validator("amount")
+    @classmethod
+    def validate_amount(cls, value: int) -> int:
+        price = settings.app.invoice_day_price_rub
+        min_days = settings.app.min_payment_days
+        max_days = settings.app.max_payment_days
+        min_amount = settings.app.min_invoice_amount
+        max_amount = settings.app.max_invoice_amount
+        if value < min_amount or value > max_amount:
+            raise ValueError(f"Amount must be between {min_amount} and {max_amount}")
+        if value % price != 0:
+            raise ValueError(f"Amount must be a multiple of {price}")
+        days = value // price
+        if days < min_days or days > max_days:
+            raise ValueError(f"Payment must cover from {min_days} to {max_days} days")
+        return value
 
 
 class PaymentReturnRequest(BaseModel):

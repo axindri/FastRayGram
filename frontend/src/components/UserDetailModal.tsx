@@ -12,7 +12,6 @@ import { CardTitleWithIcon } from "@/components/CardTitleWithIcon";
 import { InvoiceCard } from "@/components/InvoiceCard";
 import { PaginatedList } from "@/components/PaginatedList";
 import { SubscriptionNotFound } from "@/components/SubscriptionNotFound";
-import { SubscriptionLink } from "@/components/SubscriptionLink";
 import { UserAvatar } from "@/components/UserAvatar";
 import { XuiClientCard } from "@/components/XuiClientCard";
 
@@ -111,7 +110,6 @@ export function UserDetailModal({ open, user, onClose }: UserDetailModalProps) {
                     Заметка: <span className="font-semibold text-foreground">{user.mark}</span>
                   </p>
                 ) : null}
-                {user.sub_url ? <SubscriptionLink href={user.sub_url} /> : null}
               </CardContent>
             </Card>
 

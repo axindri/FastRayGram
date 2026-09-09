@@ -10,8 +10,14 @@ from src.core.enums import InvoiceStatus, Role
 from src.core.logger import get_logger
 from src.core.settings import settings
 from src.models.tw import InvoiceResponse
-from src.models.users import AdminUserResponse, CreateUserRequest, UpdateUserRoleResponse, UserProfileResponse, UserStatsResponse
-from src.models.xui import ClientResponse, CreateClientRequest
+from src.models.users import (
+    AdminUserResponse,
+    CreateUserRequest,
+    UpdateUserRoleResponse,
+    UserProfileResponse,
+    UserStatsResponse,
+)
+from src.models.xui import ClientResponse, CreateClientRequest, UpdateClientRequest
 from src.schemas.invoices import Invoice
 from src.schemas.registration_codes import RegistrationCode
 from src.schemas.users import User
@@ -26,7 +32,9 @@ class UserService:
     jwt_service: JwtService
     xui_service: XuiService
 
-    async def create(self, db: AsyncSession, user: CreateUserRequest, *, registration_code_id: int | None = None) -> str:
+    async def create(
+        self, db: AsyncSession, user: CreateUserRequest, *, registration_code_id: int | None = None
+    ) -> str:
         token_position = 0
         await self.xui_service.add_client_to_inbounds(
             CreateClientRequest(

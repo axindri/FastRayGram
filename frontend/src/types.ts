@@ -166,6 +166,9 @@ export type XuiClient = {
 
 export type AppConfig = {
   version: string;
+  invoice_day_price_rub: number;
+  min_payment_days: number;
+  max_payment_days: number;
   min_invoice_amount: number;
   max_invoice_amount: number;
   default_expiry_time_days: number;
@@ -173,6 +176,14 @@ export type AppConfig = {
   default_limit_ips: number;
   boosty_url: string;
   github_url: string;
+};
+
+export type Finances = {
+  balance: number;
+  currency: string;
+  monthly_cost: number;
+  total_paid: number;
+  hours_left: number;
 };
 
 export type RegistrationCode = {

@@ -11,7 +11,7 @@ from src.services.tw import TimeWebService, get_timeweb_service
 router = APIRouter(prefix="/tw", tags=["timeweb"])
 
 
-@router.get("/finances", dependencies=[Depends(require_roles(Role.SUPERUSER))])
+@router.get("/finances", dependencies=[Depends(require_roles(Role.SUPERUSER, Role.ADMIN))])
 async def get_finances(timeweb_service: TimeWebService = Depends(get_timeweb_service)) -> FinancesResponse:
     finances = await timeweb_service.get_finances()
     return finances

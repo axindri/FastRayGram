@@ -100,25 +100,28 @@ class XuiService:
         )
 
     async def update_client_by_email(self, email: str, client: UpdateClientRequest) -> None:
+        current = await self.get_client_by_email(email)
+        if current is None:
+            raise HTTPException(status_code=404, detail="Client not found in XUI")
+
+        if client.expiry_time_days is not None:
+            expiry_time = int((datetime.now() + timedelta(days=client.expiry_time_days)).timestamp()) * 1000
+        else:
+            expiry_time = int(current.expiry_datetime.timestamp()) * 1000
+
+        payload: dict[str, str | int | bool | float] = {
+            "email": email,
+            "enable": current.enable if client.enable is None else client.enable,
+            "limitIp": current.limit_ips if client.limit_ips is None else client.limit_ips,
+            "comment": current.comment if client.comment is None else client.comment,
+            "expiryTime": expiry_time,
+            "totalGB": int(current.total_gb * (1024**3)),
+            "flow": current.flow,
+        }
+
         headers = {
             "Authorization": f"Bearer {self.api_key}",
         }
-
-        payload: dict[str, str | int | bool] = {
-            "email": email,
-        }
-        if client.expiry_time_days is not None:
-            payload["expiryTime"] = int((datetime.now() + timedelta(days=client.expiry_time_days)).timestamp()) * 1000
-        if client.enable is not None:
-            payload["enable"] = client.enable
-        if client.limit_ips is not None:
-            payload["limitIp"] = client.limit_ips
-        if client.comment is not None:
-            payload["comment"] = client.comment
-
-        if len(payload) == 1:
-            raise HTTPException(status_code=400, detail="Nothing to update")
-
         response = await AsyncClient(timeout=self.timeout).post(
             f"{self.url}/panel/api/clients/update/{email}",
             headers=headers,

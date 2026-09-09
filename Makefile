@@ -19,12 +19,14 @@ help:
 	@echo "  make build           пересборка Docker-образов (frontend собирается внутри образа)"
 	@echo "  make update          pull + build"
 	@echo "  make start           запуск в фоне (prod: docker-compose.yml)"
+	@echo "  make start-logs      запуск в фоне с логированием"
 	@echo "  make stop            остановка и удаление контейнеров"
 	@echo "  make restart         stop, затем start"
 	@echo ""
 	@echo "Dev-режим: добавьте MODE=dev к любой команде"
 	@echo "  make build MODE=dev"
 	@echo "  make start MODE=dev"
+	@echo "  make start-logs MODE=dev"
 	@echo "  make stop MODE=dev"
 	@echo "  make restart MODE=dev"
 
@@ -38,6 +40,9 @@ update: pull build
 
 start:
 	$(COMPOSE) $(COMPOSE_ARGS) up -d --build
+
+start-logs:
+	$(COMPOSE) $(COMPOSE_ARGS) up --build
 
 stop:
 	$(COMPOSE) $(COMPOSE_ARGS) down
