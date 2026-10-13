@@ -1,8 +1,8 @@
 function copyWithExecCommand(text: string): void {
   const textarea = document.createElement("textarea");
   textarea.value = text;
+  // iOS Safari: avoid readonly + offscreen tricks that break selection.
   textarea.setAttribute("readonly", "");
-  // iOS Safari: keep the node in-viewport and selectable during the user gesture.
   textarea.style.position = "fixed";
   textarea.style.top = "0";
   textarea.style.left = "0";
@@ -20,7 +20,7 @@ function copyWithExecCommand(text: string): void {
   const selection = window.getSelection();
   const selectedRange = selection && selection.rangeCount > 0 ? selection.getRangeAt(0) : null;
 
-  textarea.focus();
+  textarea.focus({ preventScroll: true });
   textarea.select();
   textarea.setSelectionRange(0, textarea.value.length);
 
@@ -40,19 +40,16 @@ function copyWithExecCommand(text: string): void {
 }
 
 export async function copyToClipboard(text: string): Promise<void> {
-  // Prefer a synchronous copy path so callers inside closing menus / dropdowns
-  // (mobile Safari) still count as a user gesture. Clipboard API is often rejected
-  // after Radix DropdownMenu moves focus away on select.
-  try {
-    copyWithExecCommand(text);
-    return;
-  } catch {
-    // Fall through when execCommand is unavailable or blocked.
+  // Clipboard API first — works from a real button click (CopyableInput).
+  // execCommand is a fallback for older browsers / non-secure contexts.
+  if (navigator.clipboard?.writeText && window.isSecureContext) {
+    try {
+      await navigator.clipboard.writeText(text);
+      return;
+    } catch {
+      // Fall through to legacy path.
+    }
   }
 
-  if (!navigator.clipboard?.writeText || !window.isSecureContext) {
-    throw new Error("copy failed");
-  }
-
-  await navigator.clipboard.writeText(text);
+  copyWithExecCommand(text);
 }
