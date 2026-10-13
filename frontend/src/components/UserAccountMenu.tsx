@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Link2, Loader2, LogOut, RefreshCw } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -37,6 +37,7 @@ export function UserAccountMenu() {
   const navigate = useNavigate();
   const { user, logout, login } = useAuth();
   const copy = useCopyToClipboard();
+  const copiedOnPointerDownRef = useRef(false);
   const [authToken, setAuthToken] = useState(() => localStorage.getItem(TOKEN_KEY) || "");
   const [tokenRefreshLoading, setTokenRefreshLoading] = useState(false);
   const [confirmRefresh, setConfirmRefresh] = useState(false);
@@ -120,7 +121,25 @@ export function UserAccountMenu() {
                 </div>
               </DropdownMenuLabel>
               {authLink ? (
-                <DropdownMenuItem onSelect={onCopyAuthLink}>
+                <DropdownMenuItem
+                  onPointerDown={(event) => {
+                    // Copy during the gesture before the menu closes and drops
+                    // user-activation (mobile Safari rejects async clipboard writes).
+                    if (event.button !== 0) {
+                      return;
+                    }
+                    copiedOnPointerDownRef.current = true;
+                    onCopyAuthLink();
+                  }}
+                  onSelect={() => {
+                    if (copiedOnPointerDownRef.current) {
+                      copiedOnPointerDownRef.current = false;
+                      return;
+                    }
+                    // Keyboard activation (Enter/Space) — pointerDown may not run.
+                    onCopyAuthLink();
+                  }}
+                >
                   <Link2 />
                   Скопировать
                 </DropdownMenuItem>
