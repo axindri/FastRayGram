@@ -1,55 +1,88 @@
+type CopyAttempt = {
+  step: string;
+  ok: boolean;
+  detail?: string;
+};
+
+function describeError(error: unknown): string {
+  if (error instanceof DOMException) {
+    return `DOMException ${error.name}: ${error.message}`;
+  }
+  if (error instanceof Error) {
+    return `${error.name}: ${error.message}`;
+  }
+  return String(error);
+}
+
+function buildCopyError(attempts: CopyAttempt[], extra: Record<string, string | number | boolean>): Error {
+  const lines = [
+    "Не удалось скопировать",
+    ...attempts.map((attempt) => `- ${attempt.step}: ${attempt.ok ? "ok" : "fail"}${attempt.detail ? ` (${attempt.detail})` : ""}`),
+    ...Object.entries(extra).map(([key, value]) => `- ${key}: ${String(value)}`),
+  ];
+  return new Error(lines.join("\n"));
+}
+
 function copyWithExecCommand(text: string): void {
   const textarea = document.createElement("textarea");
   textarea.value = text;
-  // iOS Safari: avoid readonly + offscreen tricks that break selection.
-  textarea.setAttribute("readonly", "");
   textarea.style.position = "fixed";
-  textarea.style.top = "0";
-  textarea.style.left = "0";
-  textarea.style.width = "1px";
-  textarea.style.height = "1px";
-  textarea.style.padding = "0";
-  textarea.style.border = "none";
-  textarea.style.outline = "none";
-  textarea.style.boxShadow = "none";
-  textarea.style.background = "transparent";
-  textarea.style.opacity = "0";
-
+  textarea.style.left = "-9999px";
   document.body.appendChild(textarea);
-
-  const selection = window.getSelection();
-  const selectedRange = selection && selection.rangeCount > 0 ? selection.getRangeAt(0) : null;
-
-  textarea.focus({ preventScroll: true });
+  textarea.focus();
   textarea.select();
-  textarea.setSelectionRange(0, textarea.value.length);
 
   try {
     if (!document.execCommand("copy")) {
-      throw new Error("copy failed");
+      throw new Error("execCommand('copy') returned false");
     }
   } finally {
     document.body.removeChild(textarea);
-    if (selection) {
-      selection.removeAllRanges();
-      if (selectedRange) {
-        selection.addRange(selectedRange);
-      }
-    }
   }
 }
 
 export async function copyToClipboard(text: string): Promise<void> {
-  // Clipboard API first — works from a real button click (CopyableInput).
-  // execCommand is a fallback for older browsers / non-secure contexts.
-  if (navigator.clipboard?.writeText && window.isSecureContext) {
+  const attempts: CopyAttempt[] = [];
+  const env = {
+    secureContext: window.isSecureContext,
+    protocol: window.location.protocol,
+    hasClipboard: Boolean(navigator.clipboard),
+    hasWriteText: Boolean(navigator.clipboard?.writeText),
+    hasFocus: document.hasFocus(),
+    visibility: document.visibilityState,
+    textLength: text.length,
+    ua: navigator.userAgent.slice(0, 80),
+  };
+
+  if (navigator.clipboard?.writeText) {
     try {
       await navigator.clipboard.writeText(text);
       return;
-    } catch {
-      // Fall through to legacy path.
+    } catch (error) {
+      attempts.push({
+        step: "clipboard.writeText",
+        ok: false,
+        detail: describeError(error),
+      });
     }
+  } else {
+    attempts.push({
+      step: "clipboard.writeText",
+      ok: false,
+      detail: env.hasClipboard ? "writeText отсутствует" : "navigator.clipboard отсутствует",
+    });
   }
 
-  copyWithExecCommand(text);
+  try {
+    copyWithExecCommand(text);
+    return;
+  } catch (error) {
+    attempts.push({
+      step: "execCommand",
+      ok: false,
+      detail: describeError(error),
+    });
+  }
+
+  throw buildCopyError(attempts, env);
 }
