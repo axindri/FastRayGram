@@ -1,5 +1,5 @@
 import { Copy } from "lucide-react";
-import type { ReactNode } from "react";
+import { useRef, type ReactNode } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,21 +15,33 @@ type CopyableInputProps = {
 
 export function CopyableInput({ value, label, highlight = false, buttonVariant = "text" }: CopyableInputProps) {
   const copy = useCopyToClipboard();
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const onCopy = () => {
+    // Pass the visible input so iOS can copy via on-screen selection over HTTP.
+    copy(value, inputRef.current);
+  };
 
   const copyButton =
     buttonVariant === "icon" ? (
-      <Button type="button" variant="outline" size="icon" className="rounded-l-none" aria-label="Скопировать" onClick={() => copy(value)}>
+      <Button type="button" variant="outline" size="icon" className="rounded-l-none" aria-label="Скопировать" onClick={onCopy}>
         <Copy />
       </Button>
     ) : (
-      <Button type="button" variant="outline" className="rounded-l-none" onClick={() => copy(value)}>
+      <Button type="button" variant="outline" className="rounded-l-none" onClick={onCopy}>
         Скопировать
       </Button>
     );
 
   const input = (
     <div className="flex w-full">
-      <Input value={value} readOnly className={cn("rounded-r-none text-foreground", highlight && "font-semibold")} />
+      <Input
+        ref={inputRef}
+        value={value}
+        readOnly
+        className={cn("rounded-r-none text-foreground", highlight && "font-semibold")}
+        onFocus={(event) => event.currentTarget.select()}
+      />
       <div className="-ml-px shrink-0">{copyButton}</div>
     </div>
   );
