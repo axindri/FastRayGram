@@ -1,10 +1,11 @@
 import { useMemo, useState } from "react";
-import { Link2, Loader2, LogOut, RefreshCw } from "lucide-react";
+import { Loader2, LogOut, RefreshCw } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
 import { buildAuthLink, refreshMyToken } from "@/api";
 import { useAuth } from "@/auth";
+import { CopyableInput } from "@/components/CopyableInput";
 import { UserAvatar } from "@/components/UserAvatar";
 import {
   AlertDialog,
@@ -20,7 +21,6 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { ROLE_LABELS, TOKEN_KEY } from "@/constants";
 import { BADGE_STYLES } from "@/lib/badge-styles";
 import { cn } from "@/lib/utils";
-import { useCopyToClipboard } from "@/hooks/useCopyToClipboard";
 import { getApiErrorMessage } from "@/utils/apiError";
 import { displayName } from "@/utils/format";
 import { formatJwtExpiryRemaining, isJwtToken, jwtExpiryTagColor } from "@/utils/jwt";
@@ -36,7 +36,6 @@ function expiryBadgeClassName(color: "success" | "error" | "default") {
 export function UserAccountMenu() {
   const navigate = useNavigate();
   const { user, logout, login } = useAuth();
-  const copy = useCopyToClipboard();
   const [authToken, setAuthToken] = useState(() => localStorage.getItem(TOKEN_KEY) || "");
   const [tokenRefreshLoading, setTokenRefreshLoading] = useState(false);
   const [confirmRefresh, setConfirmRefresh] = useState(false);
@@ -53,13 +52,6 @@ export function UserAccountMenu() {
   const onLogout = () => {
     logout();
     navigate("/login");
-  };
-
-  const onCopyAuthLink = () => {
-    if (!authLink) {
-      return;
-    }
-    copy(authLink);
   };
 
   const onRefreshAuthToken = async () => {
@@ -93,7 +85,7 @@ export function UserAccountMenu() {
             <span className="truncate">{name}</span>
           </button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-56">
+        <DropdownMenuContent align="end" className="w-72">
           <DropdownMenuLabel className="font-normal">
             <div className="flex flex-col gap-1">
               <p className="text-sm leading-none font-medium">{name}</p>
@@ -120,10 +112,15 @@ export function UserAccountMenu() {
                 </div>
               </DropdownMenuLabel>
               {authLink ? (
-                <DropdownMenuItem onSelect={onCopyAuthLink}>
-                  <Link2 />
-                  Скопировать
-                </DropdownMenuItem>
+                <div
+                  className="px-2 pb-1.5"
+                  onPointerDown={(event) => {
+                    // Keep the menu open so the visible input stays selectable on iOS.
+                    event.preventDefault();
+                  }}
+                >
+                  <CopyableInput value={authLink} buttonVariant="icon" />
+                </div>
               ) : null}
               {canRefreshToken ? (
                 <DropdownMenuItem
