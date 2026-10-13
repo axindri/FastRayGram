@@ -17,10 +17,7 @@ export function CopyableInput({ value, label, highlight = false, buttonVariant =
   const copy = useCopyToClipboard();
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const onCopy = () => {
-    // Pass the visible input so iOS can copy via on-screen selection over HTTP.
-    copy(value, inputRef.current);
-  };
+  const onCopy = () => copy(value, inputRef.current);
 
   const copyButton =
     buttonVariant === "icon" ? (
