@@ -40,6 +40,7 @@ class AppSettings(BaseModel):
     jwt_secret: str = Field(default="jwt_secret")
     jwt_exp_days: int = Field(default=365)
     superuser_token: str = Field(default="superuser_token")
+    decimal_places: int = Field(default=2)
 
     default_expiry_time_days: int = Field(default=30)
 
@@ -79,25 +80,6 @@ class HostingSettings(BaseModel):
     base_url: str = Field(default="https://my.aeza.net/api/v2")
 
 
-class TimeWebSettings(BaseModel):
-    base_url: str = Field(default="https://api.timeweb.cloud/api/v1")
-    portal_url: str = Field(default="https://timeweb.cloud/portal/v4")
-    servers_url: str = Field(default="https://timeweb.cloud/my/servers")
-    api_url: str = Field(default="https://timeweb.cloud/api/v1")
-    token: str = Field(default="")
-    payer_id: int = Field(default=0)
-    default_headers: dict = Field(
-        default={
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) \
-            AppleWebKit/537.36 (KHTML, like Gecko) \
-            Chrome/120.0.0.0 Safari/537.36",
-            "Accept": "*/*",
-            "Accept-Encoding": "gzip, deflate, br",
-            "Connection": "keep-alive",
-        }
-    )
-
-
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         env_file=".env",
@@ -112,9 +94,6 @@ class Settings(BaseSettings):
     database: DatabaseSettings = Field(default_factory=DatabaseSettings, alias="DB")
     xui: XuiPanelSettings = Field(default_factory=XuiPanelSettings, alias="XUI")
     hosting: HostingSettings = Field(default_factory=HostingSettings, alias="HOSTING")
-
-    # deprecated
-    timeweb: TimeWebSettings = Field(default_factory=TimeWebSettings, alias="TIMEWEB")
 
 
 @lru_cache

@@ -9,7 +9,7 @@ from src.core.settings import settings
 class FinancesResponse(BaseModel):
     balance: float
     currency: str
-    decimal: int = Field(default=2)
+    decimal_places: int = Field(default=settings.app.decimal_places)
 
     model_config = ConfigDict(from_attributes=True)
 
