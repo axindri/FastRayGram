@@ -9,7 +9,6 @@ from src.api.admin import router as admin_router
 from src.api.hosting import router as hosting_router
 from src.api.register import router as register_router
 from src.api.root import router as root_router
-from src.api.tw import router as tw_router
 from src.api.user import router as user_router
 from src.api.xui import router as xui_router
 from src.core.cache import request_key_builder
