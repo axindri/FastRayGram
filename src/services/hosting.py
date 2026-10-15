@@ -39,7 +39,7 @@ class HostingService:
         response.raise_for_status()
         data = response.json()
         return FinancesResponse(
-            balance=data["balance"],
+            balance=data["balance"] / (10**settings.app.decimal_places),
             currency=data["currency"],
         )
 

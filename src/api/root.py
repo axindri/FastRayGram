@@ -65,6 +65,7 @@ async def app_config() -> dict[str, str | int]:
         "registration_expiry_time_days": settings.app.registration_expiry_time_days,
         "default_limit_ips": settings.app.default_limit_ips,
         "currency": settings.payment.currency,
+        "decimal_places": settings.app.decimal_places,
         "boosty_url": settings.app.boosty_url,
         "github_url": settings.app.github_url,
     }
