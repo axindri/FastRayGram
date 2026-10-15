@@ -5,14 +5,15 @@ from src.core.deps import get_current_user, require_roles
 from src.core.enums import Role
 from src.core.payments import invoice_renewal_days
 from src.core.settings import settings
+from src.models.admin import AdminInvoiceResponse
 from src.models.common import PaginatedResponse, build_paginated_response
 from src.models.fields import USERNAME_MAX_LENGTH
+from src.models.hosting import InvoiceResponse
 from src.models.registration import (
     CreateRegistrationCodeRequest,
     ExtendRegistrationCodeRequest,
     RegistrationCodeResponse,
 )
-from src.models.tw import AdminInvoiceResponse, InvoiceResponse
 from src.models.users import (
     AdminUserResponse,
     CreateUserRequest,

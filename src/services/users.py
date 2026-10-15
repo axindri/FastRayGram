@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.core.enums import InvoiceStatus, Role
 from src.core.logger import get_logger
 from src.core.settings import settings
-from src.models.tw import InvoiceResponse
+from src.models.hosting import InvoiceResponse
 from src.models.users import (
     AdminUserResponse,
     CreateUserRequest,
