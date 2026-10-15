@@ -23,9 +23,10 @@ from src.models.users import (
 )
 from src.models.xui import UpdateClientRequest
 from src.schemas.users import User
+from src.services.admin import AdminService, get_admin_service
 from src.services.db import get_db
+from src.services.hosting import HostingService, get_hosting_service
 from src.services.registration import RegistrationService, get_registration_service
-from src.services.tw import TimeWebService, get_timeweb_service
 from src.services.users import UserService, get_user_service
 from src.services.xui import XuiService, get_xui_service
 
@@ -137,9 +138,9 @@ async def list_invoices(
     id: int | None = Query(default=None, ge=1),
     username: str | None = Query(default=None, max_length=USERNAME_MAX_LENGTH),
     db: AsyncSession = Depends(get_db),
-    tw_service: TimeWebService = Depends(get_timeweb_service),
+    admin_service: AdminService = Depends(get_admin_service),
 ) -> PaginatedResponse[AdminInvoiceResponse]:
-    items, total, page = await tw_service.list_invoices(
+    items, total, page = await admin_service.get_invoices(
         db,
         page=page,
         limit=limit,
@@ -154,11 +155,11 @@ async def list_invoices(
 @router.get("/invoices/check")
 async def check_invoices(
     db: AsyncSession = Depends(get_db),
-    tw_service: TimeWebService = Depends(get_timeweb_service),
+    hosting_service: HostingService = Depends(get_hosting_service),
     xui_service: XuiService = Depends(get_xui_service),
     user_service: UserService = Depends(get_user_service),
 ) -> list[InvoiceResponse]:
-    payed_invoices = await tw_service.check_invoices(db)
+    payed_invoices = await hosting_service.check_invoices(db)
     for invoice in payed_invoices:
         user = await user_service.get_by_id(db, invoice.user_id)
         if user is None:
@@ -179,9 +180,9 @@ async def check_invoices(
 async def cancel_invoice(
     id: int,
     db: AsyncSession = Depends(get_db),
-    tw_service: TimeWebService = Depends(get_timeweb_service),
+    admin_service: AdminService = Depends(get_admin_service),
 ) -> InvoiceResponse:
-    return await tw_service.cancel_invoice(db, id)
+    return await admin_service.cancel_invoice(db, id)
 
 
 @router.get("/registration-codes")

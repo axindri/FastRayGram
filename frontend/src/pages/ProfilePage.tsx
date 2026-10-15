@@ -122,7 +122,7 @@ export function ProfilePage() {
           return;
         }
 
-        const nextDayPrice = config.invoice_day_price_rub;
+        const nextDayPrice = config.invoice_day_price;
         const nextMinDays = config.min_payment_days;
         const nextMaxDays = config.max_payment_days;
         const nextMinAmount = config.min_invoice_amount;

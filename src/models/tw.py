@@ -17,18 +17,18 @@ class FinancesResponse(BaseModel):
 
 
 class NewInvoiceRequest(BaseModel):
-    amount: int = Field(default=settings.app.min_invoice_amount)
+    amount: int = Field(default=settings.payment.min_invoice_amount)
     return_url: str
     fail_url: str
 
     @field_validator("amount")
     @classmethod
     def validate_amount(cls, value: int) -> int:
-        price = settings.app.invoice_day_price_rub
-        min_days = settings.app.min_payment_days
-        max_days = settings.app.max_payment_days
-        min_amount = settings.app.min_invoice_amount
-        max_amount = settings.app.max_invoice_amount
+        price = settings.payment.invoice_day_price
+        min_days = settings.payment.min_payment_days
+        max_days = settings.payment.max_payment_days
+        min_amount = settings.payment.min_invoice_amount
+        max_amount = settings.payment.max_invoice_amount
         if value < min_amount or value > max_amount:
             raise ValueError(f"Amount must be between {min_amount} and {max_amount}")
         if value % price != 0:

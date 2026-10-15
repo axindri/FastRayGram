@@ -4,10 +4,30 @@ from urllib.parse import quote_plus
 from pydantic import BaseModel, Field, computed_field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+from src.core.enums import Currency
+
 
 class CacheSettings(BaseModel):
     namespace: str = Field(default="fast-ray-gram")
     default_ttl_seconds: int = Field(default=60)
+
+
+class PaymentSettings(BaseModel):
+    invoice_day_price: int = Field(default=5, ge=1)
+    min_payment_days: int = Field(default=30, ge=1)
+    max_payment_days: int = Field(default=90, ge=1)
+    currency: Currency = Field(default=Currency.EUR)
+
+    @computed_field
+    @property
+    def min_invoice_amount(self) -> int:
+        # gather than min price for hosting
+        return self.invoice_day_price * self.min_payment_days
+
+    @computed_field
+    @property
+    def max_invoice_amount(self) -> int:
+        return self.invoice_day_price * self.max_payment_days
 
 
 class AppSettings(BaseModel):
@@ -20,26 +40,17 @@ class AppSettings(BaseModel):
     jwt_secret: str = Field(default="jwt_secret")
     jwt_exp_days: int = Field(default=365)
     superuser_token: str = Field(default="superuser_token")
-    invoice_day_price_rub: int = Field(default=10, ge=1)
-    min_payment_days: int = Field(default=50, ge=1)
-    max_payment_days: int = Field(default=100, ge=1)
+
     default_expiry_time_days: int = Field(default=30)
+
     registration_expiry_time_days: int = Field(default=3)
     default_registration_code_max_uses: int = Field(default=1)
+
     default_limit_ips: int = Field(default=5)
+
     monitoring_service_url: str = Field(default="http://localhost:8000/status/")
     boosty_url: str = Field(default="http://localhost")
     github_url: str = Field(default="https://github.com/axindri/FastRayGram")
-
-    @computed_field
-    @property
-    def min_invoice_amount(self) -> int:
-        return self.invoice_day_price_rub * self.min_payment_days
-
-    @computed_field
-    @property
-    def max_invoice_amount(self) -> int:
-        return self.invoice_day_price_rub * self.max_payment_days
 
 
 class DatabaseSettings(BaseModel):
@@ -61,6 +72,11 @@ class XuiPanelSettings(BaseModel):
     url: str = Field(default="http://localhost:8080/AbCd")
     sub_url: str = Field(default="http://localhost:8080/sub")
     api_key: str = Field(default="xui_api_key")
+
+
+class HostingSettings(BaseModel):
+    token: str = Field(default="")
+    base_url: str = Field(default="https://my.aeza.net/api/v2")
 
 
 class TimeWebSettings(BaseModel):
@@ -91,9 +107,13 @@ class Settings(BaseSettings):
     )
 
     app: AppSettings = Field(default_factory=AppSettings, alias="APP")
+    payment: PaymentSettings = Field(default_factory=PaymentSettings, alias="PAYMENT")
     cache: CacheSettings = Field(default_factory=CacheSettings, alias="CACHE")
     database: DatabaseSettings = Field(default_factory=DatabaseSettings, alias="DB")
     xui: XuiPanelSettings = Field(default_factory=XuiPanelSettings, alias="XUI")
+    hosting: HostingSettings = Field(default_factory=HostingSettings, alias="HOSTING")
+
+    # deprecated
     timeweb: TimeWebSettings = Field(default_factory=TimeWebSettings, alias="TIMEWEB")
 
 

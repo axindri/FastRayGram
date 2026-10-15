@@ -166,7 +166,7 @@ export type XuiClient = {
 
 export type AppConfig = {
   version: string;
-  invoice_day_price_rub: number;
+  invoice_day_price: number;
   min_payment_days: number;
   max_payment_days: number;
   min_invoice_amount: number;
