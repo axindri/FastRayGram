@@ -39,7 +39,7 @@ async def admin_links() -> dict[str, str]:
     return {
         "swagger_url": "/docs",
         "xui_panel_url": settings.xui.url,
-        "servers_url": settings.hosting.base_url,
+        "servers_url": settings.hosting.servers_url,
         "services_status_url": settings.app.monitoring_service_url,
     }
 

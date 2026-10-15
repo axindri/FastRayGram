@@ -3,7 +3,7 @@ import { Monitor, Moon, Sun, type LucideIcon } from "lucide-react";
 export type NavSection = "main" | "admin" | "settings";
 
 // App
-export const APP_VERSION = "v3.5.1";
+export const APP_VERSION = "v4.0.0";
 export const TOKEN_KEY = "authToken";
 export const API_PREFIX = "/api";
 export const THEME_STORAGE_KEY = "theme";
@@ -77,7 +77,7 @@ export const ADMIN_LINKS_META = [
   { key: "swagger_url" as const, title: "Swagger", hint: "Документация API" },
   { key: "services_status_url" as const, title: "Services Status", hint: "Статус сервисов в Uptime Kuma" },
   { key: "xui_panel_url" as const, title: "XUI Panel", hint: "Панель управления" },
-  { key: "servers_url" as const, title: "Hosting API", hint: "API панели хостинга" },
+  { key: "servers_url" as const, title: "Hosting website", hint: "Вебсайт панели хостинга" },
 ];
 
 // Users / XUI

@@ -32,7 +32,7 @@ class PaymentSettings(BaseModel):
 
 class AppSettings(BaseModel):
     name: str = Field(default="Fast Ray Gram API")
-    version: str = Field(default="1.8.0")
+    version: str = Field(default="2.0.0")
     host: str = Field(default="0.0.0.0")
     port: int = Field(default=8000)
     debug: bool = Field(default=False)
@@ -78,6 +78,7 @@ class XuiPanelSettings(BaseModel):
 class HostingSettings(BaseModel):
     token: str = Field(default="")
     base_url: str = Field(default="https://my.aeza.net/api/v2")
+    servers_url: str = Field(default="https://my.aeza.net/services")
 
 
 class Settings(BaseSettings):
