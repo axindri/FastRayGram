@@ -174,6 +174,8 @@ export type AppConfig = {
   default_expiry_time_days: number;
   registration_expiry_time_days: number;
   default_limit_ips: number;
+  currency: string;
+  decimal_places: number;
   boosty_url: string;
   github_url: string;
 };
@@ -181,9 +183,7 @@ export type AppConfig = {
 export type Finances = {
   balance: number;
   currency: string;
-  monthly_cost: number;
-  total_paid: number;
-  hours_left: number;
+  decimal_places: number;
 };
 
 export type RegistrationCode = {

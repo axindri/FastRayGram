@@ -77,7 +77,7 @@ export const ADMIN_LINKS_META = [
   { key: "swagger_url" as const, title: "Swagger", hint: "Документация API" },
   { key: "services_status_url" as const, title: "Services Status", hint: "Статус сервисов в Uptime Kuma" },
   { key: "xui_panel_url" as const, title: "XUI Panel", hint: "Панель управления" },
-  { key: "servers_url" as const, title: "TimeWeb Servers", hint: "Серверы в панели TimeWeb" },
+  { key: "servers_url" as const, title: "Hosting API", hint: "API панели хостинга" },
 ];
 
 // Users / XUI

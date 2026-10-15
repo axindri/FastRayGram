@@ -21,6 +21,7 @@ import { XuiClientCard } from "@/components/XuiClientCard";
 import { filterNavItems, flattenNavLinks } from "@/config/navigation";
 import { useServiceStatus } from "@/hooks/useServiceStatus";
 import { getApiErrorMessage } from "@/utils/apiError";
+import { formatMoneyMinor } from "@/utils/format";
 import { isInvoiceActive, type UserRole } from "@/types";
 
 type PaymentConfig = {
@@ -29,6 +30,8 @@ type PaymentConfig = {
   maxDays: number;
   minAmount: number;
   maxAmount: number;
+  currency: string;
+  decimalPlaces: number;
 };
 
 function QuickLinks({ role }: { role: UserRole }) {
@@ -75,7 +78,10 @@ export function ProfilePage() {
   const maxDays = paymentConfig?.maxDays ?? 0;
   const minAmount = paymentConfig?.minAmount ?? 0;
   const maxAmount = paymentConfig?.maxAmount ?? 0;
+  const currency = paymentConfig?.currency ?? "";
+  const decimalPlaces = paymentConfig?.decimalPlaces ?? 2;
   const amount = paymentConfig ? days * dayPrice : 0;
+  const formatAmount = (value: number) => formatMoneyMinor(value, currency, decimalPlaces);
 
   const loadXuiClient = async () => {
     setXuiLoading(true);
@@ -127,6 +133,8 @@ export function ProfilePage() {
         const nextMaxDays = config.max_payment_days;
         const nextMinAmount = config.min_invoice_amount;
         const nextMaxAmount = config.max_invoice_amount;
+        const nextCurrency = String(config.currency || "").trim();
+        const nextDecimalPlaces = config.decimal_places;
 
         if (
           !Number.isFinite(nextDayPrice) ||
@@ -138,7 +146,10 @@ export function ProfilePage() {
           !Number.isFinite(nextMinAmount) ||
           !Number.isFinite(nextMaxAmount) ||
           nextMinAmount < 1 ||
-          nextMaxAmount < nextMinAmount
+          nextMaxAmount < nextMinAmount ||
+          !nextCurrency ||
+          !Number.isFinite(nextDecimalPlaces) ||
+          nextDecimalPlaces < 0
         ) {
           setPaymentConfig(null);
           return;
@@ -150,6 +161,8 @@ export function ProfilePage() {
           maxDays: nextMaxDays,
           minAmount: nextMinAmount,
           maxAmount: nextMaxAmount,
+          currency: nextCurrency,
+          decimalPlaces: nextDecimalPlaces,
         });
         setDays(nextMinDays);
       })
@@ -194,7 +207,7 @@ export function ProfilePage() {
     }
 
     if (amount < minAmount || amount > maxAmount || amount % dayPrice !== 0) {
-      setDaysError(`Сумма от ${minAmount} до ${maxAmount} ₽`);
+      setDaysError(`Сумма от ${formatAmount(minAmount)} до ${formatAmount(maxAmount)}`);
       return;
     }
 
@@ -243,7 +256,7 @@ export function ProfilePage() {
                     <div className="flex flex-wrap items-end justify-between gap-3">
                       <div>
                         <p className="text-sm text-muted-foreground">К оплате</p>
-                        <p className="text-3xl font-semibold tracking-tight text-foreground tabular-nums">{amount.toLocaleString("ru-RU")} ₽</p>
+                        <p className="text-3xl font-semibold tracking-tight text-foreground tabular-nums">{formatAmount(amount)}</p>
                       </div>
                       <div className="text-right">
                         <p className="text-sm text-muted-foreground">Срок подписки</p>
@@ -251,7 +264,7 @@ export function ProfilePage() {
                       </div>
                     </div>
                     <p className="mt-3 text-sm text-muted-foreground">
-                      {days} × {dayPrice} ₽/день = {amount.toLocaleString("ru-RU")} ₽
+                      {days} × {formatAmount(dayPrice)}/день = {formatAmount(amount)}
                     </p>
                   </div>
                   <div className="flex flex-col gap-2">
@@ -278,7 +291,7 @@ export function ProfilePage() {
               <CardFooter>
                 <Button type="submit" form="profile-payment-form" disabled={paymentsDisabled || paymentLoading}>
                   {paymentLoading ? <Loader2 className="animate-spin" /> : null}
-                  Оплатить {amount.toLocaleString("ru-RU")} ₽
+                  Оплатить {formatAmount(amount)}
                 </Button>
               </CardFooter>
             </Card>
@@ -310,7 +323,15 @@ export function ProfilePage() {
           ) : null}
           <AsyncListState loading={profileLoading} empty={!invoices.length} emptyDescription="Счетов пока нет" minHeight={80} size="default">
             {invoices.map((item) => (
-              <InvoiceCard key={item.id} item={item} access="user" paymentBlocked={paymentsDisabled} canRenew={canRenew} />
+              <InvoiceCard
+                key={item.id}
+                item={item}
+                access="user"
+                paymentBlocked={paymentsDisabled}
+                canRenew={canRenew}
+                currency={currency || undefined}
+                decimalPlaces={paymentConfig?.decimalPlaces}
+              />
             ))}
           </AsyncListState>
         </SectionCard>

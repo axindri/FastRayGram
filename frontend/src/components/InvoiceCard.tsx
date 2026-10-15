@@ -1,6 +1,9 @@
 import { Ban } from "lucide-react";
+import { useEffect, useState } from "react";
 
+import { fetchConfig } from "@/api";
 import { formatDate } from "@/utils/datetime";
+import { formatMoneyMinor } from "@/utils/format";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardAction, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -24,6 +27,8 @@ type InvoiceCardProps = {
   access?: AccessLevel;
   paymentBlocked?: boolean;
   canRenew?: boolean;
+  currency?: string;
+  decimalPlaces?: number;
   onCancel?: (id: number) => void;
   cancelLoadingId?: number | null;
 };
@@ -32,7 +37,16 @@ function isAdminInvoice(item: Invoice | AdminInvoice): item is AdminInvoice {
   return "username" in item && typeof (item as AdminInvoice).username === "string";
 }
 
-export function InvoiceCard({ item, access = "admin", paymentBlocked = false, canRenew = false, onCancel, cancelLoadingId = null }: InvoiceCardProps) {
+export function InvoiceCard({
+  item,
+  access = "admin",
+  paymentBlocked = false,
+  canRenew = false,
+  currency,
+  decimalPlaces,
+  onCancel,
+  cancelLoadingId = null,
+}: InvoiceCardProps) {
   const status = String(item.status || "").toLowerCase();
   const isPending = status === "pending";
   const isAdmin = access === "admin";
@@ -42,7 +56,48 @@ export function InvoiceCard({ item, access = "admin", paymentBlocked = false, ca
   const canCancel = isAdmin && isInvoiceActive(status) && Boolean(onCancel);
   const cancelLoading = cancelLoadingId === item.id;
 
-  const title = isAdmin ? `#${item.invoice_id}${adminItem ? ` · ${adminItem.amount} ₽` : ""}` : `#${item.invoice_id} · ${item.amount} ₽`;
+  const [moneyCurrency, setMoneyCurrency] = useState(currency ?? "");
+  const [moneyDecimals, setMoneyDecimals] = useState(decimalPlaces ?? 2);
+
+  useEffect(() => {
+    if (currency) {
+      setMoneyCurrency(currency);
+    }
+    if (decimalPlaces !== undefined) {
+      setMoneyDecimals(decimalPlaces);
+    }
+  }, [currency, decimalPlaces]);
+
+  useEffect(() => {
+    if (currency && decimalPlaces !== undefined) {
+      return;
+    }
+
+    let cancelled = false;
+
+    void fetchConfig()
+      .then((config) => {
+        if (cancelled) {
+          return;
+        }
+        if (!currency) {
+          setMoneyCurrency(String(config.currency || "").trim());
+        }
+        if (decimalPlaces === undefined && Number.isFinite(config.decimal_places)) {
+          setMoneyDecimals(config.decimal_places);
+        }
+      })
+      .catch(() => {
+        // Keep fallback formatting if config is unavailable.
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [currency, decimalPlaces]);
+
+  const amountLabel = moneyCurrency ? formatMoneyMinor(item.amount, moneyCurrency, moneyDecimals) : String(item.amount);
+  const title = isAdmin ? `#${item.invoice_id}${adminItem ? ` · ${amountLabel}` : ""}` : `#${item.invoice_id} · ${amountLabel}`;
 
   return (
     <Card>

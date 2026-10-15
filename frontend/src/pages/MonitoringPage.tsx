@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { fetchAdminLinks, fetchFinances, fetchStatus } from "@/api";
 import { SectionCard } from "@/components/SectionCard";
 import { getApiErrorMessage } from "@/utils/apiError";
+import { formatMoney } from "@/utils/format";
 import { BADGE_STYLES } from "@/lib/badge-styles";
 import { ADMIN_LINKS_META, SERVICE_STATUS_LABELS } from "@/constants";
 import { getStatusServices, type AdminLinks, type Finances, type StatusResponse } from "@/types";
@@ -40,33 +41,6 @@ function serviceStatusBadge(status: string) {
   };
 }
 
-function formatCurrency(value: number, currency: string): string {
-  const code = currency.toUpperCase() === "RUB" ? "RUB" : currency.toUpperCase();
-  try {
-    return new Intl.NumberFormat("ru-RU", {
-      style: "currency",
-      currency: code,
-      maximumFractionDigits: 2,
-    }).format(value);
-  } catch {
-    return `${value.toLocaleString("ru-RU")} ${currency}`;
-  }
-}
-
-function formatHoursLeft(hours: number): string {
-  if (hours < 24) {
-    return `${hours} ч`;
-  }
-
-  const days = Math.floor(hours / 24);
-  const restHours = hours % 24;
-  if (!restHours) {
-    return `${days} дн.`;
-  }
-
-  return `${days} дн. ${restHours} ч`;
-}
-
 export function MonitoringPage() {
   const [status, setStatus] = useState<StatusResponse | null>(null);
   const [links, setLinks] = useState<AdminLinks | null>(null);
@@ -93,7 +67,7 @@ export function MonitoringPage() {
         .then(setFinances)
         .catch((error) => {
           setFinances(null);
-          toast.error(getApiErrorMessage(error, "Не удалось загрузить финансы TimeWeb"));
+          toast.error(getApiErrorMessage(error, "Не удалось загрузить финансы хостинга"));
         }),
     ]);
 
@@ -143,10 +117,10 @@ export function MonitoringPage() {
         {finances ? (
           <div className="flex flex-wrap gap-x-6 gap-y-2">
             <p className="text-sm text-muted-foreground">
-              Баланс: <span className="font-semibold text-foreground">{formatCurrency(finances.balance, finances.currency)}</span>
-            </p>
-            <p className="text-sm text-muted-foreground">
-              Осталось: <span className="font-semibold text-foreground">{formatHoursLeft(finances.hours_left)}</span>
+              Баланс:{" "}
+              <span className="font-semibold text-foreground">
+                {formatMoney(finances.balance, finances.currency, finances.decimal_places)}
+              </span>
             </p>
           </div>
         ) : null}

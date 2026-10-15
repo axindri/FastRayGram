@@ -116,26 +116,9 @@ export async function fetchXuiMe(): Promise<XuiClient> {
 }
 
 export async function createInvoice(amount: number): Promise<Invoice> {
-  const returnUrl = new URL("/payment/success", window.location.origin).href;
-  const failUrl = new URL("/payment/fail", window.location.origin).href;
-
-  return request<Invoice>(`${API_PREFIX}/tw/new-invoice`, {
+  return request<Invoice>(`${API_PREFIX}/hosting/new-invoice`, {
     method: "POST",
-    body: JSON.stringify({
-      amount,
-      return_url: returnUrl,
-      fail_url: failUrl,
-    }),
-  });
-}
-
-export async function confirmPaymentReturn(invoiceId: number, mdOrder?: string | null): Promise<Invoice> {
-  return request<Invoice>(`${API_PREFIX}/tw/payment-return`, {
-    method: "POST",
-    body: JSON.stringify({
-      invoice_id: invoiceId,
-      md_order: mdOrder || undefined,
-    }),
+    body: JSON.stringify({ amount }),
   });
 }
 
@@ -144,7 +127,7 @@ export async function fetchStatus(): Promise<StatusResponse> {
 }
 
 export async function fetchFinances(): Promise<Finances> {
-  return request<Finances>(`${API_PREFIX}/tw/finances`);
+  return request<Finances>(`${API_PREFIX}/hosting/finances`);
 }
 
 export async function fetchAdminLinks(): Promise<AdminLinks> {
