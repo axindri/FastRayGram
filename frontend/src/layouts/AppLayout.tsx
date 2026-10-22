@@ -4,6 +4,7 @@ import { Outlet } from "react-router-dom";
 import { AppSidebar } from "@/components/app-sidebar";
 import { HelpFab } from "@/components/HelpFab";
 import { ServiceStatusBanner } from "@/components/ServiceStatusBanner";
+import { UpdatesBell } from "@/components/UpdatesBell";
 import { UserAccountMenu } from "@/components/UserAccountMenu";
 import { ServiceStatusProvider } from "@/hooks/useServiceStatus";
 import { SidebarInset, SidebarProvider, useSidebar } from "@/components/ui/sidebar";
@@ -34,8 +35,9 @@ export function AppLayout() {
             <div className="md:hidden">
               <MobileSidebarTrigger />
             </div>
-            <div className="ml-auto">
+            <div className="ml-auto flex items-center gap-1">
               <UserAccountMenu />
+              <UpdatesBell />
             </div>
           </header>
 
