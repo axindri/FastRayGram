@@ -16,6 +16,7 @@ import { PaymentsAllPage } from "@/pages/payments/AllPage";
 import { PaymentsPaidPage } from "@/pages/payments/PaidPage";
 import { ProfilePage } from "@/pages/ProfilePage";
 import { RegisterPage } from "@/pages/RegisterPage";
+import { NotificationsPage } from "@/pages/NotificationsPage";
 import { RegistrationPage } from "@/pages/RegistrationPage";
 import { SettingsAppearancePage } from "@/pages/SettingsAppearancePage";
 import { TooManyRequestsPage } from "@/pages/TooManyRequestsPage";
@@ -92,6 +93,15 @@ export function AppRoutes() {
             element={
               <NavAdminSectionLayout fallbackTitle="Регистрация">
                 <RegistrationPage />
+              </NavAdminSectionLayout>
+            }
+          />
+
+          <Route
+            path="/notifications"
+            element={
+              <NavAdminSectionLayout fallbackTitle="Уведомления">
+                <NotificationsPage />
               </NavAdminSectionLayout>
             }
           />

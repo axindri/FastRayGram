@@ -9,6 +9,11 @@ from src.models.admin import AdminInvoiceResponse
 from src.models.common import PaginatedResponse, build_paginated_response
 from src.models.fields import USERNAME_MAX_LENGTH
 from src.models.hosting import InvoiceResponse
+from src.models.notifications import (
+    CreateNotificationRequest,
+    NotificationResponse,
+    UpdateNotificationRequest,
+)
 from src.models.registration import (
     CreateRegistrationCodeRequest,
     ExtendRegistrationCodeRequest,
@@ -27,6 +32,7 @@ from src.schemas.users import User
 from src.services.admin import AdminService, get_admin_service
 from src.services.db import get_db
 from src.services.hosting import HostingService, get_hosting_service
+from src.services.notifications import NotificationService, get_notification_service
 from src.services.registration import RegistrationService, get_registration_service
 from src.services.users import UserService, get_user_service
 from src.services.xui import XuiService, get_xui_service
@@ -184,6 +190,36 @@ async def cancel_invoice(
     admin_service: AdminService = Depends(get_admin_service),
 ) -> InvoiceResponse:
     return await admin_service.cancel_invoice(db, id)
+
+
+@router.get("/notifications")
+async def list_notifications(
+    page: int = Query(default=1, ge=1),
+    limit: int = Query(default=20, ge=1, le=100),
+    db: AsyncSession = Depends(get_db),
+    notification_service: NotificationService = Depends(get_notification_service),
+) -> PaginatedResponse[NotificationResponse]:
+    items, total, page = await notification_service.list_all(db, page=page, limit=limit)
+    return build_paginated_response(items, total, page, limit)
+
+
+@router.post("/notifications")
+async def create_notification(
+    payload: CreateNotificationRequest,
+    db: AsyncSession = Depends(get_db),
+    notification_service: NotificationService = Depends(get_notification_service),
+) -> NotificationResponse:
+    return await notification_service.create(db, payload)
+
+
+@router.post("/notifications/{id}")
+async def update_notification(
+    id: int,
+    payload: UpdateNotificationRequest,
+    db: AsyncSession = Depends(get_db),
+    notification_service: NotificationService = Depends(get_notification_service),
+) -> NotificationResponse:
+    return await notification_service.update(db, id, payload)
 
 
 @router.get("/registration-codes")

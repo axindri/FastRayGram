@@ -1,4 +1,5 @@
 import {
+  Bell,
   Key,
   Monitor,
   Settings,
@@ -59,6 +60,14 @@ export const NAV_ITEMS: NavItem[] = [
     ],
   },
   { path: "/registration", label: "Регистрация", hint: "Коды для новых пользователей", Icon: Key, section: "admin", adminOnly: true },
+  {
+    path: "/notifications",
+    label: "Уведомления",
+    hint: "Сообщения пользователям",
+    Icon: Bell,
+    section: "admin",
+    adminOnly: true,
+  },
   {
     path: "/settings",
     label: "Настройки",

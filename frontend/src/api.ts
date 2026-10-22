@@ -11,6 +11,7 @@ import type {
   RegistrationCode,
   StatusResponse,
   UpdateUserRoleResponse,
+  UserNotification,
   UserProfile,
   UserStats,
   XuiClient,
@@ -258,6 +259,35 @@ export async function extendRegistrationCode(id: number, extendDays: number): Pr
 
 export async function fetchConfig(): Promise<AppConfig> {
   return request<AppConfig>(`${API_PREFIX}/config`);
+}
+
+export async function fetchMyNotifications(): Promise<UserNotification[]> {
+  return request<UserNotification[]>(`${API_PREFIX}/user/notifications`);
+}
+
+export async function fetchAdminNotifications(page = 1, limit = 20): Promise<Paginated<UserNotification>> {
+  return request<Paginated<UserNotification>>(`${API_PREFIX}/admin/notifications?page=${page}&limit=${limit}`);
+}
+
+export async function createNotification(payload: {
+  username: string;
+  title: string;
+  body: string;
+}): Promise<UserNotification> {
+  return request<UserNotification>(`${API_PREFIX}/admin/notifications`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function updateNotification(
+  id: number,
+  payload: { title?: string; body?: string },
+): Promise<UserNotification> {
+  return request<UserNotification>(`${API_PREFIX}/admin/notifications/${id}`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
 }
 
 export async function createUser(payload: CreateUserPayload): Promise<string> {

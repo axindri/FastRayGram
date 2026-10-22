@@ -199,6 +199,16 @@ export type RegistrationCode = {
   updated_at: string;
 };
 
+export type UserNotification = {
+  id: number;
+  user_id: number;
+  username: string;
+  title: string;
+  body: string;
+  created_at: string;
+  updated_at: string;
+};
+
 export type RegisterValidation = {
   valid: boolean;
   expires_at: string | null;

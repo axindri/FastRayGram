@@ -1,31 +1,46 @@
-export type ChangelogItem = {
+export type FeedItem = {
   id: string;
   date: string;
   title: string;
   body: string;
 };
 
-export const CHANGELOG_URL = "/changelog.json";
-export const CHANGELOG_LAST_READ_KEY = "changelogLastReadId";
+export type ChangelogItem = FeedItem;
 
-export function getChangelogLastReadId(): string | null {
+export const CHANGELOG_URL = "/changelog.json";
+export const PROFILE_LAST_READ_KEY = "notificationsProfileLastReadId";
+export const APP_LAST_READ_KEY = "notificationsAppLastReadId";
+/** @deprecated migrated to APP_LAST_READ_KEY */
+const LEGACY_CHANGELOG_KEY = "changelogLastReadId";
+
+export function getFeedLastReadId(storageKey: string): string | null {
   try {
-    return localStorage.getItem(CHANGELOG_LAST_READ_KEY);
+    const value = localStorage.getItem(storageKey);
+    if (value) {
+      return value;
+    }
+    if (storageKey === APP_LAST_READ_KEY) {
+      return localStorage.getItem(LEGACY_CHANGELOG_KEY);
+    }
+    return null;
   } catch {
     return null;
   }
 }
 
-export function setChangelogLastReadId(id: string): void {
+export function setFeedLastReadId(storageKey: string, id: string): void {
   try {
-    localStorage.setItem(CHANGELOG_LAST_READ_KEY, id);
+    localStorage.setItem(storageKey, id);
+    if (storageKey === APP_LAST_READ_KEY) {
+      localStorage.removeItem(LEGACY_CHANGELOG_KEY);
+    }
   } catch {
     // Ignore quota / private mode errors.
   }
 }
 
-/** Changelog is newest-first. Unread = items before lastReadId. */
-export function isChangelogItemUnread(items: ChangelogItem[], itemId: string, lastReadId: string | null): boolean {
+/** Newest-first feed. Unread = items newer than lastReadId. Clicking an item marks it and older as read. */
+export function isFeedItemUnread(items: FeedItem[], itemId: string, lastReadId: string | null): boolean {
   if (!lastReadId) {
     return true;
   }
@@ -39,8 +54,8 @@ export function isChangelogItemUnread(items: ChangelogItem[], itemId: string, la
   return itemIndex >= 0 && itemIndex < lastReadIndex;
 }
 
-export function countUnreadChangelog(items: ChangelogItem[], lastReadId: string | null): number {
-  return items.filter((item) => isChangelogItemUnread(items, item.id, lastReadId)).length;
+export function countUnreadFeed(items: FeedItem[], lastReadId: string | null): number {
+  return items.filter((item) => isFeedItemUnread(items, item.id, lastReadId)).length;
 }
 
 export async function fetchChangelog(): Promise<ChangelogItem[]> {
