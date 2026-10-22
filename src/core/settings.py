@@ -52,6 +52,7 @@ class AppSettings(BaseModel):
     monitoring_service_url: str = Field(default="http://localhost:8000/status/")
     boosty_url: str = Field(default="http://localhost")
     github_url: str = Field(default="https://github.com/axindri/FastRayGram")
+    help_url: str = Field(default="")
 
 
 class DatabaseSettings(BaseModel):

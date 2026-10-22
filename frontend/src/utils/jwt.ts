@@ -1,4 +1,4 @@
-import { parseUtcDate } from "@/utils/datetime";
+import { isUnlimitedExpiry, parseUtcDate } from "@/utils/datetime";
 
 function pluralRu(value: number, one: string, few: string, many: string): string {
   const abs = Math.abs(value);
@@ -48,6 +48,10 @@ export function formatJwtExpiryRemaining(token: string): string | null {
 }
 
 export function formatDateExpiryRemaining(value: string): string | null {
+  if (isUnlimitedExpiry(value)) {
+    return "безлимит";
+  }
+
   const expiry = parseUtcDate(value);
   if (!expiry) {
     return null;
@@ -83,7 +87,11 @@ export function jwtExpiryTagColor(token: string): "success" | "error" | "default
   return expiryTagColor(expiry);
 }
 
-export function dateExpiryTagColor(value: string): "success" | "error" | "default" {
+export function dateExpiryTagColor(value: string): "success" | "error" | "default" | "unlimited" {
+  if (isUnlimitedExpiry(value)) {
+    return "unlimited";
+  }
+
   const expiry = parseUtcDate(value);
   if (!expiry) {
     return "default";

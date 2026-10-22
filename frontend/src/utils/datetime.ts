@@ -31,8 +31,18 @@ export function parseUtcDate(value?: string | null): Date | null {
   return Number.isNaN(date.getTime()) ? null : date;
 }
 
+/** XUI uses Unix epoch as "no expiry" / unlimited subscription. */
+export function isUnlimitedExpiry(value?: string | null): boolean {
+  const date = parseUtcDate(value);
+  return Boolean(date && date.getTime() === 0);
+}
+
 /** Format backend UTC datetime for display in Moscow time. */
 export function formatDate(value?: string | null): string {
+  if (isUnlimitedExpiry(value)) {
+    return "безлимит";
+  }
+
   const date = parseUtcDate(value);
   return date ? MOSCOW_DATE_TIME_FORMATTER.format(date) : "—";
 }
@@ -54,6 +64,10 @@ function pluralRu(value: number, one: string, few: string, many: string): string
 }
 
 export function formatExpiryRemaining(value?: string | null): string | null {
+  if (isUnlimitedExpiry(value)) {
+    return "(безлимит)";
+  }
+
   const expiry = parseUtcDate(value);
   if (!expiry) {
     return null;

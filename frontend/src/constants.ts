@@ -3,7 +3,7 @@ import { Monitor, Moon, Sun, type LucideIcon } from "lucide-react";
 export type NavSection = "main" | "admin" | "settings";
 
 // App
-export const APP_VERSION = "v4.0.0";
+export const APP_VERSION = "v4.1.0";
 export const TOKEN_KEY = "authToken";
 export const API_PREFIX = "/api";
 export const THEME_STORAGE_KEY = "theme";
@@ -113,8 +113,7 @@ export const USER_SEARCH_FIELD_LABELS: Record<UserSearchField, string> = {
 export const RENEW_HINT =
   "Новый счёт можно выставить, когда до конца подписки останется меньше 24 часов (включая уже истёкшую).";
 
-export const CONTACT_MESSAGE =
-  "По всем вопросам обращайтесь к администратору или в личные сообщения группы.";
+export const CONTACT_MESSAGE = "По всем вопросам обращайтесь по кнопке «Помощь».";
 
 // Profile result pages
 export type ProfileResultStatus = "success" | "error" | "403" | "404" | "500" | "info" | "warning";

@@ -2,6 +2,7 @@ import { PanelLeft } from "lucide-react";
 import { Outlet } from "react-router-dom";
 
 import { AppSidebar } from "@/components/app-sidebar";
+import { HelpFab } from "@/components/HelpFab";
 import { ServiceStatusBanner } from "@/components/ServiceStatusBanner";
 import { UserAccountMenu } from "@/components/UserAccountMenu";
 import { ServiceStatusProvider } from "@/hooks/useServiceStatus";
@@ -45,6 +46,7 @@ export function AppLayout() {
             </div>
           </div>
         </SidebarInset>
+        <HelpFab />
       </SidebarProvider>
     </ServiceStatusProvider>
   );

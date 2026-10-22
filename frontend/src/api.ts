@@ -21,7 +21,7 @@ import {
   RENEWAL_WINDOW_MS,
   TOKEN_KEY,
 } from "@/constants";
-import { parseUtcDate } from "@/utils/datetime";
+import { isUnlimitedExpiry, parseUtcDate } from "@/utils/datetime";
 
 export class ApiError extends Error {
   readonly status: number;
@@ -95,6 +95,10 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 }
 
 export function canRenewSubscription(expiryDatetime?: string): boolean {
+  if (isUnlimitedExpiry(expiryDatetime)) {
+    return false;
+  }
+
   const expiry = parseUtcDate(expiryDatetime);
   if (!expiry) {
     return false;

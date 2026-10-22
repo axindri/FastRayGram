@@ -68,4 +68,5 @@ async def app_config() -> dict[str, str | int]:
         "decimal_places": settings.app.decimal_places,
         "boosty_url": settings.app.boosty_url,
         "github_url": settings.app.github_url,
+        "help_url": settings.app.help_url,
     }

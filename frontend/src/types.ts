@@ -178,6 +178,7 @@ export type AppConfig = {
   decimal_places: number;
   boosty_url: string;
   github_url: string;
+  help_url: string;
 };
 
 export type Finances = {
