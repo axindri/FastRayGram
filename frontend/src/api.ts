@@ -257,17 +257,45 @@ export async function extendRegistrationCode(id: number, extendDays: number): Pr
   });
 }
 
-let configPromise: Promise<AppConfig> | null = null;
+let cachedConfig: AppConfig | null = null;
+let configInflight: Promise<AppConfig> | null = null;
 
-/** Shared app config: one in-flight/cached request for all callers. */
-export function fetchConfig(): Promise<AppConfig> {
-  if (!configPromise) {
-    configPromise = request<AppConfig>(`${API_PREFIX}/config`).catch((error) => {
-      configPromise = null;
-      throw error;
-    });
+type FetchConfigOptions = {
+  /** Bypass cache and hit the network (e.g. on route change). */
+  force?: boolean;
+};
+
+/**
+ * App config with in-memory cache.
+ * Concurrent callers share one in-flight request; use `force` to revalidate.
+ */
+export function fetchConfig(options: FetchConfigOptions = {}): Promise<AppConfig> {
+  const { force = false } = options;
+
+  if (!force && cachedConfig) {
+    return Promise.resolve(cachedConfig);
   }
-  return configPromise;
+
+  if (configInflight) {
+    return configInflight;
+  }
+
+  configInflight = request<AppConfig>(`${API_PREFIX}/config`)
+    .then((config) => {
+      cachedConfig = config;
+      return config;
+    })
+    .catch((error) => {
+      if (!force) {
+        cachedConfig = null;
+      }
+      throw error;
+    })
+    .finally(() => {
+      configInflight = null;
+    });
+
+  return configInflight;
 }
 
 export async function fetchMyNotifications(): Promise<UserNotification[]> {

@@ -5,91 +5,72 @@
 <h1 align="center">Fast Ray Gram</h1>
 
 <p align="center">
-  Личный кабинет и админка для VPN-подписки на базе <strong>3X-UI</strong>
+  Self-hosted кабинет и админка для VPN на <strong>3X-UI</strong>
 </p>
 
 <p align="center">
-  <a href="LICENSE"><img src="https://img.shields.io/badge/license-GPL--3.0-blue.svg" alt="License: GPL-3.0" /></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-GPL--3.0-blue.svg" alt="License" /></a>
   <img src="https://img.shields.io/badge/python-3.13+-blue.svg" alt="Python" />
-  <img src="https://img.shields.io/badge/frontend-React_19-61dafb.svg" alt="React" />
+  <img src="https://img.shields.io/badge/react-19-61dafb.svg" alt="React" />
 </p>
 
----
+## Features
 
-## О проекте
+- Личный кабинет: подписка, deep-link в VPN-клиенты, оплата, вход по ссылке
+- Регистрация по одноразовому коду
+- Админка: пользователи, XUI, счета, уведомления, мониторинг
+- Платежи через хостинг-API (Aeza), воркер проверяет оплату и продлевает XUI
 
-**Fast Ray Gram** — self-hosted веб-приложение для небольших VPN-сервисов:
+**Stack:** FastAPI · PostgreSQL · React · Docker
 
-- **Личный кабинет** — подписка, ссылка для VPN-клиента, оплата продления, вход по ссылке без пароля.
-- **Регистрация по коду** — админ выдаёт ссылку, пользователь сам создаёт аккаунт.
-- **Админка** — пользователи, XUI-клиенты, счета, коды регистрации, мониторинг сервисов.
-- **Платежи** — выставление счетов в TimeWeb, фоновая проверка оплат, продление подписки в XUI.
+## Preview
 
-Стек: **FastAPI** · **PostgreSQL** · **React** · **Docker**.
-
-## Превью
-
-| Профиль | Пользователи |
+| Admin | Profile |
 |:---:|:---:|
-| ![Меню администратора](docs/screenshots/menu.png) | ![Профиль пользователя](docs/screenshots/profile.png) | 
+| ![Menu](docs/screenshots/menu.png) | ![Profile](docs/screenshots/profile.png) |
 
-## Запуск на сервере
+## Quick start
 
-### Пререквизиты
-
-На сервере (VPS / bare metal):
-
-1. **Docker** и **Docker Compose** v2
-2. Рабочая панель **3X-UI** (API URL, sub URL, API key)
-3. Аккаунт **TimeWeb** с API-токеном и `payer_id` (для приёма платежей)
-4. Открытый порт **80/443** (или проброс на `APP_PORT`)
-
-Опционально: reverse proxy (Caddy / Nginx) и TLS-сертификат перед контейнером.
-
-### Деплой
+**Need:** Docker Compose v2, панель 3X-UI, токен хостинга для платежей.
 
 ```bash
 git clone <repository-url>
-cd fast-ray-gram
+cd FastRayGram
 cp .env.example .env
-```
-
-Заполните `.env` — обязательно смените секреты и укажите XUI / TimeWeb.
-
-```bash
+# смените секреты, укажите XUI и HOSTING
 docker compose up -d --build
 ```
 
-Приложение: `http://<ваш-сервер>/` (фронтенд, порт `FRONTEND_PORT`, по умолчанию `80`). API с rate limit — только через nginx (`/api/...`). Прямой доступ к FastAPI на `:8000` привязан к `127.0.0.1` (для отладки с сервера).
+Откройте `http://<server>/` (порт `FRONTEND_PORT`, по умолчанию `80`).
 
-Стек контейнеров: **nginx** (фронтенд + прокси `/api`) → **FastAPI** → **PostgreSQL**. Nginx ограничивает API: **5 req/s** (burst 15) и **60 req/min** (burst 10) с одного IP (`429` при превышении; браузер перенаправляется на `/too-many-requests`).
+```
+Browser → nginx (frontend + /api) → FastAPI → PostgreSQL
+                ↑
+         invoice-worker
+```
 
-Вместе с приложением поднимаются **PostgreSQL** и **invoice-worker** (проверка оплат, `CHECK_INTERVAL_SEC`, по умолчанию 30 с).
+API снаружи только через nginx. Прямой `:8000` слушает `127.0.0.1`. Rate limit на `/api`: **20 r/s** и **300 r/m** с IP → `429` / страница `/too-many-requests`.
 
-PostgreSQL доступен снаружи на порту `DB__PORT` (по умолчанию `5432`). Конфигурация рассчитана на VPS с 1 GB RAM / 1 vCPU — см. `docker/postgres/postgresql.conf`.
+## Configuration
 
-### Переменные окружения
-
-| Переменная | Описание |
+| Variable | Purpose |
 |---|---|
-| `APP__JWT_SECRET` | Секрет подписи JWT |
-| `APP__SUPERUSER_TOKEN` | Токен суперпользователя и воркера инвойсов |
-| `APP__MONITORING_SERVICE_URL` | URL внешнего мониторинга (Uptime Kuma и т.п.) |
-| `XUI__URL` / `XUI__SUB_URL` / `XUI__API_KEY` | Панель 3X-UI |
-| `TIMEWEB__TOKEN` / `TIMEWEB__PAYER_ID` | Платежи TimeWeb |
-| `DB__HOST` / `DB__PORT` / `DB__USER` / `DB__PASSWORD` / `DB__DB` | Подключение к PostgreSQL (URL собирается автоматически) |
-| `APP_PORT` | Порт API на хосте (по умолчанию `8000`) |
-| `FRONTEND_PORT` | Порт nginx на хосте (по умолчанию `80`) |
-| `CHECK_INTERVAL_SEC` | Интервал проверки оплат |
+| `APP__JWT_SECRET` | JWT |
+| `APP__SUPERUSER_TOKEN` | суперпользователь + invoice-worker |
+| `APP__HELP_URL` | кнопка «Помощь» |
+| `XUI__URL` / `XUI__SUB_URL` / `XUI__API_KEY` | 3X-UI |
+| `HOSTING__TOKEN` / `HOSTING__BASE_URL` | платежи |
+| `PAYMENT__*` | цена дня, срок, валюта |
+| `DB__*` | PostgreSQL |
+| `FRONTEND_PORT` / `APP_PORT` | порты на хосте |
+| `CHECK_INTERVAL_SEC` | интервал проверки оплат |
 
-Полный список — в [`.env.example`](.env.example).
+Полный список: [`.env.example`](.env.example).
 
-## Документация
+## Docs
 
-- [Участие в разработке и локальный запуск](CONTRIBUTING.md)
+- [Contributing](CONTRIBUTING.md) — локальный запуск и PR
 
-## Лицензия
+## License
 
-Проект распространяется под лицензией **[GNU General Public License v3.0](LICENSE)**.
-
-Вы можете свободно использовать, изменять и распространять код при условии сохранения той же лицензии для производных работ.
+[GPL-3.0](LICENSE)

@@ -6,6 +6,7 @@ import { HelpFab } from "@/components/HelpFab";
 import { ServiceStatusBanner } from "@/components/ServiceStatusBanner";
 import { UpdatesBell } from "@/components/UpdatesBell";
 import { UserAccountMenu } from "@/components/UserAccountMenu";
+import { AppConfigProvider } from "@/hooks/useAppConfig";
 import { ServiceStatusProvider } from "@/hooks/useServiceStatus";
 import { SidebarInset, SidebarProvider, useSidebar } from "@/components/ui/sidebar";
 
@@ -27,29 +28,31 @@ function MobileSidebarTrigger() {
 
 export function AppLayout() {
   return (
-    <ServiceStatusProvider>
-      <SidebarProvider>
-        <AppSidebar />
-        <SidebarInset>
-          <header className="flex h-16 shrink-0 items-center gap-2 px-4 lg:px-6">
-            <div className="md:hidden">
-              <MobileSidebarTrigger />
-            </div>
-            <div className="ml-auto flex items-center gap-1">
-              <UserAccountMenu />
-              <UpdatesBell />
-            </div>
-          </header>
+    <AppConfigProvider>
+      <ServiceStatusProvider>
+        <SidebarProvider>
+          <AppSidebar />
+          <SidebarInset>
+            <header className="flex h-16 shrink-0 items-center gap-2 px-4 lg:px-6">
+              <div className="md:hidden">
+                <MobileSidebarTrigger />
+              </div>
+              <div className="ml-auto flex items-center gap-1">
+                <UserAccountMenu />
+                <UpdatesBell />
+              </div>
+            </header>
 
-          <div className="flex flex-1 flex-col px-4 py-6 lg:px-8">
-            <div className="app-main-inner flex w-full flex-col gap-6">
-              <ServiceStatusBanner />
-              <Outlet />
+            <div className="flex flex-1 flex-col px-4 py-6 lg:px-8">
+              <div className="app-main-inner flex w-full flex-col gap-6">
+                <ServiceStatusBanner />
+                <Outlet />
+              </div>
             </div>
-          </div>
-        </SidebarInset>
-        <HelpFab />
-      </SidebarProvider>
-    </ServiceStatusProvider>
+          </SidebarInset>
+          <HelpFab />
+        </SidebarProvider>
+      </ServiceStatusProvider>
+    </AppConfigProvider>
   );
 }
