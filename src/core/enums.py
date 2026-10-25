@@ -18,3 +18,13 @@ class InvoiceStatus(StrEnum):
     PROCESSING = auto()
     PAID = auto()
     CANCELLED = auto()
+
+
+class PaymentMethod(StrEnum):
+    YOOKASSA_SBP = "yookassa:sbp"
+
+
+class Currency(StrEnum):
+    EUR = "EUR"
+    RUB = "RUB"
+    USD = "USD"

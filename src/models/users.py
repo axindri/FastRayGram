@@ -3,7 +3,7 @@ from pydantic import BaseModel, Field
 from src.core.enums import Role
 from src.core.settings import settings
 from src.models.fields import OptionalMark, Username
-from src.models.tw import InvoiceResponse
+from src.models.hosting import InvoiceResponse
 
 
 class CreateUserRequest(BaseModel):

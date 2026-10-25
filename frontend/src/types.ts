@@ -166,7 +166,7 @@ export type XuiClient = {
 
 export type AppConfig = {
   version: string;
-  invoice_day_price_rub: number;
+  invoice_day_price: number;
   min_payment_days: number;
   max_payment_days: number;
   min_invoice_amount: number;
@@ -174,16 +174,17 @@ export type AppConfig = {
   default_expiry_time_days: number;
   registration_expiry_time_days: number;
   default_limit_ips: number;
+  currency: string;
+  decimal_places: number;
   boosty_url: string;
   github_url: string;
+  help_url: string;
 };
 
 export type Finances = {
   balance: number;
   currency: string;
-  monthly_cost: number;
-  total_paid: number;
-  hours_left: number;
+  decimal_places: number;
 };
 
 export type RegistrationCode = {
@@ -194,6 +195,16 @@ export type RegistrationCode = {
   registrations_count: number;
   enable: boolean;
   created_by_id: number | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type UserNotification = {
+  id: number;
+  user_id: number;
+  username: string;
+  title: string;
+  body: string;
   created_at: string;
   updated_at: string;
 };

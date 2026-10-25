@@ -1,9 +1,11 @@
 import { Ban } from "lucide-react";
 
 import { formatDate } from "@/utils/datetime";
+import { formatMoneyMinor } from "@/utils/format";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardAction, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { useAppConfig } from "@/hooks/useAppConfig";
 import { cn } from "@/lib/utils";
 import { invoiceStatusBadge, isInvoiceActive, type AccessLevel, type AdminInvoice, type Invoice } from "@/types";
 
@@ -24,6 +26,8 @@ type InvoiceCardProps = {
   access?: AccessLevel;
   paymentBlocked?: boolean;
   canRenew?: boolean;
+  currency?: string;
+  decimalPlaces?: number;
   onCancel?: (id: number) => void;
   cancelLoadingId?: number | null;
 };
@@ -32,7 +36,17 @@ function isAdminInvoice(item: Invoice | AdminInvoice): item is AdminInvoice {
   return "username" in item && typeof (item as AdminInvoice).username === "string";
 }
 
-export function InvoiceCard({ item, access = "admin", paymentBlocked = false, canRenew = false, onCancel, cancelLoadingId = null }: InvoiceCardProps) {
+export function InvoiceCard({
+  item,
+  access = "admin",
+  paymentBlocked = false,
+  canRenew = false,
+  currency,
+  decimalPlaces,
+  onCancel,
+  cancelLoadingId = null,
+}: InvoiceCardProps) {
+  const { config } = useAppConfig();
   const status = String(item.status || "").toLowerCase();
   const isPending = status === "pending";
   const isAdmin = access === "admin";
@@ -42,7 +56,10 @@ export function InvoiceCard({ item, access = "admin", paymentBlocked = false, ca
   const canCancel = isAdmin && isInvoiceActive(status) && Boolean(onCancel);
   const cancelLoading = cancelLoadingId === item.id;
 
-  const title = isAdmin ? `#${item.invoice_id}${adminItem ? ` · ${adminItem.amount} ₽` : ""}` : `#${item.invoice_id} · ${item.amount} ₽`;
+  const moneyCurrency = currency || String(config?.currency || "").trim();
+  const moneyDecimals = decimalPlaces ?? config?.decimal_places ?? 2;
+  const amountLabel = moneyCurrency ? formatMoneyMinor(item.amount, moneyCurrency, moneyDecimals) : String(item.amount);
+  const title = isAdmin ? `#${item.invoice_id}${adminItem ? ` · ${amountLabel}` : ""}` : `#${item.invoice_id} · ${amountLabel}`;
 
   return (
     <Card>

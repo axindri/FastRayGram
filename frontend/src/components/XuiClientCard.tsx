@@ -1,29 +1,15 @@
 import { useEffect, useState } from "react";
-import { Ellipsis, Info, Loader2, Pencil, RotateCcw, Trash2, Wifi } from "lucide-react";
+import { Ellipsis, HelpCircle, Infinity as InfinityIcon, Loader2, Pencil, RotateCcw, Trash2, Wifi } from "lucide-react";
 
-import { formatDate, formatExpiryRemaining } from "@/utils/datetime";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { formatDate, formatExpiryRemaining, isUnlimitedExpiry } from "@/utils/datetime";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardAction, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { BADGE_STYLES } from "@/lib/badge-styles";
@@ -34,6 +20,7 @@ import type { AccessLevel, XuiClient } from "@/types";
 import { CopyableInput } from "@/components/CopyableInput";
 import { CardTitleWithIcon } from "@/components/CardTitleWithIcon";
 import { HintTooltip } from "@/components/HintTooltip";
+import { SubscriptionApps } from "@/components/SubscriptionApps";
 import { LIMIT_IP_HINT } from "@/constants";
 
 type XuiUpdatePayload = {
@@ -56,30 +43,44 @@ type XuiClientCardProps = {
 
 function subscriptionStatus(client: XuiClient, access: AccessLevel) {
   if (access === "admin") {
+    if (client.enable && isUnlimitedExpiry(client.expiry_datetime)) {
+      return { color: "unlimited" as const, label: "Безлимит", showInfinity: true };
+    }
+
     return {
       color: client.enable ? ("success" as const) : ("error" as const),
       label: client.enable ? "Включён" : "Выключен",
+      showInfinity: false,
     };
   }
 
   if (!client.enable) {
-    return { color: "error" as const, label: "Выключена" };
+    return { color: "error" as const, label: "Выключена", showInfinity: false };
+  }
+
+  if (isUnlimitedExpiry(client.expiry_datetime)) {
+    return { color: "unlimited" as const, label: "Безлимит", showInfinity: true };
   }
 
   const remaining = formatDateExpiryRemaining(client.expiry_datetime);
   if (!remaining || remaining === "истекла") {
-    return { color: "error" as const, label: "Истекла" };
+    return { color: "error" as const, label: "Истекла", showInfinity: false };
   }
 
   return {
     color: dateExpiryTagColor(client.expiry_datetime),
     label: `Активна ${remaining}`,
+    showInfinity: false,
   };
 }
 
-function statusBadgeClassName(color: "success" | "error" | "default") {
+function statusBadgeClassName(color: "success" | "error" | "default" | "unlimited") {
   if (color === "success") {
     return BADGE_STYLES.success;
+  }
+
+  if (color === "unlimited") {
+    return BADGE_STYLES.unlimited;
   }
 
   if (color === "error") {
@@ -97,39 +98,61 @@ function CardTitleContent({ access, email }: { access: AccessLevel; email: strin
   return <CardTitleWithIcon icon={Wifi}>Подписка</CardTitleWithIcon>;
 }
 
-function SubUrlBlock({ access, subUrl }: { access: AccessLevel; subUrl: string }) {
-  const hint = access === "admin" ? "Ссылка подписки" : "Добавьте ссылку в VPN-клиент для подключения";
-
+function SubUrlBlock({ access, subUrl, email }: { access: AccessLevel; subUrl: string; email: string }) {
   if (access === "user") {
     return (
       <div className="flex w-full flex-col gap-3">
-        <Alert>
-          <Info />
-          <AlertDescription className="text-foreground">{hint}</AlertDescription>
-        </Alert>
-        <CopyableInput value={subUrl} buttonVariant="icon" />
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-1.5">
+            <p className="text-sm font-semibold text-foreground">Ссылка подписки</p>
+            <Popover>
+              <PopoverTrigger asChild>
+                <button type="button" className="inline-flex shrink-0 text-muted-foreground hover:text-foreground" aria-label="Как добавить подписку">
+                  <HelpCircle className="size-3.5" />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent side="top" align="start" className="w-72">
+                <p className="text-sm text-popover-foreground">Скопируйте ссылку и добавьте её в VPN-клиент вручную.</p>
+              </PopoverContent>
+            </Popover>
+          </div>
+          <CopyableInput value={subUrl} buttonVariant="icon" />
+        </div>
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-1.5">
+            <p className="text-sm font-semibold text-foreground">Добавить в приложении</p>
+            <Popover>
+              <PopoverTrigger asChild>
+                <button
+                  type="button"
+                  className="inline-flex shrink-0 text-muted-foreground hover:text-foreground"
+                  aria-label="Как добавить в приложение"
+                >
+                  <HelpCircle className="size-3.5" />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent side="top" align="start" className="w-72">
+                <p className="text-sm text-popover-foreground">
+                  Если нажать «Добавить», конфиг подписки откроется и добавится в выбранном приложении автоматически.
+                </p>
+              </PopoverContent>
+            </Popover>
+          </div>
+          <SubscriptionApps subUrl={subUrl} name={email} />
+        </div>
       </div>
     );
   }
 
   return (
     <div className="flex w-full flex-col gap-2">
-      <p className="text-sm font-semibold">{hint}</p>
+      <p className="text-sm font-semibold">Ссылка подписки</p>
       <CopyableInput value={subUrl} buttonVariant="icon" />
     </div>
   );
 }
 
-export function XuiClientCard({
-  client,
-  access = "admin",
-  defaultExpiryDays = 30,
-  actionLoading = false,
-  className,
-  onUpdate,
-  onResetTraffic,
-  onDelete,
-}: XuiClientCardProps) {
+export function XuiClientCard({ client, access = "admin", defaultExpiryDays = 30, actionLoading = false, className, onUpdate, onResetTraffic, onDelete }: XuiClientCardProps) {
   const [editing, setEditing] = useState(false);
   const [expiryDays, setExpiryDays] = useState(defaultExpiryDays);
   const [enabled, setEnabled] = useState(client.enable);
@@ -175,23 +198,15 @@ export function XuiClientCard({
         {isAdmin && expiryRemaining ? <CardDescription>Осталось: {expiryRemaining}</CardDescription> : null}
         <CardAction>
           <div className="flex flex-wrap items-center gap-1">
-            <Badge
-              variant={status.color === "error" ? "destructive" : "outline"}
-              className={cn(status.color !== "error" && statusBadgeClassName(status.color))}
-            >
+            <Badge variant={status.color === "error" ? "destructive" : "outline"} className={cn("gap-1", status.color !== "error" && statusBadgeClassName(status.color))}>
+              {status.showInfinity ? <InfinityIcon className="size-3.5" /> : null}
               {status.label}
             </Badge>
             {showActions ? (
               <>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="icon-sm"
-                      aria-label="Действия"
-                      disabled={editing || actionLoading}
-                    >
+                    <Button type="button" variant="outline" size="icon-sm" aria-label="Действия" disabled={editing || actionLoading}>
                       {actionLoading ? <Loader2 className="animate-spin" /> : <Ellipsis />}
                     </Button>
                   </DropdownMenuTrigger>
@@ -277,13 +292,7 @@ export function XuiClientCard({
           <div className="flex flex-col gap-3">
             <div className="flex flex-col gap-2">
               <Label htmlFor={`expiry-${client.email}`}>Срок действия, дней</Label>
-              <Input
-                id={`expiry-${client.email}`}
-                type="number"
-                min={1}
-                value={expiryDays}
-                onChange={(event) => setExpiryDays(Number(event.target.value) || defaultExpiryDays)}
-              />
+              <Input id={`expiry-${client.email}`} type="number" min={1} value={expiryDays} onChange={(event) => setExpiryDays(Number(event.target.value) || defaultExpiryDays)} />
             </div>
             <div className="flex flex-col gap-2">
               <Label>Включён</Label>
@@ -314,7 +323,7 @@ export function XuiClientCard({
             <p>
               Действует до: <span className="font-semibold text-foreground">{formatDate(client.expiry_datetime)}</span>
             </p>
-            {client.sub_url ? <SubUrlBlock access={access} subUrl={client.sub_url} /> : null}
+            {client.sub_url ? <SubUrlBlock access={access} subUrl={client.sub_url} email={client.email} /> : null}
           </div>
         )}
       </CardContent>

@@ -2,7 +2,7 @@ import { Loader2 } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
 import { toast } from "sonner";
 
-import { buildAuthLink, createUser, fetchConfig } from "@/api";
+import { buildAuthLink, createUser } from "@/api";
 import { useAuth } from "@/auth";
 import { CopyableInput } from "@/components/CopyableInput";
 import { SectionCard } from "@/components/SectionCard";
@@ -11,34 +11,33 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { FLOW_NONE, FLOW_OPTIONS, MARK_HINT, MARK_MAX_LENGTH, USERNAME_HINT, USERNAME_MAX_LENGTH } from "@/constants";
+import { useAppConfig } from "@/hooks/useAppConfig";
 import type { UserRole } from "@/types";
 import { getApiErrorMessage } from "@/utils/apiError";
 import { getAssignableRoleOptions, validateCreateUser, type CreateUserFieldErrors, type CreateUserForm } from "@/utils/username";
 
 export function UsersCreatePage() {
   const { user: currentUser } = useAuth();
+  const { config } = useAppConfig();
   const roleOptions = getAssignableRoleOptions(currentUser?.role);
 
-  const [defaultExpiryDays, setDefaultExpiryDays] = useState(30);
-  const [defaultLimitIps, setDefaultLimitIps] = useState(5);
+  const defaultExpiryDays = config?.default_expiry_time_days ?? 30;
+  const defaultLimitIps = config?.default_limit_ips ?? 5;
   const [loading, setLoading] = useState(false);
   const [authLink, setAuthLink] = useState("");
   const [form, setForm] = useState<CreateUserForm>({ username: "", role: "user", limit_ips: 5 });
   const [fieldErrors, setFieldErrors] = useState<CreateUserFieldErrors>({});
 
   useEffect(() => {
-    fetchConfig()
-      .then((config) => {
-        setDefaultExpiryDays(config.default_expiry_time_days);
-        setDefaultLimitIps(config.default_limit_ips);
-        setForm((prev) => ({
-          ...prev,
-          expiry_time_days: config.default_expiry_time_days,
-          limit_ips: config.default_limit_ips,
-        }));
-      })
-      .catch(() => undefined);
-  }, []);
+    if (!config) {
+      return;
+    }
+    setForm((prev) => ({
+      ...prev,
+      expiry_time_days: config.default_expiry_time_days,
+      limit_ips: config.default_limit_ips,
+    }));
+  }, [config]);
 
   const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();

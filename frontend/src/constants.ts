@@ -3,7 +3,7 @@ import { Monitor, Moon, Sun, type LucideIcon } from "lucide-react";
 export type NavSection = "main" | "admin" | "settings";
 
 // App
-export const APP_VERSION = "v3.5.1";
+export const APP_VERSION = "v4.2";
 export const TOKEN_KEY = "authToken";
 export const API_PREFIX = "/api";
 export const THEME_STORAGE_KEY = "theme";
@@ -77,7 +77,7 @@ export const ADMIN_LINKS_META = [
   { key: "swagger_url" as const, title: "Swagger", hint: "Документация API" },
   { key: "services_status_url" as const, title: "Services Status", hint: "Статус сервисов в Uptime Kuma" },
   { key: "xui_panel_url" as const, title: "XUI Panel", hint: "Панель управления" },
-  { key: "servers_url" as const, title: "TimeWeb Servers", hint: "Серверы в панели TimeWeb" },
+  { key: "servers_url" as const, title: "Hosting website", hint: "Вебсайт панели хостинга" },
 ];
 
 // Users / XUI
@@ -113,8 +113,7 @@ export const USER_SEARCH_FIELD_LABELS: Record<UserSearchField, string> = {
 export const RENEW_HINT =
   "Новый счёт можно выставить, когда до конца подписки останется меньше 24 часов (включая уже истёкшую).";
 
-export const CONTACT_MESSAGE =
-  "По всем вопросам обращайтесь к администратору или в личные сообщения группы.";
+export const CONTACT_MESSAGE = "По всем вопросам обращайтесь по кнопке «Помощь».";
 
 // Profile result pages
 export type ProfileResultStatus = "success" | "error" | "403" | "404" | "500" | "info" | "warning";

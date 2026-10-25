@@ -22,10 +22,10 @@ import {
   SidebarMenuSubItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { fetchConfig } from "@/api";
 import { useAuth } from "@/auth";
 import { APP_VERSION } from "@/constants";
 import { NAV_SECTION_LABELS, groupNavItems, type NavChildItem, type NavItem, NAV_ITEMS } from "@/config/navigation";
+import { useAppConfig } from "@/hooks/useAppConfig";
 import { isAdminRole } from "@/types";
 
 function closeMobileSidebar(isMobile: boolean, setOpenMobile: (open: boolean) => void) {
@@ -114,15 +114,9 @@ export function AppSidebar() {
   const { user } = useAuth();
   const location = useLocation();
   const { isMobile, setOpenMobile } = useSidebar();
-  const [boostyUrl, setBoostyUrl] = useState("");
-  const [githubUrl, setGithubUrl] = useState("");
-
-  useEffect(() => {
-    void fetchConfig().then((config) => {
-      setBoostyUrl(config.boosty_url);
-      setGithubUrl(config.github_url);
-    });
-  }, []);
+  const { config } = useAppConfig();
+  const boostyUrl = config?.boosty_url ?? "";
+  const githubUrl = config?.github_url ?? "";
 
   const groups = useMemo(() => {
     const showAdmin = user ? isAdminRole(user.role) : false;

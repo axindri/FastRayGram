@@ -28,7 +28,7 @@ export function PaymentsPaidPage() {
   return (
     <div className="flex w-full flex-col gap-4">
       {checkedInvoices === null ? (
-        <ListEmptyState icon={FileSearch} title="Проверка не запускалась" description="Нажмите «Проверить», чтобы найти оплаченные счета в TimeWeb" />
+        <ListEmptyState icon={FileSearch} title="Проверка не запускалась" description="Нажмите «Проверить», чтобы найти оплаченные счета у хостинга" />
       ) : checkedInvoices.length === 0 ? (
         <ListEmptyState icon={Receipt} title="Новых оплат нет" description="После проверки здесь появятся недавно оплаченные счета" />
       ) : (

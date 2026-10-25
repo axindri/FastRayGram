@@ -11,6 +11,7 @@ import type {
   RegistrationCode,
   StatusResponse,
   UpdateUserRoleResponse,
+  UserNotification,
   UserProfile,
   UserStats,
   XuiClient,
@@ -21,7 +22,7 @@ import {
   RENEWAL_WINDOW_MS,
   TOKEN_KEY,
 } from "@/constants";
-import { parseUtcDate } from "@/utils/datetime";
+import { isUnlimitedExpiry, parseUtcDate } from "@/utils/datetime";
 
 export class ApiError extends Error {
   readonly status: number;
@@ -95,6 +96,10 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 }
 
 export function canRenewSubscription(expiryDatetime?: string): boolean {
+  if (isUnlimitedExpiry(expiryDatetime)) {
+    return false;
+  }
+
   const expiry = parseUtcDate(expiryDatetime);
   if (!expiry) {
     return false;
@@ -116,26 +121,9 @@ export async function fetchXuiMe(): Promise<XuiClient> {
 }
 
 export async function createInvoice(amount: number): Promise<Invoice> {
-  const returnUrl = new URL("/payment/success", window.location.origin).href;
-  const failUrl = new URL("/payment/fail", window.location.origin).href;
-
-  return request<Invoice>(`${API_PREFIX}/tw/new-invoice`, {
+  return request<Invoice>(`${API_PREFIX}/hosting/new-invoice`, {
     method: "POST",
-    body: JSON.stringify({
-      amount,
-      return_url: returnUrl,
-      fail_url: failUrl,
-    }),
-  });
-}
-
-export async function confirmPaymentReturn(invoiceId: number, mdOrder?: string | null): Promise<Invoice> {
-  return request<Invoice>(`${API_PREFIX}/tw/payment-return`, {
-    method: "POST",
-    body: JSON.stringify({
-      invoice_id: invoiceId,
-      md_order: mdOrder || undefined,
-    }),
+    body: JSON.stringify({ amount }),
   });
 }
 
@@ -144,7 +132,7 @@ export async function fetchStatus(): Promise<StatusResponse> {
 }
 
 export async function fetchFinances(): Promise<Finances> {
-  return request<Finances>(`${API_PREFIX}/tw/finances`);
+  return request<Finances>(`${API_PREFIX}/hosting/finances`);
 }
 
 export async function fetchAdminLinks(): Promise<AdminLinks> {
@@ -269,8 +257,46 @@ export async function extendRegistrationCode(id: number, extendDays: number): Pr
   });
 }
 
-export async function fetchConfig(): Promise<AppConfig> {
-  return request<AppConfig>(`${API_PREFIX}/config`);
+let configPromise: Promise<AppConfig> | null = null;
+
+/** Shared app config: one in-flight/cached request for all callers. */
+export function fetchConfig(): Promise<AppConfig> {
+  if (!configPromise) {
+    configPromise = request<AppConfig>(`${API_PREFIX}/config`).catch((error) => {
+      configPromise = null;
+      throw error;
+    });
+  }
+  return configPromise;
+}
+
+export async function fetchMyNotifications(): Promise<UserNotification[]> {
+  return request<UserNotification[]>(`${API_PREFIX}/user/notifications`);
+}
+
+export async function fetchAdminNotifications(page = 1, limit = 20): Promise<Paginated<UserNotification>> {
+  return request<Paginated<UserNotification>>(`${API_PREFIX}/admin/notifications?page=${page}&limit=${limit}`);
+}
+
+export async function createNotification(payload: {
+  username: string;
+  title: string;
+  body: string;
+}): Promise<UserNotification> {
+  return request<UserNotification>(`${API_PREFIX}/admin/notifications`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function updateNotification(
+  id: number,
+  payload: { title?: string; body?: string },
+): Promise<UserNotification> {
+  return request<UserNotification>(`${API_PREFIX}/admin/notifications/${id}`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
 }
 
 export async function createUser(payload: CreateUserPayload): Promise<string> {

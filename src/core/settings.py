@@ -4,15 +4,35 @@ from urllib.parse import quote_plus
 from pydantic import BaseModel, Field, computed_field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+from src.core.enums import Currency
+
 
 class CacheSettings(BaseModel):
     namespace: str = Field(default="fast-ray-gram")
     default_ttl_seconds: int = Field(default=60)
 
 
+class PaymentSettings(BaseModel):
+    invoice_day_price: int = Field(default=5, ge=1)
+    min_payment_days: int = Field(default=30, ge=1)
+    max_payment_days: int = Field(default=90, ge=1)
+    currency: Currency = Field(default=Currency.EUR)
+
+    @computed_field
+    @property
+    def min_invoice_amount(self) -> int:
+        # gather than min price for hosting
+        return self.invoice_day_price * self.min_payment_days
+
+    @computed_field
+    @property
+    def max_invoice_amount(self) -> int:
+        return self.invoice_day_price * self.max_payment_days
+
+
 class AppSettings(BaseModel):
     name: str = Field(default="Fast Ray Gram API")
-    version: str = Field(default="1.8.0")
+    version: str = Field(default="2.0.0")
     host: str = Field(default="0.0.0.0")
     port: int = Field(default=8000)
     debug: bool = Field(default=False)
@@ -20,26 +40,19 @@ class AppSettings(BaseModel):
     jwt_secret: str = Field(default="jwt_secret")
     jwt_exp_days: int = Field(default=365)
     superuser_token: str = Field(default="superuser_token")
-    invoice_day_price_rub: int = Field(default=10, ge=1)
-    min_payment_days: int = Field(default=50, ge=1)
-    max_payment_days: int = Field(default=100, ge=1)
+    decimal_places: int = Field(default=2)
+
     default_expiry_time_days: int = Field(default=30)
+
     registration_expiry_time_days: int = Field(default=3)
     default_registration_code_max_uses: int = Field(default=1)
+
     default_limit_ips: int = Field(default=5)
+
     monitoring_service_url: str = Field(default="http://localhost:8000/status/")
     boosty_url: str = Field(default="http://localhost")
     github_url: str = Field(default="https://github.com/axindri/FastRayGram")
-
-    @computed_field
-    @property
-    def min_invoice_amount(self) -> int:
-        return self.invoice_day_price_rub * self.min_payment_days
-
-    @computed_field
-    @property
-    def max_invoice_amount(self) -> int:
-        return self.invoice_day_price_rub * self.max_payment_days
+    help_url: str = Field(default="")
 
 
 class DatabaseSettings(BaseModel):
@@ -63,23 +76,10 @@ class XuiPanelSettings(BaseModel):
     api_key: str = Field(default="xui_api_key")
 
 
-class TimeWebSettings(BaseModel):
-    base_url: str = Field(default="https://api.timeweb.cloud/api/v1")
-    portal_url: str = Field(default="https://timeweb.cloud/portal/v4")
-    servers_url: str = Field(default="https://timeweb.cloud/my/servers")
-    api_url: str = Field(default="https://timeweb.cloud/api/v1")
+class HostingSettings(BaseModel):
     token: str = Field(default="")
-    payer_id: int = Field(default=0)
-    default_headers: dict = Field(
-        default={
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) \
-            AppleWebKit/537.36 (KHTML, like Gecko) \
-            Chrome/120.0.0.0 Safari/537.36",
-            "Accept": "*/*",
-            "Accept-Encoding": "gzip, deflate, br",
-            "Connection": "keep-alive",
-        }
-    )
+    base_url: str = Field(default="https://my.aeza.net/api/v2")
+    servers_url: str = Field(default="https://my.aeza.net/services")
 
 
 class Settings(BaseSettings):
@@ -91,10 +91,11 @@ class Settings(BaseSettings):
     )
 
     app: AppSettings = Field(default_factory=AppSettings, alias="APP")
+    payment: PaymentSettings = Field(default_factory=PaymentSettings, alias="PAYMENT")
     cache: CacheSettings = Field(default_factory=CacheSettings, alias="CACHE")
     database: DatabaseSettings = Field(default_factory=DatabaseSettings, alias="DB")
     xui: XuiPanelSettings = Field(default_factory=XuiPanelSettings, alias="XUI")
-    timeweb: TimeWebSettings = Field(default_factory=TimeWebSettings, alias="TIMEWEB")
+    hosting: HostingSettings = Field(default_factory=HostingSettings, alias="HOSTING")
 
 
 @lru_cache

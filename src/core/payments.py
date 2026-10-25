@@ -3,7 +3,7 @@ from src.core.settings import settings
 
 def invoice_renewal_days(amount: int) -> int:
     """Convert paid invoice amount to subscription days (same formula as frontend)."""
-    price = settings.app.invoice_day_price_rub
+    price = settings.payment.invoice_day_price
     if price <= 0:
         raise ValueError("Invoice day price must be positive")
     if amount % price != 0:

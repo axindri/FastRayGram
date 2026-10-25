@@ -6,9 +6,9 @@ from fastapi_cache.backends.inmemory import InMemoryBackend
 from sqlalchemy import text
 
 from src.api.admin import router as admin_router
+from src.api.hosting import router as hosting_router
 from src.api.register import router as register_router
 from src.api.root import router as root_router
-from src.api.tw import router as tw_router
 from src.api.user import router as user_router
 from src.api.xui import router as xui_router
 from src.core.cache import request_key_builder
@@ -30,10 +30,7 @@ async def lifespan(app: FastAPI):
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
         await conn.execute(
-            text(
-                "ALTER TABLE registration_codes "
-                "ADD COLUMN IF NOT EXISTS enable BOOLEAN NOT NULL DEFAULT TRUE"
-            )
+            text("ALTER TABLE registration_codes ADD COLUMN IF NOT EXISTS enable BOOLEAN NOT NULL DEFAULT TRUE")
         )
     yield
     await engine.dispose()
@@ -52,8 +49,8 @@ api_router.include_router(register_router)
 api_router.include_router(root_router)
 api_router.include_router(admin_router)
 api_router.include_router(user_router)
-api_router.include_router(tw_router)
 api_router.include_router(xui_router)
+api_router.include_router(hosting_router)
 app.include_router(api_router)
 
 init_msg = """
