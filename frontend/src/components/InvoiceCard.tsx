@@ -1,12 +1,11 @@
 import { Ban } from "lucide-react";
-import { useEffect, useState } from "react";
 
-import { fetchConfig } from "@/api";
 import { formatDate } from "@/utils/datetime";
 import { formatMoneyMinor } from "@/utils/format";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardAction, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { useAppConfig } from "@/hooks/useAppConfig";
 import { cn } from "@/lib/utils";
 import { invoiceStatusBadge, isInvoiceActive, type AccessLevel, type AdminInvoice, type Invoice } from "@/types";
 
@@ -47,6 +46,7 @@ export function InvoiceCard({
   onCancel,
   cancelLoadingId = null,
 }: InvoiceCardProps) {
+  const { config } = useAppConfig();
   const status = String(item.status || "").toLowerCase();
   const isPending = status === "pending";
   const isAdmin = access === "admin";
@@ -56,46 +56,8 @@ export function InvoiceCard({
   const canCancel = isAdmin && isInvoiceActive(status) && Boolean(onCancel);
   const cancelLoading = cancelLoadingId === item.id;
 
-  const [moneyCurrency, setMoneyCurrency] = useState(currency ?? "");
-  const [moneyDecimals, setMoneyDecimals] = useState(decimalPlaces ?? 2);
-
-  useEffect(() => {
-    if (currency) {
-      setMoneyCurrency(currency);
-    }
-    if (decimalPlaces !== undefined) {
-      setMoneyDecimals(decimalPlaces);
-    }
-  }, [currency, decimalPlaces]);
-
-  useEffect(() => {
-    if (currency && decimalPlaces !== undefined) {
-      return;
-    }
-
-    let cancelled = false;
-
-    void fetchConfig()
-      .then((config) => {
-        if (cancelled) {
-          return;
-        }
-        if (!currency) {
-          setMoneyCurrency(String(config.currency || "").trim());
-        }
-        if (decimalPlaces === undefined && Number.isFinite(config.decimal_places)) {
-          setMoneyDecimals(config.decimal_places);
-        }
-      })
-      .catch(() => {
-        // Keep fallback formatting if config is unavailable.
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [currency, decimalPlaces]);
-
+  const moneyCurrency = currency || String(config?.currency || "").trim();
+  const moneyDecimals = decimalPlaces ?? config?.decimal_places ?? 2;
   const amountLabel = moneyCurrency ? formatMoneyMinor(item.amount, moneyCurrency, moneyDecimals) : String(item.amount);
   const title = isAdmin ? `#${item.invoice_id}${adminItem ? ` · ${amountLabel}` : ""}` : `#${item.invoice_id} · ${amountLabel}`;
 

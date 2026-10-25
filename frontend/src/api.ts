@@ -257,8 +257,17 @@ export async function extendRegistrationCode(id: number, extendDays: number): Pr
   });
 }
 
-export async function fetchConfig(): Promise<AppConfig> {
-  return request<AppConfig>(`${API_PREFIX}/config`);
+let configPromise: Promise<AppConfig> | null = null;
+
+/** Shared app config: one in-flight/cached request for all callers. */
+export function fetchConfig(): Promise<AppConfig> {
+  if (!configPromise) {
+    configPromise = request<AppConfig>(`${API_PREFIX}/config`).catch((error) => {
+      configPromise = null;
+      throw error;
+    });
+  }
+  return configPromise;
 }
 
 export async function fetchMyNotifications(): Promise<UserNotification[]> {

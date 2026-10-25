@@ -1,21 +1,11 @@
 import { CircleHelp } from "lucide-react";
-import { useEffect, useState } from "react";
 
-import { fetchConfig } from "@/api";
+import { useAppConfig } from "@/hooks/useAppConfig";
 import { cn } from "@/lib/utils";
 
 export function HelpFab() {
-  const [helpUrl, setHelpUrl] = useState("");
-
-  useEffect(() => {
-    void fetchConfig()
-      .then((config) => {
-        setHelpUrl(String(config.help_url || "").trim());
-      })
-      .catch(() => {
-        setHelpUrl("");
-      });
-  }, []);
+  const { config } = useAppConfig();
+  const helpUrl = String(config?.help_url || "").trim();
 
   if (!helpUrl) {
     return null;

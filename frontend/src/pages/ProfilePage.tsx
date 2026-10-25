@@ -7,7 +7,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 
-import { canRenewSubscription, createInvoice, fetchConfig, fetchXuiMe } from "@/api";
+import { canRenewSubscription, createInvoice, fetchXuiMe } from "@/api";
 import { RENEW_HINT } from "@/constants";
 import { useAuth } from "@/auth";
 import { AsyncListState } from "@/components/AsyncListState";
@@ -19,10 +19,11 @@ import { SectionCard } from "@/components/SectionCard";
 import { SubscriptionNotFound } from "@/components/SubscriptionNotFound";
 import { XuiClientCard } from "@/components/XuiClientCard";
 import { filterNavItems, flattenNavLinks } from "@/config/navigation";
+import { useAppConfig } from "@/hooks/useAppConfig";
 import { useServiceStatus } from "@/hooks/useServiceStatus";
 import { getApiErrorMessage } from "@/utils/apiError";
 import { formatMoneyMinor } from "@/utils/format";
-import { isInvoiceActive, type UserRole } from "@/types";
+import { isInvoiceActive, type AppConfig, type UserRole } from "@/types";
 
 type PaymentConfig = {
   dayPrice: number;
@@ -33,6 +34,36 @@ type PaymentConfig = {
   currency: string;
   decimalPlaces: number;
 };
+
+function toPaymentConfig(config: AppConfig): PaymentConfig | null {
+  const dayPrice = config.invoice_day_price;
+  const minDays = config.min_payment_days;
+  const maxDays = config.max_payment_days;
+  const minAmount = config.min_invoice_amount;
+  const maxAmount = config.max_invoice_amount;
+  const currency = String(config.currency || "").trim();
+  const decimalPlaces = config.decimal_places;
+
+  if (
+    !Number.isFinite(dayPrice) ||
+    dayPrice <= 0 ||
+    !Number.isFinite(minDays) ||
+    !Number.isFinite(maxDays) ||
+    minDays < 1 ||
+    maxDays < minDays ||
+    !Number.isFinite(minAmount) ||
+    !Number.isFinite(maxAmount) ||
+    minAmount < 1 ||
+    maxAmount < minAmount ||
+    !currency ||
+    !Number.isFinite(decimalPlaces) ||
+    decimalPlaces < 0
+  ) {
+    return null;
+  }
+
+  return { dayPrice, minDays, maxDays, minAmount, maxAmount, currency, decimalPlaces };
+}
 
 function QuickLinks({ role }: { role: UserRole }) {
   const sections = useMemo(() => flattenNavLinks(filterNavItems(role, { excludePaths: ["/profile", "/settings"] })), [role]);
@@ -62,8 +93,9 @@ function QuickLinks({ role }: { role: UserRole }) {
 
 export function ProfilePage() {
   const { user, refreshUser } = useAuth();
+  const { config } = useAppConfig();
 
-  const [paymentConfig, setPaymentConfig] = useState<PaymentConfig | null>(null);
+  const paymentConfig = useMemo(() => (config ? toPaymentConfig(config) : null), [config]);
   const [days, setDays] = useState(0);
   const [daysError, setDaysError] = useState("");
   const { loading: statusLoading, paymentBlocked } = useServiceStatus();
@@ -120,62 +152,10 @@ export function ProfilePage() {
   }, [user?.id, user?.role]);
 
   useEffect(() => {
-    let cancelled = false;
-
-    void fetchConfig()
-      .then((config) => {
-        if (cancelled) {
-          return;
-        }
-
-        const nextDayPrice = config.invoice_day_price;
-        const nextMinDays = config.min_payment_days;
-        const nextMaxDays = config.max_payment_days;
-        const nextMinAmount = config.min_invoice_amount;
-        const nextMaxAmount = config.max_invoice_amount;
-        const nextCurrency = String(config.currency || "").trim();
-        const nextDecimalPlaces = config.decimal_places;
-
-        if (
-          !Number.isFinite(nextDayPrice) ||
-          nextDayPrice <= 0 ||
-          !Number.isFinite(nextMinDays) ||
-          !Number.isFinite(nextMaxDays) ||
-          nextMinDays < 1 ||
-          nextMaxDays < nextMinDays ||
-          !Number.isFinite(nextMinAmount) ||
-          !Number.isFinite(nextMaxAmount) ||
-          nextMinAmount < 1 ||
-          nextMaxAmount < nextMinAmount ||
-          !nextCurrency ||
-          !Number.isFinite(nextDecimalPlaces) ||
-          nextDecimalPlaces < 0
-        ) {
-          setPaymentConfig(null);
-          return;
-        }
-
-        setPaymentConfig({
-          dayPrice: nextDayPrice,
-          minDays: nextMinDays,
-          maxDays: nextMaxDays,
-          minAmount: nextMinAmount,
-          maxAmount: nextMaxAmount,
-          currency: nextCurrency,
-          decimalPlaces: nextDecimalPlaces,
-        });
-        setDays(nextMinDays);
-      })
-      .catch(() => {
-        if (!cancelled) {
-          setPaymentConfig(null);
-        }
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+    if (paymentConfig) {
+      setDays(paymentConfig.minDays);
+    }
+  }, [paymentConfig?.minDays]);
 
   if (!user) {
     return null;

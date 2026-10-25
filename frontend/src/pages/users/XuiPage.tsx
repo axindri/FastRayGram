@@ -1,27 +1,23 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 
-import { ApiError, deleteXuiClient, fetchConfig, fetchXuiClient, resetXuiClientTraffic, updateXuiClient } from "@/api";
+import { ApiError, deleteXuiClient, fetchXuiClient, resetXuiClientTraffic, updateXuiClient } from "@/api";
 import { Input } from "@/components/ui/input";
 import { LookupActionForm } from "@/components/LookupActionForm";
 import { SubscriptionNotFound } from "@/components/SubscriptionNotFound";
 import { XuiClientCard } from "@/components/XuiClientCard";
+import { useAppConfig } from "@/hooks/useAppConfig";
 import { getApiErrorMessage } from "@/utils/apiError";
 
 export function UsersXuiPage() {
-  const [defaultExpiryDays, setDefaultExpiryDays] = useState(30);
+  const { config } = useAppConfig();
+  const defaultExpiryDays = config?.default_expiry_time_days ?? 30;
   const [email, setEmail] = useState("");
   const [emailError, setEmailError] = useState("");
   const [getLoading, setGetLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
   const [client, setClient] = useState<Awaited<ReturnType<typeof fetchXuiClient>> | null>(null);
   const [searchAttempted, setSearchAttempted] = useState(false);
-
-  useEffect(() => {
-    fetchConfig()
-      .then((config) => setDefaultExpiryDays(config.default_expiry_time_days))
-      .catch(() => undefined);
-  }, []);
 
   const reloadClient = async (username: string) => {
     setClient(await fetchXuiClient(username));
